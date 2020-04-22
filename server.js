@@ -6,6 +6,8 @@ const { KEY_SECRET, PORT } = require("./config")
 const formData = require("express-form-data");
 const os = require("os");
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const options = {
   uploadDir: os.tmpdir(),
   autoClean: true
@@ -34,5 +36,7 @@ app.use(require("./router/account/index"))
 app.use("/dashboard", require("./router/dashboard/index"))
 
 app.use("/load-excel", require("./router/loadExcel/index"))
+
+app.use("/admision", require("./router/admision/index"))
 
 app.listen( 3000 || PORT)
