@@ -14,7 +14,7 @@
     "express": "^4.17.1",
     "express-form-data": "^2.0.12",
     "express-session": "^1.17.1",
-    "pg-promise": "^10.5.1",
+    "pg": "^8.0.3",
     "read-excel-file": "^4.0.6"
   }
 }
