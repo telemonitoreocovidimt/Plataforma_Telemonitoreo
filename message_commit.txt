@@ -1,5 +1,5 @@
-merge: Join Upload Excel and dashboard
+merge: convert view uploader excel to hbs.
 
-Upload of patients and vizualization of inbox
+conver view to .hbs
 
-Version 0.8
+Version 0.8.2
