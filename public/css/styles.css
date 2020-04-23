@@ -725,3 +725,9 @@ body {
   display: block;
 }
 /*# sourceMappingURL=styles.css.map */
+
+table.modal-table {
+  width: 500px;
+  display: table;
+  margin: auto;
+}
