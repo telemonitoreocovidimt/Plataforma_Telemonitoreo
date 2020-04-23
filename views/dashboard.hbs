@@ -1,0 +1,51 @@
+{{#each flash}}
+    <div class="alert alert-{{this.type}}">{{this.message}}</div>
+{{/each}}
+
+<div class="row-stadistics">
+    <div class="card mb-3 m-1">
+        <div class="card-header">{{ cases_for_attent }}</div>
+        <div class="card-body">
+            <h5 class="card-title">Casos por atender hoy</h5>
+        </div>
+    </div>
+    <div class="card mb-3 m-1">
+        <div class="card-header">{{ cases_attented  }}</div>
+        <div class="card-body">
+            <h5 class="card-title">Casos atendidos hoy</h5>
+        </div>
+    </div>
+    <div class="card mb-3 m-1">
+        <div class="card-header">{{ cases_attented_promean }}</div>
+        <div class="card-body">
+            <h5 class="card-title">Casos por dia/médico</h5>
+        </div>
+    </div>
+    <div class="card mb-3 m-1">
+        <div class="card-header">{{ cases_attented_for_me }}</div>
+        <div class="card-body">
+            <h5 class="card-title">Casos atendidos por mi</h5>
+        </div>
+    </div>
+</div>
+
+
+{{!-- <div class="tab-content" id="v-pills-tabContent">
+    <div class="table-responsive table-wrapper-scroll-y my-custom-scrollbar p-4">
+        {{> ListUrgentCase }}
+    </div>
+    <div class="table-responsive table-wrapper-scroll-y my-custom-scrollbar p-4">
+        {{> ListPendingCase }}
+    </div>
+</div> --}}
+
+<div class="tab-content" id="v-pills-tabContent">
+    {{> ListUrgentCase }}
+</div>
+
+<div class="tab-content" id="v-pills-tabContent">
+   {{> ListPendingCase }}
+</div>
+<div class="tab-content" id="v-pills-tabContent">
+    {{> ListPersonalCase }}
+</div>
