@@ -75,7 +75,8 @@ router.get("/case/:case",async (req, res)=>{
                     let factors = [{ id:true, descripcion:"SI"}, { id:false, descripcion:"NO"}]
                     let test = [{ id:"Positivo", descripcion:"Positivo"}, { id:"Negativo", descripcion:"Negativo"}]
                     // res.json(cases)
-                    res.render("form",{...data, status_patients, groups, factors, test})
+            islogin:true,
+                    res.render("form",{layout: 'case',islogin:true,...data, status_patients, groups, factors, test})
                 }
                 else{
                     req.flash("danger", data[0].message)
