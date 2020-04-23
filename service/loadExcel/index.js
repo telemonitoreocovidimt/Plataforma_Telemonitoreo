@@ -150,10 +150,10 @@ const tamizajeSchema = {
 	  prop: 'tipoMuestra3',
 	  type: String
 	},
-	//'Resultado Tipo de muestra 3': {
-	//  prop: 'resultadoTipoMuestra3',
-	//  type: String
-	//},
+	'Resultado Tipo de muestra 3': {
+	 prop: 'resultadoTipoMuestra3',
+	 type: String
+	},
 	'Fecha de resultado Tipo de muestra 3': {
 	  prop: 'fechaTipoMuestra3',
 	  type: Date
