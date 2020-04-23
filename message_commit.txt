@@ -1,0 +1,5 @@
+merge: Join Upload Excel and dashboard
+
+Upload of patients and vizualization of inbox
+
+Version 0.8

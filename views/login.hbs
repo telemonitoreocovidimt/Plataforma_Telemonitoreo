@@ -1,0 +1,30 @@
+{{#each flash}}
+    <div class="alert alert-{{this.type}}" style="z-index: 31331331;position: absolute;width:100%">{{this.message}}</div>
+{{/each}}
+
+
+<div class="wrapper">
+    <div class="inner">
+        <div class="image-holder">
+            <img src="/img/login.jpg" alt="" />
+        </div>
+        <form action="/" method="POST">
+            <h3 class="tittle">INICIA SESIÓN</h3>
+            <div class="form-wrapper">
+                <input type="text" placeholder="Usuario" name="email" class="form-control" required />
+                <i class="zmdi zmdi-email"></i>
+            </div>
+            <div class="form-wrapper">
+                <input type="password" placeholder="Contraseña" name="password" class="form-control" required />
+                <i class="zmdi zmdi-lock"></i>
+            </div>
+            <div class="form-wrapper">
+                <label htmlFor="">¿Aún no eres voluntario?
+                    <a href="/registro">Registráte</a></label>
+            </div>
+            <button class="btn-main" type="submit">
+                INGRESAR
+            </button>
+        </form>
+    </div>
+</div>
