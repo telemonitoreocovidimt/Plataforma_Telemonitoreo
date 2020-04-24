@@ -1,6 +1,8 @@
 const { Router } = require("express")
 const router = Router()
-const { getPatientsSurvey01, getPatientsSurvey02, existePatient, save_answer, patient_change_status } = require("./../../model/api")
+const { getPatientsSurvey01, getPatientsSurvey02, existePatient, save_answer, patient_change_status, patient_change_risk_factor, patient_change_age } = require("./../../model/api")
+
+const { makeMigrationsCustomer } = require("./../../model/migration")
 
 function arrayJsonToPatientsList(patients){
     let list_patients = []
@@ -27,34 +29,60 @@ function arrayJsonToPatientsList(patients){
     return format
 }
 
-async function answer_daily_survey(patient_id, answers, index=0, patientToUrgency = 0, patientToNormalTray = 0){
+async function answer_daily_survey(patient_id, answers){
   
-  if(index >= answer.length){
-    return
-  }
-  
-  let answer = answers[index]
-  let rows = await save_answer(patient_id, answer.variable, answer.answer, answer.asked_at, answer.answered_at)
-  if((answer.variable == "dificultad_para_respirar" || answer.variable == "dolor_pecho" ||
-      answer.variable == "confusion_desorientacion" || answer.variable == "labios_azules") && 
-      answer.answer == "SI"){
-      patientToUrgency++
-  }
-  if((answer.id == "fiebre_hoy" || answer.id == "diarrea") && answer.value == "SI") {
-      patientToNormalTray++;
+  let patientToUrgency = 0;
+  let patientToNormalTray = 0;
+  for(const i in answers){
+
+    let rows = await save_answer(patient_id, answers[i].variable, answers[i].answer, answers[i].asked_at, answers[i].answered_at)
+    if((answers[i].variable == "dificultad_para_respirar" || answers[i].variable == "dolor_pecho" ||
+        answers[i].variable == "confusion_desorientacion" || answers[i].variable == "labios_azules") && 
+        answers[i].answer.toUpperCase() == "SI"){
+        patientToUrgency++
+    }
+    if((answers[i].variable == "fiebre_hoy" || answers[i].variable == "diarrea") && answers[i].answer.toUpperCase() == "SI") {
+        patientToNormalTray++;
+    }
+
   }
     
+  console.log("patientToUrgency: " + patientToUrgency);
+  console.log("patientToNormalTray: " + patientToNormalTray);
+
   if(patientToUrgency > 0){
     //pasa a urgencia
     let x = await patient_change_status(patient_id, 3)
+    await makeMigrationsCustomer(patient_id)
   }
 
   if(patientToNormalTray == 2){
     //pasa a bandeja normal
     let x = await patient_change_status(patient_id, 2)
+    await makeMigrationsCustomer(patient_id)
   }
   
-  answer_daily_survey(patient_id, answers, index, patientToUrgency, patientToNormalTray)
+}
+
+async function answer_initial_survey(patient_id, answers){
+  
+  let is_risk_factor = false;
+  let patient_age = 0;
+  for(const i in answers){
+    let rows = await save_answer(patient_id, answers[i].variable, answers[i].answer, answers[i].asked_at, answers[i].answered_at)
+    if(answers[i].variable == "edad_paciente") patient_age = parseInt(answers[i].answer);
+    if(answers[i].variable == "comorbilidades" && answers[i].answer.toUpperCase() == "SI"){
+      is_risk_factor = true;
+    }
+  }
+  console.log(is_risk_factor);
+  let y = await patient_change_age(patient_id, patient_age)
+    console.log("interna")
+      console.log(patient_id)
+  if(is_risk_factor)
+      await makeMigrationsCustomer(patient_id)
+  let x = await patient_change_risk_factor(patient_id, is_risk_factor)
+  
 }
 
 router.get("/:survey",async (req, res)=>{
@@ -74,13 +102,47 @@ router.get("/:survey",async (req, res)=>{
 })
 
 router.post("/save_answers", async (req, res)=>{
-  if(req.body.patient_code){
-    let patient = await existePatient(req.body.patient_code)
+  if(req.body.identity_document){
+    let patient = await existePatient(req.body.identity_document)
     if(patient.length){
-      let dni_patient = patient[0].identity_document
+      let dni_patient = req.body.identity_document
       let answers = req.body.answers
-      answer_daily_survey(dni_patient, answers)
-      res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+      console.log(patient[0])
+      console.log(answers)
+      if(answers == null || answers.length == 0){
+        res.json({"success": "bad", "message": "No se detectó respuestas."})
+      }else{
+
+          if(!patient[0].paso_encuesta_inicial){
+            //ENCUESTA INICIAL
+            console.log("ENCUESTA INICIAL")
+            answer_initial_survey(dni_patient, answers)
+            res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+          }else if(patient[0].paso_encuesta_inicial){
+            //ENCUESTA DIARIA
+            console.log("ENCUESTA DIARIA")
+            answer_daily_survey(dni_patient, answers)
+             res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+          }else{
+            res.json({"success": "bad", "message": "Encuesta inválida"})
+          }
+
+        // if(req.body.survey == "encuesta_inicial_covid_19_hch"){
+        //   //ENCUESTA INICIAL
+        //   console.log("ENCUESTA INICIAL")
+        //   answer_initial_survey(req.body.patient_code, answers)
+        //   res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+        // }else if(req.body.survey == "encuesta_monitoreo_covid_19_hch"){
+        //   //ENCUESTA DIARIA
+        //   console.log("ENCUESTA DIARIA")
+        //   answer_daily_survey(req.body.patient_code, answers)
+        //    res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+        // }else{
+        //   res.json({"success": "bad", "message": "Encuesta inválida"})
+        // }
+        
+      }
+      
     }
     else{
       res.json({"success": "bad", "message": "Paciente no existe."})

@@ -2,7 +2,7 @@
 const CronJob = require("cron").CronJob;
 
 //Global variables
-const { TIME_OUT_ROUTINE } = require("./../config")
+const { TIME_OUT_ROUTINE } = require("./config")
 
 //Import my modules
 

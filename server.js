@@ -10,7 +10,10 @@ const exphbs = require("express-handlebars")
 const cookieParser = require('cookie-parser')
 const { pool } = require("./model/connection")
 const randomString = require("randomstring")
-const os = require("os");
+const os = require("os")
+const { makeMigrations } = require("./model/migration")
+const { runJobs } = require("./timers")
+runJobs()
 
 const options = {
   uploadDir: os.tmpdir(),
@@ -21,9 +24,6 @@ app.use(formData.parse(options));
 app.use(formData.format());
 app.use(formData.stream());
 app.use(formData.union());
-
-
-app.use(cookieParser());
 
 app.use(session({
     name: 'SID',
@@ -56,10 +56,30 @@ app.engine(".hbs", exphbs.create({
     defaultLayout: 'main',
     partialsDir: path.join(app.get("views"), "partials"),
     layoutsDir: path.join(app.get("views"), "layouts"),
-    extname: ".hbs"
+    extname: ".hbs",
+    helpers:{
+        "compare" : (v1, v2, v)=>{
+            console.log(v1)
+            console.log(v2)
+            console.log(v)
+            return v1 == v2 ? v : ""
+        },
+        "generate" : (v)=>{
+            let text = ""
+            for(let i = 0; i < v; i++){
+                text+="*"
+            }
+            return text
+        }
+    }
 }).engine)
 
 app.set("view engine", ".hbs")
+
+app.get("/routine", (req, res)=>{
+    makeMigrations()
+    res.json({ "success": "ok" })
+})
 
 app.use(require("./router/account/index"))
 

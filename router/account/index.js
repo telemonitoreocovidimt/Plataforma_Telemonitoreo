@@ -19,7 +19,6 @@ router.post("/",async (req, res)=>{
         if(result.length){
             req.flash("success", `Bienvenido ${result[0].nombre}.`)
             req.session.user = result[0]
-            req.session.save()
             res.redirect("/dashboard")
         }
         else{

@@ -2,9 +2,10 @@ const { Router } = require("express")
 const router = Router()
 const { getPatientsAlert, getPatients, countAllCaseToday, countAllCaseAttendedToday,
      countAllCaseAttendedToDayForDoctor, countAllCaseAttendedToDayBetweenDoctors, takeCase, canTakeCase,
-     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase } = require("./../../model/dashboard")
+     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase } = require("./../../model/dashboard")
 
 router.get("/",async (req, res)=>{
+    
     if(req.session.user){
         let data = await getPatientsAlert(true)
         let cases_alert = data.result
@@ -49,8 +50,6 @@ router.get("/",async (req, res)=>{
 })
 
 router.get("/case/:case",async (req, res)=>{
-    console.log(typeof(req.params.case))
-    console.log(req.params.case)
     req.params.case = parseInt(req.params.case)
     if(req.session.user){
         if(req.params.case){
@@ -62,24 +61,23 @@ router.get("/case/:case",async (req, res)=>{
                 let dni_medico = req.session.user.dni
                 let data = await canTakeCase(dni_medico, id_case)
                 let canTake = data.result
+
+                console.log(canTake)
                 if(canTake[0].pasa){
                     data = await takeCase(id_case, dni_medico, true)
                     let taked = data.result
                     console.log(taked)
                     data = await getCase(id_case, true, data.client)
-                    console.log(data)
                     let cases = data.result
                     data = await getStatusPatients(false, data.client)
                     let status_patients = data.result
                     let groups = [{ id:"A", descripcion:"A"}, { id:"B", descripcion:"B"}, { id:"C", descripcion:"C"}]
                     let factors = [{ id:true, descripcion:"SI"}, { id:false, descripcion:"NO"}]
                     let test = [{ id:"Positivo", descripcion:"Positivo"}, { id:"Negativo", descripcion:"Negativo"}]
-                    // res.json(cases)
-
-                    res.render("form",{layout: 'case',islogin:true,...data, status_patients, groups, factors, test})
+                    res.render("form",{layout: 'case',islogin:true, ...cases[0], ...data, status_patients, groups, factors, test})
                 }
                 else{
-                    req.flash("danger", data[0].message)
+                    req.flash("danger", canTake[0].message)
                     res.redirect("/dashboard")
                 }
             }
@@ -93,22 +91,39 @@ router.get("/case/:case",async (req, res)=>{
     } 
 })
 
-router.post("/:case/completed",async (req, res)=>{
+router.post("/case/:case",async (req, res)=>{
+    console.log(req.body)
     if(req.session.user){
         let id_case = req.params.case
         let dni_medico = req.session.user.dni
-        let canTerminate = await canTerminateCase(dni_medico, id_case)
-        console.log(canTerminate)
+        let data = await canTerminateCase(dni_medico, id_case)
+        let canTerminate = data.result
+        if(canTerminate[0].pasa){
+            let json = req.boby
+            json.id_caso = id_case
+            await updateCase(json)
+            
+            if(req.boby.tipo_guardado == "2"){
+                await terminateCase(id_case, dni_doctor)
+                req.flash("success", "Caso grabado y cerrado exitosamente.")
+                res.redirect("/dashboard")
+            }
+            else{
+                req.flash("success", "Caso grabado exitosamente.")
+                res.redirect("/dashboard")
+            }
+        }
+        else{
+            req.flash("danger", data[0].message)
+            res.redirect("/dashboard")
+        }
         /***
          * Update de respuestas
          */
-        let json = req.boby
-        await updateCase()
-        await terminateCase(id_case, dni_doctor)
-        res.json(cases)
+    
     }   
     else{
-        res.redirect("login")
+        res.redirect("/")
     } 
 })
 
