@@ -1,192 +1,120 @@
-const admisionSchema = {
-	'Nº': {
-		prop: 'numero',
-		type: Number,
-		required: true
-	},
-	'FECHA': {
-	  prop: 'fecha',
-	  type: Date,
-	  required: true
-	},
-	'APELLIDOS Y NOMBRES': {
-	  prop: 'nombresCompleto',
-	  type: String,
-	  required: true
-	},
-	'TIPO DOC': {
-	  prop: 'tipoDocumento',
-	  type: String,
-	  required: true
-	},
-	'DNI': {
-	  prop: 'numeroDocumento',
-	  type: String,
-	  required: true
-	},
-	'DIRECCIÓN': {
-	  prop: 'direccion',
-	  type: String,
-	  required: true
-	},
-	'CELULAR': {
-	  prop: 'celular',
-	  type: Number,
-	  required: true,
-	  parse(value) {
-		const number = parsePhoneNumber(value)
-		if (!number) {
-		  throw new Error('invalid')
+const excelToJson = require('convert-excel-to-json')
+const { patient_excel_01, patient_excel_02, history } = require('../../model/loadExcel')
+
+function excel_admision(excel){
+    return new Promise((resolve, reject)=>{
+        const result = excelToJson({
+			sourceFile: excel,
+			header:{
+		    	rows: 1
+			},
+			columnToKey: {
+				A: 'numero',
+				B: 'fecha',
+				C: 'nombre',
+				D: 'tipoDocumento',
+				E: 'documento',
+				F: 'direccion',
+				G: 'celular',
+				H: 'fijo'
+			}
+		});
+		const rows = result[Object.keys(result)[0]]
+		let error = validateAdmision(rows)
+		if(error.length !== 0){
+			reject(error)
+		}else{
+			rows.forEach((row, i) => {
+				const rowNumber = i+2
+				let params = []
+				params.push(row.documento)
+				params.push(row.numero)
+				params.push(row.nombre)
+				params.push(row.fecha)
+				params.push(row.fecha)
+				params.push(tipoDocumentoPG(row.tipoDocumento))
+				params.push(row.direccion)
+				params.push(row.celular)
+				params.push(row.fijo)
+				patient_excel_01(params).then((resolvedValue) => {
+
+				}, (error) => {
+					error.push('No se pudo ingresar en la BD la fila '+rowNumber)
+				});
+			})
+			if(error.length !== 0){
+				reject({error : error})
+			}else{
+				resolve({result: 'La Carga fue exitosa'})
+			}
 		}
-		return value
-	  }
-	},
-	'FIJO': {
-	  prop: 'fijo',
-	  type: String,
-	  required: true
+    })
+}
+
+function validateAdmision(rows){
+	let error = []
+	rows.forEach((row, i) => {
+		const rowNumber = i+2
+		isRequired(row.numero, 'A', rowNumber, error)
+		isRequired(row.fecha, 'B', rowNumber, error)
+		isRequired(row.nombre, 'C', rowNumber, error)
+		isRequired(row.tipoDocumento, 'D', rowNumber, error)
+		isRequired(row.documento, 'E', rowNumber, error)
+		isRequired(row.direccion, 'F', rowNumber, error)
+		isRequired(row.celular, 'G', rowNumber, error)
+		isRequired(row.fijo, 'H', rowNumber, error)
+		isDate(row.fecha, 'B', rowNumber, error)
+		parseTipoDocumento(row.tipoDocumento, 'D', rowNumber, error)
+		parsePhoneNumber(row.celular, 'G', rowNumber, error)
+	})
+	return error
+}
+
+function isRequired(data, column, row, error){
+	if(data === null || data === undefined ){
+		error.push(column+row+' es obligatorio')
 	}
 }
 
-const tamizajeSchema = {
-	'N°': {
-	  prop: 'numero',
-	  type: Number,
-	  required: true
-	},
-	'SE': {
-	  prop: 'semanaEpid',
-	  type: Number,
-	  required: true
-	},
-	'Fecha de atención': {
-	  prop: 'fechaAtencion',
-	  type: Date,
-	  required: true
-	},
-	'DNI/ C. Extr': {
-	  prop: 'numeroDocumento',
-	  type: String,
-	  required: true
-	},
-	'Apellidos y Nombres': {
-	  prop: 'nombresCompleto',
-	  type: String,
-	  required: true
-	},
-	'Edad': {
-	  prop: 'edad',
-	  type: Number,
-	  required: true
-	},
-	'Sexo': {
-	  prop: 'sexo',
-	  type: String,
-	  required: true
-	},
-	'Celular': {
-	  prop: 'celular',
-	  type: Number,
-	  required: true,
-	  parse(value) {
-		const number = parsePhoneNumber(value)
-		if (!number) {
-		  throw new Error('invalid')
-		}
-		return value
-	  }
-	},
-	'Pais posible infección': {
-	  prop: 'paisInfeccion',
-	  type: String
-	},
-	'Provincia Residencia actual': {
-	  prop: 'provinciaResidencia',
-	  type: String
-	},
-	'Distrito de residencia actual': {
-	  prop: 'distritoResidencia',
-	  type: String
-	},
-	'Direcion residencia actual': {
-	  prop: 'direccion',
-	  type: String
-	},
-	'Fecha Inicio de síntomas': {
-	  prop: 'fechaInicio',
-	  type: Date,
-	  required: true
-	},
-	'Fecha toma de muestra': {
-	  prop: 'fechaMuestra',
-	  type: Date,
-	  required: true
-	},
-	'Tipo de muestra 1': {
-	  prop: 'tipoMuestra1',
-	  type: String
-	},
-	'Resultado Tipo de muestra 1': {
-	  prop: 'resultadoTipoMuestra1',
-	  type: String
-	},
-	'Fecha de resultado Tipo de muestra 1': {
-	  prop: 'fechaTipoMuestra1',
-	  type: Date
-	},
-	'Tipo de muestra 2': {
-	  prop: 'tipoMuestra2',
-	  type: String
-	},
-	'Resultado Tipo de muestra 2': {
-	  prop: 'resultadoTipoMuestra2',
-	  type: String
-	},
-	'Fecha de resultado Tipo de muestra 2': {
-	  prop: 'fechaTipoMuestra2',
-	  type: Date
-	},
-	'Tipo de muestra 3': {
-	  prop: 'tipoMuestra3',
-	  type: String
-	},
-	//'Resultado Tipo de muestra 3': {
-	//  prop: 'resultadoTipoMuestra3',
-	//  type: String
-	//},
-	'Fecha de resultado Tipo de muestra 3': {
-	  prop: 'fechaTipoMuestra3',
-	  type: Date
-	},
-	'Destino': {
-	  prop: 'destino',
-	  type: String
-	},
-	'Lugar de destino': {
-	  prop: 'lugarDestino',
-	  type: String
-	},
-	'CLASIFICACION EPIDEMIOLOGICA': {
-	  prop: 'clasificacion',
-	  type: String
-	},
-	'EVOLUCION 1': {
-	  prop: 'evolucion1',
-	  type: String
-	},
-	'EVOLUCION 2': {
-	  prop: 'evolucion2',
-	  type: String
+function isDate(data, column, row, error){
+	if(data !== null && data !== undefined && !(data instanceof Date)){
+		error.push(column+row+' debe ser de tipo Fecha')
 	}
-  }
-
-var parsePhoneNumber = function(value) {
-if(value.toString().length !== 9) {
-	return false;
 }
-return /^(9)([0-9]{8})$/.test(value);
-};
+
+function parseTipoDocumento(data, column, row, error){
+	if(data !== null && data !== undefined && 
+		data.toUpperCase() !== 'DNI' && 
+		data.toUpperCase() !== 'CARNET DE EXTRANJERIA' ){
+			error.push(column+row+' solo puede tener los siguientes valores DNI o CARNET DE EXTRANJERIA')
+	}
+}
+
+function parsePhoneNumber(data, column, row, error) {
+	if(data !== null && data !== undefined && 
+		(data.toString().length !== 9 || !(/^(9)([0-9]{8})$/.test(data)))) {
+		error.push(column+row+' el telefono debe comenzar con 9 y ser de 9 digitos')
+	}
+}
+
+function tipoDocumentoPG(tipoDocumento){
+	let result=null
+	if(tipoDocumento.toUpperCase() === 'DNI'){
+		result=1
+	}
+	if(tipoDocumento.toUpperCase() === 'CARNET DE EXTRANJERIA'){
+		result=2
+	}
+	return result
+}
+
+function excel_tamizaje(excel){
+    return new Promise((resolve, reject)=>{
+        
+    })
+}
 
 module.exports = {
-    admisionSchema
+    excel_admision,
+    excel_tamizaje
 }
