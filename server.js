@@ -12,8 +12,6 @@ const { pool } = require("./model/connection")
 const randomString = require("randomstring")
 const os = require("os");
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 const options = {
   uploadDir: os.tmpdir(),
   autoClean: true
