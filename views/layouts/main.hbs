@@ -26,7 +26,7 @@
                 <div class="logo">
                     <p>
                         <i class="zmdi zmdi-view-dashboard"></i>
-                        Sistema de Monitoreo de Pacientes - Covit 19
+                        Sistema de Monitoreo de Pacientes - COVID 19
                     </p>
                 </div>
                 <ul>
@@ -70,7 +70,7 @@
                             <i class="zmdi zmdi-email icon-navside"></i>
                             <h6>Mi bandeja</h6>
                         </button>
-                        <button
+                        <!--button
                             class="nav-link navlink"
                             id="v-pills-messages-tab"
                             data-toggle="pill"
@@ -79,7 +79,7 @@
                             aria-selected="false">
                             <i class="zmdi zmdi-help"></i>
                             <h6>Otros</h6>
-                        </button>
+                        </button-->
                     </div>
                 </div>
                 <div class="col-10">
@@ -98,6 +98,32 @@
                             src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
                             integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
                             crossorigin="anonymous"></script>
+
+<script>
+function showHome(){
+    $(".tblUrgent").show();
+    $(".tblPending").show();
+    $(".tblMine").hide();
+}
+function showMyTray(){
+    $(".tblUrgent").hide();
+    $(".tblPending").hide();
+    $(".tblMine").show();
+}
+
+$("#v-pills-home-tab").click(function(){
+    showHome();
+})
+$("#v-pills-profile-tab").click(function(){
+    showMyTray();
+})
+
+$( document ).ready(function() {
+    showHome();
+});
+
+</script>
+
                     </body>
 
                 </html>
