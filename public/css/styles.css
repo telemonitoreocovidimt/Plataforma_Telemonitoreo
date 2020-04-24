@@ -727,7 +727,19 @@ body {
 /*# sourceMappingURL=styles.css.map */
 
 table.modal-table {
-  width: 500px;
+    width: 500px;
+    display: table;
+    margin: auto;
+}
+.form-title,
+.input-group {
+  
+  margin-bottom: 1rem;
+}
+
+
+.upload-box {
+  max-width: 400px;
   display: table;
-  margin: auto;
+  margin: 2rem auto;
 }
