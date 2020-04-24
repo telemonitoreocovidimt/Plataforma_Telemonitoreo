@@ -41,7 +41,7 @@ function getPatientsSurvey02(){
 function existePatient(dni_paciente){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
-        let query = "select * from development.dt_pacientes as p where p.dni = $1)"
+        let query = "select * from development.dt_pacientes as p where p.dni = $1"
         let params = [dni_paciente]
         let result = await client.query(query, params)
         client.release(true)
@@ -53,7 +53,7 @@ function existePatient(dni_paciente){
 function save_answer(dni_paciente, variable, respuesta, asked_at, answered_at){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
-        let query = "select * from sp_save_answer($1, $2, $3, $4, $5)"
+        let query = "select * from development.sp_save_answer($1, $2, $3, $4, $5)"
         let params = [dni_paciente, variable, respuesta, asked_at, answered_at]
         let result = await client.query(query, params)
         client.release(true)
@@ -65,8 +65,19 @@ function save_answer(dni_paciente, variable, respuesta, asked_at, answered_at){
 function patient_change_status(dni_paciente, estado){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
-        let query = "select * from sp_patient_change_status($1, $2)"
+        let query = "select * from development.sp_patient_change_status($1, $2)"
         let params = [dni_paciente, estado]
+        let result = await client.query(query, params)
+        client.release(true)
+        resolve(result.rows)
+    })
+}
+
+function patient_change_risk_factor(dni_paciente, factor_riesgo){
+    return new Promise(async (resolve, reject)=>{
+        let client = await openConnection()
+        let query = "select * from development.sp_patient_change_risk_factor($1, $2)"
+        let params = [dni_paciente, factor_riesgo]
         let result = await client.query(query, params)
         client.release(true)
         resolve(result.rows)
@@ -83,5 +94,6 @@ module.exports = {
     getPatientsSurvey02,
     existePatient,
     save_answer,
-    patient_change_status
+    patient_change_status,
+    patient_change_risk_factor
 }
