@@ -45,7 +45,7 @@ function makeMigrationsCustomer(dni_paciente){
                     alteracion_sensorio,colaboracion_azul_labios,tos,dolor_garganta,congestion_nasal,malestar_general,cefalea,
                     nauseas,diarrea,comentario,fecha_caso)
                     SELECT p.dni, 1, 0,0,0,0,0,0,0,0,0,0,0,0,'', $1 FROM development.dt_pacientes p
-                    where p.estado = 1 and paso_encuesta_inicial = true and not p.grupo = 'A' and p.dni = $2;`
+                    where paso_encuesta_inicial = true and not p.grupo = 'A' and p.dni = $2;`
         let params = [datePeru_current, dni_paciente]
         let result = await client.query(query, params)
         client.release(true)

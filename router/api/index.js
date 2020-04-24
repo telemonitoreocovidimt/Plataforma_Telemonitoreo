@@ -33,6 +33,7 @@ async function answer_daily_survey(patient_id, answers){
   
   let patientToUrgency = 0;
   let patientToNormalTray = 0;
+
   for(const i in answers){
 
     let rows = await save_answer(patient_id, answers[i].variable, answers[i].answer, answers[i].asked_at, answers[i].answered_at)
@@ -69,6 +70,7 @@ async function answer_initial_survey(patient_id, answers){
   let is_risk_factor = false;
   let patient_age = 0;
   for(const i in answers){
+    console.log(patient_id, answers[i].variable, answers[i].answer, answers[i].asked_at, answers[i].answered_at)
     let rows = await save_answer(patient_id, answers[i].variable, answers[i].answer, answers[i].asked_at, answers[i].answered_at)
     if(answers[i].variable == "edad_paciente") patient_age = parseInt(answers[i].answer);
     if(answers[i].variable == "comorbilidades" && answers[i].answer.toUpperCase() == "SI"){
@@ -79,10 +81,11 @@ async function answer_initial_survey(patient_id, answers){
   let y = await patient_change_age(patient_id, patient_age)
     console.log("interna")
       console.log(patient_id)
-  if(is_risk_factor)
-      await makeMigrationsCustomer(patient_id)
+  
   let x = await patient_change_risk_factor(patient_id, is_risk_factor)
   
+  if(is_risk_factor)
+    await makeMigrationsCustomer(patient_id)
 }
 
 router.get("/:survey",async (req, res)=>{
@@ -108,38 +111,38 @@ router.post("/save_answers", async (req, res)=>{
       let dni_patient = req.body.identity_document
       let answers = req.body.answers
       console.log(patient[0])
-      console.log(answers)
+      // console.log(answers)
       if(answers == null || answers.length == 0){
         res.json({"success": "bad", "message": "No se detectó respuestas."})
       }else{
 
-          if(!patient[0].paso_encuesta_inicial){
-            //ENCUESTA INICIAL
-            console.log("ENCUESTA INICIAL")
-            answer_initial_survey(dni_patient, answers)
-            res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
-          }else if(patient[0].paso_encuesta_inicial){
-            //ENCUESTA DIARIA
-            console.log("ENCUESTA DIARIA")
-            answer_daily_survey(dni_patient, answers)
-             res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
-          }else{
-            res.json({"success": "bad", "message": "Encuesta inválida"})
-          }
+          // if(!patient[0].paso_encuesta_inicial){
+          //   //ENCUESTA INICIAL
+          //   console.log("ENCUESTA INICIAL")
+          //   answer_initial_survey(dni_patient, answers)
+          //   res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+          // }else if(patient[0].paso_encuesta_inicial){
+          //   //ENCUESTA DIARIA
+          //   console.log("ENCUESTA DIARIA")
+          //   answer_daily_survey(dni_patient, answers)
+          //    res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+          // }else{
+          //   res.json({"success": "bad", "message": "Encuesta inválida"})
+          // }
 
-        // if(req.body.survey == "encuesta_inicial_covid_19_hch"){
-        //   //ENCUESTA INICIAL
-        //   console.log("ENCUESTA INICIAL")
-        //   answer_initial_survey(req.body.patient_code, answers)
-        //   res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
-        // }else if(req.body.survey == "encuesta_monitoreo_covid_19_hch"){
-        //   //ENCUESTA DIARIA
-        //   console.log("ENCUESTA DIARIA")
-        //   answer_daily_survey(req.body.patient_code, answers)
-        //    res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
-        // }else{
-        //   res.json({"success": "bad", "message": "Encuesta inválida"})
-        // }
+        if(req.body.survey == "encuesta_inicial_covid_19_hch"){
+          //ENCUESTA INICIAL
+          console.log("ENCUESTA INICIAL")
+          answer_initial_survey(dni_patient, answers)
+          res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+        }else if(req.body.survey == "encuesta_monitoreo_covid_19_hch"){
+          //ENCUESTA DIARIA
+          console.log("ENCUESTA DIARIA")
+          answer_daily_survey(dni_patient, answers)
+           res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+        }else{
+          res.json({"success": "bad", "message": "Encuesta inválida"})
+        }
         
       }
       

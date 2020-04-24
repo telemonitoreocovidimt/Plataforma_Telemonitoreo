@@ -117,7 +117,7 @@ function countAllCaseToday(pass = false, client = null){
         if(!client)
             client = await openConnection()
         let query = `select count(*) from development.dt_casos_dia as pr
-                        where fecha_caso = $1`
+                        where fecha_caso = $1 and estado_caso in (1,2)`
         let params = [datePeru_init]
         let result = await client.query(query, params)
         if(!pass)
@@ -231,7 +231,8 @@ function getCase(id_case, pass = false, client = null){
         let { datePeru_current } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `select p.*, p.nombre , p.celular, p.fijo, p.grupo, p.factor_riesgo, p.estado , p.fecha_inicio_sintomas,
+        let query = `select p.*, p.nombre , p.celular, p.fijo, p.grupo, p.factor_riesgo, p.estado , 
+                    concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
                     extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento, 
                     (select pr.resultado from development.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'rapida' order by pr.fecha_resultado_prueba desc limit 1) as resultado_rapido,
                     (select pr.resultado from development.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'molecular' order by pr.fecha_resultado_prueba desc limit 1) as resultado_molecular,
@@ -263,13 +264,88 @@ function getStatusPatients(pass = false, client = null){
 
 function updateCase(json, pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
-        let { id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, 
-            resultado_prueba_2, resultado_prueba_3, fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, 
-            tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario } = json
+        let { id_caso, grupo, factor_riesgo, estado, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, 
+            tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas } = json
+
+        let resultado_prueba_1 = null
+        let resultado_prueba_2 = null
+        let resultado_prueba_3 = null
+        if(id_caso){
+            id_caso = parseInt(id_caso)
+        }
+        if(factor_riesgo){
+            factor_riesgo = factor_riesgo == 'true'? true : false
+        }
+        if(estado){
+            estado = parseInt(estado)
+        }
+        if(resultado_prueba_1){
+            resultado_prueba_1 = parseInt(json.resultado_prueba_1)
+        }
+        if(resultado_prueba_2){
+            resultado_prueba_2 = parseInt(json.resultado_prueba_2)
+        }
+        if(resultado_prueba_3){
+            resultado_prueba_3 = parseInt(json.resultado_prueba_3)
+        }
+        if(fibre){
+            fibre = parseInt(fibre)
+        }
+        if(dificultad_respitar){
+            dificultad_respitar = parseInt(dificultad_respitar)
+        }
+        if(dolor_pecho){
+            dolor_pecho = parseInt(dolor_pecho)
+        }
+        if(alteracion_sensorio){
+            alteracion_sensorio = parseInt(alteracion_sensorio)
+        }
+        if(colaboracion_azul_labios){
+            colaboracion_azul_labios = parseInt(colaboracion_azul_labios)
+        }
+        if(tos){
+            tos = parseInt(tos)
+        }
+        if(dolor_garganta){
+            dolor_garganta = parseInt(dolor_garganta)
+        }
+        if(congestion_nasal){
+            congestion_nasal = parseInt(congestion_nasal)
+        }
+        if(malestar_general){
+            malestar_general = parseInt(malestar_general)
+        }
+        if(cefalea){
+            cefalea = parseInt(cefalea)
+        }
+        if(nauseas){
+            nauseas = parseInt(nauseas)
+        }
+        if(diarrea){
+            diarrea = parseInt(diarrea)
+        }
+        if(!fecha_inicio_sintomas){
+            fecha_inicio_sintomas = null
+        }
+        console.log("Parametros para actualizar")
+        console.log([id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas])
         if(!client)
             client = await openConnection()
-        let query = `select * from sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`
-        let params = [id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario]
+        let query = `select * from sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`
+        let params = [id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function dropCase(id_caso,pass = false, client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+            client = await openConnection()
+        let query = `update development.dt_casos_dia set dni_medico = null, estado_caso = 1 where id = $1`
+        let params = [id_caso]
         let result = await client.query(query, params)
         if(!pass)
             client.release(true)
@@ -291,5 +367,6 @@ module.exports = {
     canTerminateCase,
     terminateCase,
     updateCase,
-    getMyPatients
+    getMyPatients,
+    dropCase
 }
