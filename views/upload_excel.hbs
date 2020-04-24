@@ -1,10 +1,45 @@
+<div class="upload-box">
 <form action="/load-excel/respuesta-admision" method="post" enctype="multipart/form-data">
-    Seleccionar Archivo Admision<br>
-    <input type="file" name="fileAdmision"><br>
-    <input type="submit" value="Submit">
+  <h3 class="form-title">Carga de Archivo Admisión</h3>
+  <div class="input-group">
+    <div class="input-group-prepend">
+     <span class="input-group-text" id="inputGroupFileAddon01">Cargar</span>
+    </div>
+    <div class="custom-file">
+        <input type="file" class="custom-file-input" id="inputGroupFile01"  name ="fileAdmision"
+        aria-describedby="inputGroupFileAddon01">
+        <label class="custom-file-label" for="inputGroupFile01">Seleccionar archivo</label>
+    </div>
+    
+</div>
+<div class="input-group">
+<input type="submit" value="Subir" class="btn btn-primary">
+</div>
+
+    
 </form>
+<br><br>
 <form action="/load-excel/respuesta-tamizaje" method="post" enctype="multipart/form-data">
-    Seleccionar Archivo Tamizaje<br>
-    <input type="file" name="fileTamizaje"><br>
-    <input type="submit" value="Submit">
+
+<h3 class="form-title">Carga de Archivo Tamizaje</h3>
+  <div class="input-group">
+    <div class="input-group-prepend">
+     <span class="input-group-text" id="inputGroupFileAddon01">Cargar</span>
+    </div>
+    <div class="custom-file">
+        <input type="file" class="custom-file-input" id="inputGroupFile01"  name ="fileTamizaje"
+        aria-describedby="inputGroupFileAddon01">
+        <label class="custom-file-label" for="inputGroupFile01">Seleccionar archivo</label>
+    </div>
+    
+</div>
+<div class="input-group">
+<input type="submit" value="Subir" class="btn btn-primary">
+</div>
+
+
+
+
+
 </form>
+</div>
