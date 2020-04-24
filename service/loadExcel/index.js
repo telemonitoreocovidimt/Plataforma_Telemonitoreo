@@ -70,6 +70,103 @@ function validateAdmision(rows){
 	return error
 }
 
+function excel_tamizaje(excel){
+    return new Promise((resolve, reject)=>{
+        const result = excelToJson({
+			sourceFile: excel,
+			header:{
+		    	rows: 1
+			},
+			columnToKey: {
+				A: 'numero',
+				B: 'semanaEpid',
+				C: 'fecha',
+				D: 'tipoDocumento',
+				E: 'documento',
+				F: 'nombre',
+				G: 'edad',
+				H: 'sexo',
+				I: 'celular',
+				J: 'fijo',
+				K: 'pais',
+				L: 'provincia',
+				M: 'distrito',
+				N: 'direccion',
+				O: 'fechaSintomas',
+				P: 'fechaMuestra',
+				Q: 'tipoMuestra1',
+				R: 'resultadoMuestra1',
+				S: 'fechaResultado1',
+				T: 'tipoMuestra2',
+				U: 'resultadoMuestra2',
+				V: 'fechaResultado2',
+				W: 'tipoMuestra3',
+				X: 'resultadoMuestra3',
+				Y: 'fechaResultado3',
+				Z: 'destino',
+				AA: 'lugar',
+				AB: 'clasificacion',
+				AC: 'evolucion1',
+				AD: 'evolucion2'
+			}
+		});
+		const rows = result[Object.keys(result)[0]]
+		let error = validateTamizaje(rows)
+		if(error.length !== 0){
+			reject(error)
+		}else{
+			rows.forEach((row, i) => {
+				const rowNumber = i+2
+				console.log(row);
+				//let params = []
+				//params.push(row.documento)
+				//params.push(row.numero)
+				//params.push(row.nombre)
+				//params.push(row.fecha)
+				//params.push(row.fecha)
+				//params.push(tipoDocumentoPG(row.tipoDocumento))
+				//params.push(row.direccion)
+				//params.push(row.celular)
+				//params.push(row.fijo)
+				//patient_excel_01(params).then((resolvedValue) => {
+				//}, (error) => {
+				//	error.push('No se pudo ingresar en la BD la fila '+rowNumber)
+				//});
+			})
+			if(error.length !== 0){
+				reject({error : error})
+			}else{
+				resolve({result: 'La Carga fue exitosa'})
+			}
+		}
+    })
+}
+
+function validateTamizaje(rows){
+	let error = []
+	rows.forEach((row, i) => {
+		const rowNumber = i+2
+		isRequired(row.numero, 'A', rowNumber, error)
+		isRequired(row.semanaEpid, 'B', rowNumber, error)
+		isRequired(row.fecha, 'C', rowNumber, error)
+		isRequired(row.tipoDocumento, 'D', rowNumber, error)
+		isRequired(row.documento, 'E', rowNumber, error)
+		isRequired(row.nombre, 'F', rowNumber, error)
+		isRequired(row.edad, 'G', rowNumber, error)
+		isRequired(row.sexo, 'H', rowNumber, error)
+		isRequired(row.celular, 'I', rowNumber, error)
+		isRequired(row.fijo, 'J', rowNumber, error)
+		isRequired(row.pais, 'K', rowNumber, error)
+		isRequired(row.provincia, 'L', rowNumber, error)
+		isRequired(row.distrito, 'M', rowNumber, error)
+		isRequired(row.direccion, 'N', rowNumber, error)
+		isDate(row.fecha, 'C', rowNumber, error)
+		parseTipoDocumento(row.tipoDocumento, 'D', rowNumber, error)
+		parsePhoneNumber(row.celular, 'I', rowNumber, error)
+	})
+	return error
+}
+
 function isRequired(data, column, row, error){
 	if(data === null || data === undefined ){
 		error.push(column+row+' es obligatorio')
@@ -106,12 +203,6 @@ function tipoDocumentoPG(tipoDocumento){
 		result=2
 	}
 	return result
-}
-
-function excel_tamizaje(excel){
-    return new Promise((resolve, reject)=>{
-        
-    })
 }
 
 module.exports = {
