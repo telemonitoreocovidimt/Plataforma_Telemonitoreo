@@ -104,6 +104,7 @@ function showHome(){
     $(".tblUrgent").show();
     $(".tblPending").show();
     $(".tblMine").hide();
+
 }
 function showMyTray(){
     $(".tblUrgent").hide();
@@ -113,9 +114,13 @@ function showMyTray(){
 
 $("#v-pills-home-tab").click(function(){
     showHome();
+    $("#v-pills-home-tab").addClass("link-active");
+    $("#v-pills-profile-tab").removeClass("link-active");
 })
 $("#v-pills-profile-tab").click(function(){
     showMyTray();
+    $("#v-pills-profile-tab").addClass("link-active");
+    $("#v-pills-home-tab").removeClass("link-active");
 })
 
 $( document ).ready(function() {
