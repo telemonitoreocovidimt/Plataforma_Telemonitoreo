@@ -231,8 +231,8 @@ function getCase(id_case, pass = false, client = null){
         let { datePeru_current } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `select p.nombre, p.celular, p.fijo, p.grupo, p.factor_riesgo, p.fecha_inicio_sintomas,
-                    $1 - p.fecha_creacion as tiempo_seguimiento , 
+        let query = `select p.*, p.nombre , p.celular, p.fijo, p.grupo, p.factor_riesgo, p.estado , p.fecha_inicio_sintomas,
+                    extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento, 
                     (select pr.resultado from development.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'rapida' order by pr.fecha_resultado_prueba desc limit 1) as resultado_rapido,
                     (select pr.resultado from development.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'molecular' order by pr.fecha_resultado_prueba desc limit 1) as resultado_molecular,
                     c.*
@@ -263,11 +263,13 @@ function getStatusPatients(pass = false, client = null){
 
 function updateCase(json, pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
-        let { id_caso, grupo, factor, bandeja, resultado_rapido, resultado_molecular, fiebre, respirar, pecho, alteracion, coloracion, tos, garganta, nasal, malestar, cefalea, nauses, diarea, comentario } = json
+        let { id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, 
+            resultado_prueba_2, resultado_prueba_3, fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, 
+            tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario } = json
         if(!client)
             client = await openConnection()
-        let query = `select * from sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`
-        let params = [id_caso, grupo, factor, bandeja, resultado_rapido, resultado_molecular, fiebre, respirar, pecho, alteracion, coloracion, tos, garganta, nasal, malestar, cefalea, nauses, diarea, comentario]
+        let query = `select * from sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`
+        let params = [id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario]
         let result = await client.query(query, params)
         if(!pass)
             client.release(true)

@@ -1,5 +1,5 @@
-merge:  corrected loaded
+fix:  funcionality take case enabled
 
-corrected loaded
+view and funcionality of user case take case finished.
 
-Version 0.8.3
+Version 0.9
