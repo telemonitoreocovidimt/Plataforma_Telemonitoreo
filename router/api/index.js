@@ -1,6 +1,6 @@
 const { Router } = require("express")
 const router = Router()
-const { getPatientsSurvey01, getPatientsSurvey02, existePatient, save_answer, patient_change_status, patient_change_risk_factor } = require("./../../model/api")
+const { getPatientsSurvey01, getPatientsSurvey02, existePatient, save_answer, patient_change_status, patient_change_risk_factor, patient_change_age } = require("./../../model/api")
 
 function arrayJsonToPatientsList(patients){
     let list_patients = []
@@ -63,13 +63,17 @@ async function answer_daily_survey(patient_id, answers){
 async function answer_initial_survey(patient_id, answers){
   
   let is_risk_factor = false;
+  let patient_age = 0;
   for(const i in answers){
     let rows = await save_answer(patient_id, answers[i].variable, answers[i].value, answers[i].asked_at, answers[i].answered_at)
+    if(answers[i].variable == "edad_paciente") patient_age = parseInt(answers[i].value);
     if(answers[i].variable == "comorbilidades" && answers[i].value.toUpperCase() == "SI"){
       is_risk_factor = true;
     }
   }
+  console.log(is_risk_factor);
   let x = await patient_change_risk_factor(patient_id, is_risk_factor)
+  let y = await patient_change_age(patient_id, patient_age)
   
 }
 

@@ -84,6 +84,17 @@ function patient_change_risk_factor(dni_paciente, factor_riesgo){
     })
 }
 
+function patient_change_age(dni_paciente, age){
+    return new Promise(async (resolve, reject)=>{
+        let client = await openConnection()
+        let query = "select * from development.sp_patient_change_age($1, $2)"
+        let params = [dni_paciente, age]
+        let result = await client.query(query, params)
+        client.release(true)
+        resolve(result.rows)
+    })
+}
+
 
 //existePatient(req.body.patient_code) sp_save_answer
 //development.sp_save_answer(patient_id, answer.variable, answer.answer, answer.asked_at, answer.answered_at) save_answer
@@ -95,5 +106,6 @@ module.exports = {
     existePatient,
     save_answer,
     patient_change_status,
-    patient_change_risk_factor
+    patient_change_risk_factor,
+    patient_change_age
 }
