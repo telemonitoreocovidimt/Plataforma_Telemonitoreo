@@ -205,7 +205,9 @@
             </tr>
             <tr>
                 <td colSpan="2" class="comment">
-                    <textarea id="comentario" class="textarea" name="comentario"  value="{{ comentario }}" placeholder="Textarea"></textarea>
+                    <textarea id="comentario" class="textarea" name="comentario" placeholder="Textarea">
+                        
+                    </textarea>
                 </td>
             </tr>
         </tbody>
@@ -214,6 +216,12 @@
         <input type="hidden" name="tipo_guardado" id="tipo_guardado">
         <input  class="m-2 btn btn-primary" type="submit" value="Guardar y cerrar caso" onclick="document.getElementById('tipo_guardado').value=2">
         <input  class="m-2 btn btn-success" type="submit" value="Guardar" onclick="document.getElementById('tipo_guardado').value=1">
-        <input  class="m-2 btn btn-danger" type="button" value="Cancelar / Liberar" onclick="window.location = '/dashboard'">
+        <input  class="m-2 btn btn-warning" type="submit" value="Liberar caso" onclick="document.getElementById('tipo_guardado').value=3">
+        <input  class="m-2 btn btn-danger" type="button" value="Cancelar" onclick="window.location = '/dashboard'">
     </div>
 </form>
+<script>
+    window.onload = ()=>{
+        $("#comentario").value = "{{ comentario }}"
+    }
+</scrip>
