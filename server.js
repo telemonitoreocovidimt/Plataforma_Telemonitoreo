@@ -10,8 +10,10 @@ const exphbs = require("express-handlebars")
 const cookieParser = require('cookie-parser')
 const { pool } = require("./model/connection")
 const randomString = require("randomstring")
-const os = require("os");
-
+const os = require("os")
+const { makeMigrations } = require("./model/migration")
+const { runJobs } = require("./timers")
+runJobs()
 
 const options = {
   uploadDir: os.tmpdir(),
@@ -22,8 +24,6 @@ app.use(formData.parse(options));
 app.use(formData.format());
 app.use(formData.stream());
 app.use(formData.union());
-
-
 
 app.use(session({
     name: 'SID',
@@ -75,6 +75,11 @@ app.engine(".hbs", exphbs.create({
 }).engine)
 
 app.set("view engine", ".hbs")
+
+app.get("/routine", (req, res)=>{
+    makeMigrations()
+    res.json({ "success": "ok" })
+})
 
 app.use(require("./router/account/index"))
 

@@ -90,10 +90,10 @@ router.get("/:survey",async (req, res)=>{
 })
 
 router.post("/save_answers", async (req, res)=>{
-  if(req.body.patient_code){
-    let patient = await existePatient(req.body.patient_code)
+  if(req.body.identity_document){
+    let patient = await existePatient(req.body.identity_document)
     if(patient.length){
-      let dni_patient = patient[0].identity_document
+      let dni_patient = req.body.identity_document
       let answers = req.body.answers
 
       if(answers == null || answers.length == 0){
