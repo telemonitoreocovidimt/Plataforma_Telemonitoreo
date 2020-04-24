@@ -1,5 +1,5 @@
-merge: convert view uploader excel to hbs.
+merge:  corrected loaded
 
-conver view to .hbs
+corrected loaded
 
-Version 0.8.2
+Version 0.8.3
