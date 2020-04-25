@@ -1,8 +1,8 @@
-<div class="container">
+<div class="col-12">
   <table class="table table-hover">
     <thead>
       <tr class="tittle tb-head-second">
-        <th colSpan="11">LISTA DE CASOS ASIGNADOS</th>
+        <th colSpan="15">LISTA DE CASOS ASIGNADOS</th>
       </tr>
       <tr class="text-center tb-head">
         <th scope="col">Nombre de Paciente</th>
@@ -13,8 +13,12 @@
         <th scope="col">Fecha Inicio de Sintomas</th>
         <th scope="col">Fecha Toma de Muestras</th>
         <th scope="col">Dia seguimiento</th>
-        <th scope="col">Resultado prueba rapida</th>
-        <th scope="col">Resultado prueba molecular</th>
+        <th scope="col">Tipo de prueba 1</th>
+        <th scope="col">Resultado prueba 1</th>
+        <th scope="col">Tipo de prueba 2</th>
+        <th scope="col">Resultado prueba 2</th>
+        <th scope="col">Tipo de prueba 3</th>
+        <th scope="col">Resultado prueba 3</th>
         <th scope="col">Atención Caso</th>
       </tr>
     </thead>
@@ -29,8 +33,12 @@
                     <td>{{ this.fecha_inicio_sintomas }}</td>
                     <td>{{ this.fecha_toma_muestra }}</td>
                     <td>{{ this.tiempo_seguimiento }}</td>
-                    <td>{{ this.resultado_rapido }}</td>
-                    <td>{{ this.resultado_molecular }}</td>
+                    <td>{{ this.tipo_prueba_1 }}</td>
+                    <td>{{ this.resultado_prueba_1 }}</td>
+                    <td>{{ this.tipo_prueba_2 }}</td>
+                    <td>{{ this.resultado_prueba_2 }}</td>
+                    <td>{{ this.tipo_prueba_3 }}</td>
+                    <td>{{ this.resultado_prueba_3 }}</td>
                     <td><a href="/dashboard/case/{{ this.id_case }}"><button><small>Tomar caso</small></button></a></td>
                 </tr>
             {{/each}}

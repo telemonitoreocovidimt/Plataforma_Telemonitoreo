@@ -38,7 +38,7 @@ function getPatientsAlert(pass = false, client = null){
                         case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
                     from development.dt_casos_dia as c
                     inner join development.dt_pacientes as p on c.dni_paciente = p.dni
-                    where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 3 order by p.edad desc;`
+                    where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 3 and p.grupo in ('C', 'B') order by p.edad desc;`
         let params = [datePeru_current, datePeru_init]
         let result = await client.query(query, params)
 
@@ -70,7 +70,7 @@ function getPatients(pass = false, client = null){
                         case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
                     from development.dt_casos_dia as c
                     inner join development.dt_pacientes as p on c.dni_paciente = p.dni
-                    where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 2 order by p.edad desc;`
+                    where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 2 and p.grupo in ('C', 'B') order by p.edad desc;`
         let params = [datePeru_current, datePeru_init]
         let result = await client.query(query, params)
         if(!pass)
@@ -101,7 +101,7 @@ function getMyPatients(dni_medico, pass = false, client = null){
                         case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
                     from development.dt_casos_dia as c
                     inner join development.dt_pacientes as p on c.dni_paciente = p.dni
-                    where c.fecha_caso = $2 and c.estado_caso = 2 and c.dni_medico = $3 order by p.edad desc;`
+                    where c.fecha_caso = $2 and c.estado_caso = 2 and c.dni_medico = $3 and p.grupo in ('C', 'B') order by p.edad desc;`
         let params = [datePeru_current, datePeru_init, dni_medico]
         let result = await client.query(query, params)
         if(!pass)
@@ -117,7 +117,9 @@ function countAllCaseToday(pass = false, client = null){
         if(!client)
             client = await openConnection()
         let query = `select count(*) from development.dt_casos_dia as pr
-                        where fecha_caso = $1 and estado_caso in (1,2)`
+                        inner join development.dt_pacientes as p
+                        on pr.dni_paciente = p.dni
+                        where fecha_caso = $1 and estado_caso in (1,2) and p.grupo in ('C', 'B')`
         let params = [datePeru_init]
         let result = await client.query(query, params)
         if(!pass)
