@@ -93,7 +93,7 @@ function excel_tamizaje(excel){
 				M: 'distrito',
 				N: 'direccion',
 				O: 'fechaSintomas',
-				P: 'fechaMuestra',
+				P: 'fechaMuestra1',
 				Q: 'tipoMuestra1',
 				R: 'resultadoMuestra1',
 				S: 'fechaResultado1',
@@ -115,23 +115,62 @@ function excel_tamizaje(excel){
 		if(error.length !== 0){
 			reject(error)
 		}else{
+			let { datePeru_init, datePeru_current } = getTimeNow()
 			rows.forEach((row, i) => {
 				const rowNumber = i+2
-				console.log(row);
-				//let params = []
-				//params.push(row.documento)
-				//params.push(row.numero)
-				//params.push(row.nombre)
-				//params.push(row.fecha)
-				//params.push(row.fecha)
-				//params.push(tipoDocumentoPG(row.tipoDocumento))
-				//params.push(row.direccion)
-				//params.push(row.celular)
-				//params.push(row.fijo)
-				//patient_excel_01(params).then((resolvedValue) => {
-				//}, (error) => {
-				//	error.push('No se pudo ingresar en la BD la fila '+rowNumber)
-				//});
+				
+				let paramsPatient = []
+				let paramsHistory = []
+
+				paramsPatient.push(row.documento)
+				paramsPatient.push(row.numero)
+				paramsPatient.push(row.nombre)
+				paramsPatient.push(row.fecha)
+				paramsPatient.push(datePeru_current)
+				paramsPatient.push(tipoDocumentoPG(row.tipoDocumento))
+				paramsPatient.push(row.direccion)
+				paramsPatient.push(row.celular)
+				paramsPatient.push(row.fijo)
+
+				paramsPatient.push(row.fechaMuestra1)
+				paramsPatient.push(resultadoMuestra(row.resultadoMuestra1))
+				paramsPatient.push(row.fechaResultado1)
+				paramsPatient.push(tipoPrueba(row.tipoMuestra1))
+
+				paramsPatient.push(row.fechaMuestra2)
+				paramsPatient.push(resultadoMuestra(row.resultadoMuestra2))
+				paramsPatient.push(row.fechaResultado2)
+				paramsPatient.push(tipoPrueba(row.tipoMuestra2))
+
+				paramsPatient.push(row.fechaMuestra3)
+				paramsPatient.push(resultadoMuestra(row.resultadoMuestra3))
+				paramsPatient.push(row.fechaResultado3)
+				paramsPatient.push(tipoPrueba(row.tipoMuestra3))
+
+				paramsPatient.push(row.sexo)
+				paramsPatient.push(row.pais)
+				paramsPatient.push(row.pais)
+				paramsPatient.push(row.provincia)
+				paramsPatient.push(row.distrito)
+				paramsPatient.push(row.fechaSintomas)
+
+				paramsPatient.push(confirmacionCovid19(row.clasificacion))
+				
+				patient_excel_02(paramsPatient).then((resolvedValue) => {
+				}, (error) => {
+					error.push('No se pudo ingresar en la BD la fila '+rowNumber)
+				});
+
+				paramsHistory.push(row.documento)
+				paramsHistory.push(row.destino)
+				paramsHistory.push(row.lugar)
+				paramsHistory.push(row.clasificacion)
+				paramsHistory.push(formatoEvolucion(row.evolucion1, row.evolucion2))
+				
+				history(paramsHistory).then((resolvedValue) => {
+				}, (error) => {
+					error.push('No se pudo ingresar en la BD la fila '+rowNumber)
+				});
 			})
 			if(error.length !== 0){
 				reject({error : error})
@@ -203,6 +242,57 @@ function tipoDocumentoPG(tipoDocumento){
 		result=2
 	}
 	return result
+}
+
+function resultadoMuestra(resultado){
+	let result=null
+	if(resultado) {
+		if(resultado.toUpperCase() === 'NEGATIVA'){
+			result = 1
+		}
+		else if(resultado.toUpperCase() === 'REACTIVA'){
+			result = 2
+		}
+		else if(resultado.toUpperCase() === 'POSITIVA'){
+			result = 3
+		}
+	}
+	return result
+}
+
+function tipoPrueba(tipo){
+	let result=null
+	if(tipo) {
+		if((tipo.toUpperCase() === 'MOLECULAR') || (tipo.toUpperCase() === 'RAPIDA')){
+			result = tipo.toUpperCase()
+		}
+	}
+	return result
+}
+
+function confirmacionCovid19(rpta) {
+	let result=false
+	if(rpta) {
+		result = rpta.toUpperCase() === 'CONFIRMADO'
+	}
+	return result
+}
+
+function formatoEvolucion(evolucion1, evolucion2) {
+	return evolucion1 + ' ' + evolucion2
+}
+
+function getTimeNow(restar_day=0, restar_hour=0){
+    let date = new Date()
+    date.setDate(date.getDate() - restar_day)
+    date.setHours(date.getHours() - restar_hour)
+    let datePeru = moment.tz(date, "America/Lima");
+    let day_string = `${datePeru.year().toString()}-${(datePeru.month() + 1).toString().padStart(2,"0")}-${datePeru.date().toString().padStart(2,"0")}`
+    let datePeru_init = `${day_string}T00:00:00.000Z`
+    let datePeru_finish = `${day_string}T23:59:59.0000Z`
+    let clock_string = `${datePeru.hours().toString().padStart(2,"0")}:${datePeru.minutes().toString().padStart(2,"0")}:${datePeru.seconds().toString().padStart(2,"0")}.${datePeru.milliseconds().toString().padStart(3,'0')}Z`
+    let datePeru_current = `${day_string}T${clock_string}`
+    return {datePeru_init, datePeru_finish, datePeru_current}
 }
 
 module.exports = {
