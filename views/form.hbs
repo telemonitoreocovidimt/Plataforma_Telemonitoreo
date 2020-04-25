@@ -205,9 +205,7 @@
             </tr>
             <tr>
                 <td colSpan="2" class="comment">
-                    <textarea id="comentario" class="textarea" name="comentario" placeholder="Textarea">
-                        
-                    </textarea>
+                    <textarea id="comentario" class="textarea" name="comentario" placeholder="Ingrese sus comentarios">{{ comentario }}</textarea>
                 </td>
             </tr>
         </tbody>
@@ -220,8 +218,3 @@
         <input  class="m-2 btn btn-danger" type="button" value="Cancelar" onclick="window.location = '/dashboard'">
     </div>
 </form>
-<script>
-    window.onload = ()=>{
-        $("#comentario").value = "{{ comentario }}"
-    }
-</scrip>
