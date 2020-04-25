@@ -1,5 +1,19 @@
 const excelToJson = require('convert-excel-to-json')
 const { patient_excel_01, patient_excel_02, history } = require('../../model/loadExcel')
+const moment = require('moment-timezone')
+
+function getTimeNow(restar_day=0, restar_hour=0){
+    let date = new Date()
+    date.setDate(date.getDate() - restar_day)
+    date.setHours(date.getHours() - restar_hour)
+    let datePeru = moment.tz(date, "America/Lima");
+    let day_string = `${datePeru.year().toString()}-${(datePeru.month() + 1).toString().padStart(2,"0")}-${datePeru.date().toString().padStart(2,"0")}`
+    let datePeru_init = `${day_string}T00:00:00.000Z`
+    let datePeru_finish = `${day_string}T23:59:59.0000Z`
+    let clock_string = `${datePeru.hours().toString().padStart(2,"0")}:${datePeru.minutes().toString().padStart(2,"0")}:${datePeru.seconds().toString().padStart(2,"0")}.${datePeru.milliseconds().toString().padStart(3,'0')}Z`
+    let datePeru_current = `${day_string}T${clock_string}`
+    return {datePeru_init, datePeru_finish, datePeru_current}
+}
 
 function excel_admision(excel){
     return new Promise((resolve, reject)=>{
@@ -24,6 +38,7 @@ function excel_admision(excel){
 		if(error.length !== 0){
 			reject(error)
 		}else{
+			let { datePeru_current } = getTimeNow()
 			rows.forEach((row, i) => {
 				const rowNumber = i+2
 				let params = []
@@ -31,7 +46,7 @@ function excel_admision(excel){
 				params.push(row.numero)
 				params.push(row.nombre)
 				params.push(row.fecha)
-				params.push(row.fecha)
+				params.push(datePeru_current)
 				params.push(tipoDocumentoPG(row.tipoDocumento))
 				params.push(row.direccion)
 				params.push(row.celular)
