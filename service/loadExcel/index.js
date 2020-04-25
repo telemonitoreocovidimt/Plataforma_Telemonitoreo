@@ -38,6 +38,9 @@ function excel_admision(excel){
 				params.push(row.direccion)
 				params.push(row.celular)
 				params.push(row.fijo)
+
+				console.info(params)
+
 				patient_excel_01(params).then((resolvedValue) => {
 
 				}, (error) => {
@@ -157,11 +160,6 @@ function excel_tamizaje(excel){
 				paramsPatient.push(row.fechaSintomas)
 
 				paramsPatient.push(confirmacionCovid19(row.clasificacion))
-				
-				patient_excel_02(paramsPatient).then((resolvedValue) => {
-				}, (error) => {
-					error.push('No se pudo ingresar en la BD la fila '+rowNumber)
-				});
 
 				paramsHistory.push(row.documento)
 				paramsHistory.push(row.destino)
@@ -169,10 +167,15 @@ function excel_tamizaje(excel){
 				paramsHistory.push(row.clasificacion)
 				paramsHistory.push(formatoEvolucion(row.evolucion1, row.evolucion2))
 				
-				history(paramsHistory).then((resolvedValue) => {
+				patient_excel_02(paramsPatient).then((resolvedValue) => {
+					history(paramsHistory).then((resolvedValue) => {
+					}, (error) => {
+						error.push('No se pudo ingresar en la BD la fila '+rowNumber)
+					});
 				}, (error) => {
 					error.push('No se pudo ingresar en la BD la fila '+rowNumber)
 				});
+				
 			})
 			if(error.length !== 0){
 				reject({error : error})
