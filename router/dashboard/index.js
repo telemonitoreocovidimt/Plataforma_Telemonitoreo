@@ -116,7 +116,7 @@ router.post("/case/:case",async (req, res)=>{
             console.log("Resultado de UPDATE")
             console.log(x)
             if(json.tipo_guardado == "2"){
-                await terminateCase(id_case, dni_doctor)
+                await terminateCase(id_case, dni_medico)
                 req.flash("success", "Caso grabado y cerrado exitosamente.")
                 res.redirect("/dashboard")
             }
