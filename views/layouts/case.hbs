@@ -60,6 +60,30 @@
                             src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
                             integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
                             crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $(".tr_symptom .td_input input").bind("change paste keyup", function() {
+            var value = $(this).val();
+            if(value < 1){
+                $(this).next().css("visibility", "hidden");
+            }else{
+                $(this).next().css("visibility", "visible");
+            }
+            $(this).next().text(generateStar(value))
+        });
+    });
+    function generateStar(length){
+        if(length > 3) return "***";
+        if(length < 1) return "*";
+        var result = "";
+        for(var i=0;i<length;i++){
+            result = result + "*"
+        }
+        return result;
+    }
+</script>
+
                     </body>
 
                 </html>
