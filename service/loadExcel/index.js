@@ -154,7 +154,6 @@ function excel_tamizaje(excel){
 
 				paramsPatient.push(row.sexo)
 				paramsPatient.push(row.pais)
-				paramsPatient.push(row.pais)
 				paramsPatient.push(row.provincia)
 				paramsPatient.push(row.distrito)
 				paramsPatient.push(row.fechaSintomas)
