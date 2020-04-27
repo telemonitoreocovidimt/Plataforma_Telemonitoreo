@@ -701,6 +701,10 @@ textarea {
   font-weight: 900;
 }
 
+.tr_symptom .td_input label{
+  font-weight: 900 !important;
+  font-size: 20px !important;   
+}
 .tr_symptom .td_input input{
   float: left;
   width: 50%; 
