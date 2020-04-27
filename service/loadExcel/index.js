@@ -83,33 +83,31 @@ function excel_tamizaje(excel){
 				A: 'numero',
 				B: 'semanaEpid',
 				C: 'fecha',
-				D: 'tipoDocumento',
-				E: 'documento',
-				F: 'nombre',
-				G: 'edad',
-				H: 'sexo',
-				I: 'celular',
-				J: 'fijo',
-				K: 'pais',
-				L: 'provincia',
-				M: 'distrito',
-				N: 'direccion',
-				O: 'fechaSintomas',
-				P: 'fechaMuestra1',
-				Q: 'tipoMuestra1',
-				R: 'resultadoMuestra1',
-				S: 'fechaResultado1',
-				T: 'tipoMuestra2',
-				U: 'resultadoMuestra2',
-				V: 'fechaResultado2',
-				W: 'tipoMuestra3',
-				X: 'resultadoMuestra3',
-				Y: 'fechaResultado3',
-				Z: 'destino',
-				AA: 'lugar',
-				AB: 'clasificacion',
-				AC: 'evolucion1',
-				AD: 'evolucion2'
+				D: 'documento',
+				E: 'nombre',
+				F: 'edad',
+				G: 'sexo',
+				H: 'celular',
+				I: 'pais',
+				J: 'provincia',
+				K: 'distrito',
+				L: 'direccion',
+				M: 'fechaSintomas',
+				N: 'fechaMuestra1',
+				O: 'tipoMuestra1',
+				P: 'resultadoMuestra1',
+				Q: 'fechaResultado1',
+				R: 'tipoMuestra2',
+				S: 'resultadoMuestra2',
+				T: 'fechaResultado2',
+				U: 'tipoMuestra3',
+				V: 'resultadoMuestra3',
+				W: 'fechaResultado3',
+				X: 'destino',
+				Y: 'lugar',
+				Z: 'clasificacion',
+				AA: 'evolucion1',
+				AB: 'evolucion2'
 			}
 		});
 		const rows = result[Object.keys(result)[0]]
@@ -124,7 +122,7 @@ function excel_tamizaje(excel){
 				let paramsPatient = []
 				let paramsHistory = []
 
-				paramsPatient.push(row.documento)
+				/*paramsPatient.push(row.documento)
 				paramsPatient.push(row.numero)
 				paramsPatient.push(row.nombre)
 				paramsPatient.push(row.fecha)
@@ -139,12 +137,12 @@ function excel_tamizaje(excel){
 				paramsPatient.push(row.fechaResultado1)
 				paramsPatient.push(tipoPrueba(row.tipoMuestra1))
 
-				paramsPatient.push(row.fechaMuestra2)
+				paramsPatient.push(row.fechaMuestra1)
 				paramsPatient.push(resultadoMuestra(row.resultadoMuestra2))
 				paramsPatient.push(row.fechaResultado2)
 				paramsPatient.push(tipoPrueba(row.tipoMuestra2))
 
-				paramsPatient.push(row.fechaMuestra3)
+				paramsPatient.push(row.fechaMuestra1)
 				paramsPatient.push(resultadoMuestra(row.resultadoMuestra3))
 				paramsPatient.push(row.fechaResultado3)
 				paramsPatient.push(tipoPrueba(row.tipoMuestra3))
@@ -170,7 +168,7 @@ function excel_tamizaje(excel){
 					});
 				}, (error) => {
 					error.push('No se pudo ingresar en la BD la fila '+rowNumber)
-				});
+				});*/
 				
 			})
 			if(error.length !== 0){
@@ -189,20 +187,32 @@ function validateTamizaje(rows){
 		isRequired(row.numero, 'A', rowNumber, error)
 		isRequired(row.semanaEpid, 'B', rowNumber, error)
 		isRequired(row.fecha, 'C', rowNumber, error)
-		isRequired(row.tipoDocumento, 'D', rowNumber, error)
-		isRequired(row.documento, 'E', rowNumber, error)
-		isRequired(row.nombre, 'F', rowNumber, error)
-		isRequired(row.edad, 'G', rowNumber, error)
-		isRequired(row.sexo, 'H', rowNumber, error)
-		isRequired(row.celular, 'I', rowNumber, error)
-		isRequired(row.fijo, 'J', rowNumber, error)
-		isRequired(row.pais, 'K', rowNumber, error)
-		isRequired(row.provincia, 'L', rowNumber, error)
-		isRequired(row.distrito, 'M', rowNumber, error)
-		isRequired(row.direccion, 'N', rowNumber, error)
+		isRequired(row.documento, 'D', rowNumber, error)
+		isRequired(row.nombre, 'E', rowNumber, error)
+		isRequired(row.edad, 'F', rowNumber, error)
+		isRequired(row.sexo, 'G', rowNumber, error)
+		isRequired(row.celular, 'H', rowNumber, error)
+		isRequired(row.pais, 'I', rowNumber, error)
+		isRequired(row.provincia, 'J', rowNumber, error)
+		isRequired(row.distrito, 'K', rowNumber, error)
+		isRequired(row.direccion, 'L', rowNumber, error)
+		isRequired(row.lugar, 'Y', rowNumber, error)
+		isRequired(row.clasificacion, 'Z', rowNumber, error)
 		isDate(row.fecha, 'C', rowNumber, error)
-		parseTipoDocumento(row.tipoDocumento, 'D', rowNumber, error)
-		parsePhoneNumber(row.celular, 'I', rowNumber, error)
+		isDate(row.fechaSintomas, 'M', rowNumber, error)
+		isDate(row.fechaMuestra1, 'N', rowNumber, error)
+		isDate(row.fechaResultado1, 'Q', rowNumber, error)
+		isDate(row.fechaResultado2, 'T', rowNumber, error)
+		isDate(row.fechaResultado3, 'W', rowNumber, error)
+		parsePhoneNumber(row.celular, 'H', rowNumber, error)
+		parseTipoMuestra(row.tipoMuestra1, 'O', rowNumber, error)
+		parseTipoMuestra(row.tipoMuestra2, 'R', rowNumber, error)
+		parseTipoMuestra(row.tipoMuestra3, 'U', rowNumber, error)
+		parseResultadoMuestra(row.resultadoMuestra1, 'P', rowNumber, error)
+		parseResultadoMuestra(row.resultadoMuestra2, 'S', rowNumber, error)
+		parseResultadoMuestra(row.resultadoMuestra3, 'V', rowNumber, error)
+		parseClasificacion(row.clasificacion, 'Z', rowNumber, error)
+
 	})
 	return error
 }
@@ -231,6 +241,38 @@ function parsePhoneNumber(data, column, row, error) {
 	if(data !== null && data !== undefined && 
 		(data.toString().length !== 9 || !(/^(9)([0-9]{8})$/.test(data)))) {
 		error.push(column+row+' el telefono debe comenzar con 9 y ser de 9 digitos')
+	}
+}
+
+function parseTipoMuestra(data, column, row, error) {
+	if(data !== null && data !== undefined && 
+		data.toUpperCase() !== 'RAPIDA' && 
+		data.toUpperCase() !== 'P RAPIDA' && 
+		data.toUpperCase() !== 'P. RAPIDA' &&
+		data.toUpperCase() !== 'HISOPADO NASOFARINGEO Y OROFARINGEO' && 
+		data.toUpperCase() !== 'MOLECULAR' && 
+		data.toUpperCase() !== 'NO TIENE' ){
+			console.info(data)
+			error.push(column+row+' solo puede tener los siguientes valores P RAPIDA, HISOPADO NASOFARINGEO Y OROFARINGEO, MOLECULAR, NO TIENE')
+	}
+}
+
+function parseResultadoMuestra(data, column, row, error) {
+	if(data !== null && data !== undefined && 
+		data.toUpperCase() !== 'POSITIVO' && 
+		data.toUpperCase() !== 'REACTIVO' && 
+		data.toUpperCase() !== 'NEGATIVO' && 
+		data.toUpperCase() !== 'PENDIENTE' ){
+			error.push(column+row+' solo puede tener los siguientes valores POSITIVO, REACTIVO, NEGATIVO, PENDIENTE')
+	}	
+}
+
+function parseClasificacion(data, column, row, error) {
+	if(data !== null && data !== undefined && 
+		data.toUpperCase() !== 'DESCARTADO' && 
+		data.toUpperCase() !== 'SOSPECHOSO' && 
+		data.toUpperCase() !== 'CONFIRMADO' ){
+			error.push(column+row+' solo puede tener los siguientes valores DESCARTADO, SOSPECHOSO, CONFIRMADO')
 	}
 }
 
