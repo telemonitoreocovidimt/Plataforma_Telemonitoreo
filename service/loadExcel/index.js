@@ -12,12 +12,13 @@ function excel_admision(excel){
 			columnToKey: {
 				A: 'numero',
 				B: 'fecha',
-				C: 'nombre',
-				D: 'tipoDocumento',
-				E: 'documento',
-				F: 'direccion',
-				G: 'celular',
-				H: 'fijo'
+				C: 'apellidoPaterno',
+				D: 'apellidoMaterno',
+				E: 'nombre',
+				F: 'documento',
+				G: 'direccion',
+				H: 'celular',
+				I: 'fijo'
 			}
 		});
 		const rows = result[Object.keys(result)[0]]
@@ -29,17 +30,15 @@ function excel_admision(excel){
 			rows.forEach((row, i) => {
 				const rowNumber = i+2
 				let params = []
+
 				params.push(row.documento)
 				params.push(row.numero)
-				params.push(row.nombre)
+				params.push(concatApellidosNombrePG(row.apellidoPaterno, row.apellidoMaterno, row.nombre))
 				params.push(row.fecha)
 				params.push(datePeru_current)
-				params.push(tipoDocumentoPG(row.tipoDocumento))
 				params.push(row.direccion)
 				params.push(row.celular)
 				params.push(row.fijo)
-
-				console.info(params)
 
 				patient_excel_01(params).then((resolvedValue) => {
 
@@ -62,14 +61,12 @@ function validateAdmision(rows){
 		const rowNumber = i+2
 		isRequired(row.numero, 'A', rowNumber, error)
 		isRequired(row.fecha, 'B', rowNumber, error)
-		isRequired(row.nombre, 'C', rowNumber, error)
-		isRequired(row.tipoDocumento, 'D', rowNumber, error)
-		isRequired(row.documento, 'E', rowNumber, error)
-		isRequired(row.direccion, 'F', rowNumber, error)
-		isRequired(row.celular, 'G', rowNumber, error)
-		isRequired(row.fijo, 'H', rowNumber, error)
+		isRequired(row.apellidoPaterno, 'C', rowNumber, error)
+		isRequired(row.apellidoMaterno, 'D', rowNumber, error)
+		isRequired(row.nombre, 'E', rowNumber, error)
+		isRequired(row.documento, 'F', rowNumber, error)
+		isRequired(row.celular, 'H', rowNumber, error)
 		isDate(row.fecha, 'B', rowNumber, error)
-		parseTipoDocumento(row.tipoDocumento, 'D', rowNumber, error)
 		parsePhoneNumber(row.celular, 'G', rowNumber, error)
 	})
 	return error
@@ -245,6 +242,11 @@ function tipoDocumentoPG(tipoDocumento){
 	if(tipoDocumento.toUpperCase() === 'CARNET DE EXTRANJERIA'){
 		result=2
 	}
+	return result
+}
+
+function concatApellidosNombrePG(apellidoPaterno, apellidoMaterno, nombre){
+	let result=apellidoPaterno + ' ' + apellidoMaterno + ' ' + nombre
 	return result
 }
 
