@@ -93,7 +93,7 @@ function excel_tamizaje(excel){
 				K: 'distrito',
 				L: 'direccion',
 				M: 'fechaSintomas',
-				N: 'fechaMuestra1',
+				N: 'fechaMuestra',
 				O: 'tipoMuestra1',
 				P: 'resultadoMuestra1',
 				Q: 'fechaResultado1',
@@ -122,27 +122,24 @@ function excel_tamizaje(excel){
 				let paramsPatient = []
 				let paramsHistory = []
 
-				/*paramsPatient.push(row.documento)
+				paramsPatient.push(row.documento)
 				paramsPatient.push(row.numero)
 				paramsPatient.push(row.nombre)
 				paramsPatient.push(row.fecha)
 				paramsPatient.push(datePeru_current)
-				paramsPatient.push(tipoDocumentoPG(row.tipoDocumento))
 				paramsPatient.push(row.direccion)
 				paramsPatient.push(row.celular)
-				paramsPatient.push(row.fijo)
+				paramsPatient.push(null)
+				paramsPatient.push(row.fechaMuestra)
 
-				paramsPatient.push(row.fechaMuestra1)
 				paramsPatient.push(resultadoMuestra(row.resultadoMuestra1))
 				paramsPatient.push(row.fechaResultado1)
 				paramsPatient.push(tipoPrueba(row.tipoMuestra1))
 
-				paramsPatient.push(row.fechaMuestra1)
 				paramsPatient.push(resultadoMuestra(row.resultadoMuestra2))
 				paramsPatient.push(row.fechaResultado2)
 				paramsPatient.push(tipoPrueba(row.tipoMuestra2))
 
-				paramsPatient.push(row.fechaMuestra1)
 				paramsPatient.push(resultadoMuestra(row.resultadoMuestra3))
 				paramsPatient.push(row.fechaResultado3)
 				paramsPatient.push(tipoPrueba(row.tipoMuestra3))
@@ -160,7 +157,7 @@ function excel_tamizaje(excel){
 				paramsHistory.push(row.lugar)
 				paramsHistory.push(row.clasificacion)
 				paramsHistory.push(formatoEvolucion(row.evolucion1, row.evolucion2))
-				
+
 				patient_excel_02(paramsPatient).then((resolvedValue) => {
 					history(paramsHistory).then((resolvedValue) => {
 					}, (error) => {
@@ -168,7 +165,7 @@ function excel_tamizaje(excel){
 					});
 				}, (error) => {
 					error.push('No se pudo ingresar en la BD la fila '+rowNumber)
-				});*/
+				});
 				
 			})
 			if(error.length !== 0){
@@ -200,7 +197,7 @@ function validateTamizaje(rows){
 		isRequired(row.clasificacion, 'Z', rowNumber, error)
 		isDate(row.fecha, 'C', rowNumber, error)
 		isDate(row.fechaSintomas, 'M', rowNumber, error)
-		isDate(row.fechaMuestra1, 'N', rowNumber, error)
+		isDate(row.fechaMuestra, 'N', rowNumber, error)
 		isDate(row.fechaResultado1, 'Q', rowNumber, error)
 		isDate(row.fechaResultado2, 'T', rowNumber, error)
 		isDate(row.fechaResultado3, 'W', rowNumber, error)
@@ -276,17 +273,6 @@ function parseClasificacion(data, column, row, error) {
 	}
 }
 
-function tipoDocumentoPG(tipoDocumento){
-	let result=null
-	if(tipoDocumento.toUpperCase() === 'DNI'){
-		result=1
-	}
-	if(tipoDocumento.toUpperCase() === 'CARNET DE EXTRANJERIA'){
-		result=2
-	}
-	return result
-}
-
 function concatApellidosNombrePG(apellidoPaterno, apellidoMaterno, nombre){
 	let result=apellidoPaterno + ' ' + apellidoMaterno + ' ' + nombre
 	return result
@@ -295,14 +281,14 @@ function concatApellidosNombrePG(apellidoPaterno, apellidoMaterno, nombre){
 function resultadoMuestra(resultado){
 	let result=null
 	if(resultado) {
-		if(resultado.toUpperCase() === 'NEGATIVA'){
+		if(resultado.toUpperCase() === 'NEGATIVO'){
 			result = 1
 		}
-		else if(resultado.toUpperCase() === 'REACTIVA'){
+		else if(resultado.toUpperCase() === 'REACTIVO'){
 			result = 2
 		}
-		else if(resultado.toUpperCase() === 'POSITIVA'){
-			result = 3
+		else if(resultado.toUpperCase() === 'POSITIVO'){
+			result = 2
 		}
 	}
 	return result
@@ -311,8 +297,20 @@ function resultadoMuestra(resultado){
 function tipoPrueba(tipo){
 	let result=null
 	if(tipo) {
-		if((tipo.toUpperCase() === 'MOLECULAR') || (tipo.toUpperCase() === 'RAPIDA')){
-			result = tipo.toUpperCase()
+		if(tipo.toUpperCase() === 'RAPIDA'){
+			result = 'RAPIDA'
+		}
+		if(tipo.toUpperCase() === 'P RAPIDA'){
+			result = 'RAPIDA'
+		}
+		if(tipo.toUpperCase() === 'P. RAPIDA'){
+			result = 'RAPIDA'
+		}
+		if(tipo.toUpperCase() === 'HISOPADO NASOFARINGEO Y OROFARINGEO'){
+			result = 'MOLECULAR'
+		}
+		if(tipo.toUpperCase() === 'MOLECULAR'){
+			result = 'MOLECULAR'
 		}
 	}
 	return result
@@ -327,7 +325,14 @@ function confirmacionCovid19(rpta) {
 }
 
 function formatoEvolucion(evolucion1, evolucion2) {
-	return evolucion1 + ' ' + evolucion2
+	let result = ''
+	if(evolucion1 !== undefined){
+		result = evolucion1
+	}
+	if(evolucion2 !== undefined){
+		result = result + ' ' + evolucion2
+	}
+	return result
 }
 
 function getTimeNow(restar_day=0, restar_hour=0){
