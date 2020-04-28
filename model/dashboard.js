@@ -266,12 +266,13 @@ function getStatusPatients(pass = false, client = null){
 
 function updateCase(json, pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
-        let { id_caso, grupo, factor_riesgo, estado, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, 
+        let { id_caso, grupo, factor_riesgo, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, estado, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, 
             tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas } = json
 
-        let resultado_prueba_1 = null
-        let resultado_prueba_2 = null
-        let resultado_prueba_3 = null
+        // let resultado_prueba_1 = null
+        // let resultado_prueba_2 = null
+        // let resultado_prueba_3 = null
+
         if(id_caso){
             id_caso = parseInt(id_caso)
         }
@@ -284,11 +285,20 @@ function updateCase(json, pass = false, client = null){
         if(resultado_prueba_1){
             resultado_prueba_1 = parseInt(json.resultado_prueba_1)
         }
+        else{
+            resultado_prueba_1 = null
+        }
         if(resultado_prueba_2){
             resultado_prueba_2 = parseInt(json.resultado_prueba_2)
         }
+        else{
+            resultado_prueba_2 = null
+        }
         if(resultado_prueba_3){
             resultado_prueba_3 = parseInt(json.resultado_prueba_3)
+        }
+        else{
+            resultado_prueba_3 = null
         }
         if(fibre){
             fibre = parseInt(fibre)

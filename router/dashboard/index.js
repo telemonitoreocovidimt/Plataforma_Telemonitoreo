@@ -22,11 +22,13 @@ router.get("/",async (req, res)=>{
         data = await countAllCaseAttendedToDayBetweenDoctors(false, data.client)
         let count = 0
         let sum = 0
+        console.log(data.result)
         data.result.forEach((json)=>{
             count++
-            sum+=json.count
+            sum+=parseInt(json.count)
         })
-
+        console.log(count)
+        console.log(sum)
         let cases_attented_promean = 0;
         if ( count && sum ){
             cases_attented_promean = parseInt(sum/count)

@@ -1,0 +1,105 @@
+
+drop function if exists sp_update_case;
+create or replace function sp_update_case(_id_caso int, _grupo char(1), _factor boolean, _bandeja int, _resultado_1 varchar(50), _resultado_2 varchar(50), _resultado_3 varchar(50), _fiebre int, _respirar int, _pecho int, _alteracion int, _coloracion int, _tos int, _garganta int, _nasal int, _malestar int, _cefalea int, _nauses int, _diarea int, _comentario varchar(350)) 
+returns boolean
+as
+$$
+declare _dni_paciente varchar(16) := (select dni_paciente from development.dt_casos_dia where id = _id_caso limit 1)::varchar(16);
+begin
+    update development.dt_pacientes set 
+        grupo = _grupo,
+        estado = _bandeja,
+        resultado_prueba_1 = _resultado_1,
+        resultado_prueba_2 = _resultado_2,
+        resultado_prueba_3 = _resultado_3
+        where dni_paciente = _dni_paciente;
+
+    update development.dt_casos_dia set
+        fiebre = _fiebre,
+        dificultad_respitar = _respirar,
+        dolor_pecho = _pecho,
+        alteracion_sensorio = _alteracion,
+        colaboracion_azul_labios = _coloracion,
+        tos = _tos,
+        dolor_garganta = _garganta,
+        congestion_nasal = _nasal,
+        malestar_general = _malestar,
+        cefalea = _cefalea,
+        nauseas = _nauses,
+        diarrea = _diarea,
+        comentario = _comentario
+    	where id = _id_caso;
+    return true;
+
+EXCEPTION  
+  WHEN OTHERS THEN RETURN false;
+end;
+$$
+language plpgsql;
+
+
+drop function if exists sp_terminate_case;
+create or replace function sp_terminate_case(_dni_medico varchar(16), _id_case int) returns table(
+    pasa boolean,
+    message varchar(100)
+)
+as
+$$
+begin
+	if exists (select * from development.dt_casos_dia  as c where c.estado_caso  = 1 and c.id = _id_case) then
+    	return query select false, 'Caso aun no tomado.'::varchar(100);
+    else
+    	if exists (select * from development.dt_casos_dia  as c where c.estado_caso in (3, 4) and c.id = _id_case) then
+            return query select false, 'El caso ya fue cerrado.'::varchar(100);
+        else
+        	if exists (select * from development.dt_casos_dia  as c where c.estado_caso = 2 and c.id = _id_case and c.dni_medico = _dni_medico) then
+                return query select true, 'Si es un caso tomado por el medico.'::varchar(100);
+            else
+            	return query select false, 'El caso esta tomado por otro medico.'::varchar(100);
+            end if;
+        end if;
+    end if;
+end;
+$$
+language plpgsql;
+
+
+
+
+drop function if exists sp_update_case;
+create or replace function sp_update_case(_id_caso int, _grupo char(1), _factor boolean, _bandeja int, _resultado_1 int, _resultado_2 int, _resultado_3 int, _fiebre int, _respirar int, _pecho int, _alteracion int, _coloracion int, _tos int, _garganta int, _nasal int, _malestar int, _cefalea int, _nauses int, _diarea int, _comentario varchar(350), _fecha_inicio_sintomas timestamp) 
+returns boolean
+as
+$$
+declare _dni_paciente varchar(16) := (select dni_paciente from development.dt_casos_dia where id = _id_caso limit 1)::varchar(16);
+begin
+    update development.dt_pacientes set 
+        grupo = _grupo,
+        estado = _bandeja,
+        
+        resultado_prueba_1 = _resultado_1,
+        resultado_prueba_2 = _resultado_2,
+        resultado_prueba_3 = _resultado_3,
+        fecha_inicio_sintomas = _fecha_inicio_sintomas
+        where dni = _dni_paciente;
+
+    update development.dt_casos_dia set
+        fiebre = _fiebre,
+        dificultad_respitar = _respirar,
+        dolor_pecho = _pecho,
+        alteracion_sensorio = _alteracion,
+        colaboracion_azul_labios = _coloracion,
+        tos = _tos,
+        dolor_garganta = _garganta,
+        congestion_nasal = _nasal,
+        malestar_general = _malestar,
+        cefalea = _cefalea,
+        nauseas = _nauses,
+        diarrea = _diarea,
+        comentario = _comentario
+    	where id = _id_caso;
+    return true;
+
+end;
+$$
+language plpgsql;

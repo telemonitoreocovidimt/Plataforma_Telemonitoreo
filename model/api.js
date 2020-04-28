@@ -95,6 +95,18 @@ function patient_change_age(dni_paciente, age){
     })
 }
 
+function validate_group_case(dni_paciente){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        let client = await openConnection()
+        let query = "select * from development.sp_validate_create_case($1, $2)"
+        let params = [dni_paciente, datePeru_init]
+        let result = await client.query(query, params)
+        client.release(true)
+        resolve(result.rows)
+    })
+}
+
 
 //existePatient(req.body.patient_code) sp_save_answer
 //development.sp_save_answer(patient_id, answer.variable, answer.answer, answer.asked_at, answer.answered_at) save_answer
@@ -107,5 +119,6 @@ module.exports = {
     save_answer,
     patient_change_status,
     patient_change_risk_factor,
-    patient_change_age
+    patient_change_age,
+    validate_group_case
 }
