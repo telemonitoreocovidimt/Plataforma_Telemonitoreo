@@ -117,6 +117,7 @@ body {
   color: #333;
   font-size: 13px;
   margin: 0;
+  overflow-x: hidden;
 }
 
 input,
