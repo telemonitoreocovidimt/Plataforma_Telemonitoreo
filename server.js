@@ -5,20 +5,22 @@ const session = require('express-session')
 const pgSession = require('connect-pg-simple')(session)
 const morgan = require("morgan")
 const { PORT } = require("./config")
-const formData = require("express-form-data");
+const formData = require("express-form-data")
 const exphbs = require("express-handlebars")
-const cookieParser = require('cookie-parser')
 const { pool } = require("./model/connection")
 const randomString = require("randomstring")
 const os = require("os")
 const { makeMigrations } = require("./model/migration")
 const { runJobs } = require("./timers")
+const assert = require("assert")
 runJobs()
 
 const options = {
   uploadDir: os.tmpdir(),
   autoClean: true
 };
+
+
 
 app.use(formData.parse(options));
 app.use(formData.format());
@@ -37,10 +39,28 @@ app.use(session({
         schemaName: 'development'
     }),
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: { secure: false }
 }))
 
-app.use(require('flash')());
+// app.use(require("flash")());
+
+app.use(require("./middleware_flash")())
+
+// app.use(function (req, res, next) {
+//     assert(req.session, 'a req.session is required!')
+//     res.locals.flash = []
+//     req.flash = res.flash = push
+//     next()
+// })
+
+// function push(type, message){
+//     let res = this.res || this
+//     res.locals.flash.push({
+//         type,
+//         message
+//     })
+// }
 
 app.use(express.urlencoded({extended:true}))
 
@@ -59,9 +79,6 @@ app.engine(".hbs", exphbs.create({
     extname: ".hbs",
     helpers:{
         "compare" : (v1, v2, v)=>{
-            console.log(v1)
-            console.log(v2)
-            console.log(v)
             return v1 == v2 ? v : ""
         },
         "generate" : (v)=>{

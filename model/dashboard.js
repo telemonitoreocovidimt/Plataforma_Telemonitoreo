@@ -23,6 +23,7 @@ function getPatientsAlert(pass = false, client = null){
         
         let query = `select c.id as id_case, p.dni, p.nombre, p.sexo, p.edad, p.grupo, 
                         case when p.factor_riesgo then 'SI' else 'NO' end as factor_riesgo,
+                        concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
                         extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento,
                         case when p.fecha_prueba_1 is null then '-' else concat(extract(day from p.fecha_prueba_1), '-', extract(month from p.fecha_prueba_1), '-', extract(year from p.fecha_prueba_1)) end as fecha_prueba_1,
                         case when p.resultado_prueba_1 is null then '-' when p.resultado_prueba_1 = 3 then 'Positivo' when p.resultado_prueba_1 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_1, 
@@ -54,6 +55,7 @@ function getPatients(pass = false, client = null){
         if(!client)
             client = await openConnection()
         let query = `select c.id as id_case, p.dni, p.nombre, p.sexo, p.edad, p.grupo, 
+                        concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
                         case when p.factor_riesgo then 'SI' else 'NO' end as factor_riesgo,
                         extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento,
                         case when p.fecha_prueba_1 is null then '-' else concat(extract(day from p.fecha_prueba_1), '-', extract(month from p.fecha_prueba_1), '-', extract(year from p.fecha_prueba_1)) end as fecha_prueba_1,
@@ -86,6 +88,7 @@ function getMyPatients(dni_medico, pass = false, client = null){
             client = await openConnection()
         let query = `select c.id as id_case, p.dni, p.nombre, p.sexo, p.edad, p.grupo, 
                         case when p.factor_riesgo then 'SI' else 'NO' end as factor_riesgo,
+                        concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
                         extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento,
                         case when p.fecha_prueba_1 is null then '-' else concat(extract(day from p.fecha_prueba_1), '-', extract(month from p.fecha_prueba_1), '-', extract(year from p.fecha_prueba_1)) end as fecha_prueba_1,
                         case when p.resultado_prueba_1 is null then '-' when p.resultado_prueba_1 = 3 then 'Positivo' when p.resultado_prueba_1 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_1, 
@@ -339,8 +342,6 @@ function updateCase(json, pass = false, client = null){
         if(!fecha_inicio_sintomas){
             fecha_inicio_sintomas = null
         }
-        console.log("Parametros para actualizar")
-        console.log([id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas])
         if(!client)
             client = await openConnection()
         let query = `select * from sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`

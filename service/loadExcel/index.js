@@ -123,7 +123,7 @@ function excel_tamizaje(excel){
 				AA: 'evolucion1',
 				AB: 'evolucion2'
 			}
-		});
+		})
 		const rows = result[Object.keys(result)[0]]
 		let error = validateTamizaje(rows)
 		if(error.length !== 0){
@@ -136,7 +136,7 @@ function excel_tamizaje(excel){
 				let paramsPatient = []
 				let paramsHistory = []
 
-				paramsPatient.push(row.documento)
+				paramsPatient.push(row.documento.toString())
 				paramsPatient.push(row.numero)
 				paramsPatient.push(row.nombre)
 				paramsPatient.push(row.fecha)
@@ -147,15 +147,15 @@ function excel_tamizaje(excel){
 				paramsPatient.push(row.fechaMuestra)
 
 				paramsPatient.push(resultadoMuestra(row.resultadoMuestra1))
-				paramsPatient.push(row.fechaResultado1)
+				paramsPatient.push(row.fechaResultado1 == undefined ? null : row.fechaResultado1)
 				paramsPatient.push(tipoPrueba(row.tipoMuestra1))
 
 				paramsPatient.push(resultadoMuestra(row.resultadoMuestra2))
-				paramsPatient.push(row.fechaResultado2)
+				paramsPatient.push(row.fechaResultado2 == undefined ? null : row.fechaResultado2)
 				paramsPatient.push(tipoPrueba(row.tipoMuestra2))
 
 				paramsPatient.push(resultadoMuestra(row.resultadoMuestra3))
-				paramsPatient.push(row.fechaResultado3)
+				paramsPatient.push(row.fechaResultado3 == undefined ? null : row.fechaResultado3)
 				paramsPatient.push(tipoPrueba(row.tipoMuestra3))
 
 				paramsPatient.push(row.sexo)
@@ -171,7 +171,7 @@ function excel_tamizaje(excel){
 				paramsHistory.push(row.lugar)
 				paramsHistory.push(row.clasificacion)
 				paramsHistory.push(formatoEvolucion(row.evolucion1, row.evolucion2))
-
+				console.log("JSON paciente : ", paramsPatient)
 				patient_excel_02(paramsPatient).then((resolvedValue) => {
 					history(paramsHistory).then((resolvedValue) => {
 					}, (error) => {
@@ -333,7 +333,8 @@ function tipoPrueba(tipo){
 function confirmacionCovid19(rpta) {
 	let result=false
 	if(rpta) {
-		result = rpta.toUpperCase() === 'CONFIRMADO'
+		if(rpta.toUpperCase() == 'CONFIRMADO' || rpta.toUpperCase() == 'DESCARTADO')
+			result = true
 	}
 	return result
 }

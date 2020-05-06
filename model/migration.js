@@ -36,8 +36,6 @@ function makeMigrations(){
 
 
 function makeMigrationsCustomer(dni_paciente){
-    console.log("DNI PARA HACER LA MIGRACIKON")
-    console.log(dni_paciente)
     return new Promise(async (resolve, reject)=>{
         let { datePeru_current } = getTimeNow()
         let client = await openConnection()
@@ -55,7 +53,6 @@ function makeMigrationsCustomer(dni_paciente){
 
 
 function makeMigrationsNextUploaded(){
-    console.log("MIGRACION DESPUES DE CARGA")
     return new Promise(async (resolve, reject)=>{
         let { datePeru_current } = getTimeNow()
         let client = await openConnection()
