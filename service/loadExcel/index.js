@@ -44,8 +44,8 @@ function excel_admision(excel){
 			rows.forEach((row, i) => {
 				const rowNumber = i+2
 				let params = []
-
-				params.push(row.documento)
+				
+				params.push(numeroDocumento(row.documento))
 				params.push(row.numero)
 				params.push(concatApellidosNombrePG(row.apellidoPaterno, row.apellidoMaterno, row.nombre))
 				params.push(row.fecha)
@@ -136,7 +136,7 @@ function excel_tamizaje(excel){
 				let paramsPatient = []
 				let paramsHistory = []
 
-				paramsPatient.push(row.documento.toString())
+				paramsPatient.push(numeroDocumento(row.documento))
 				paramsPatient.push(row.numero)
 				paramsPatient.push(row.nombre)
 				paramsPatient.push(row.fecha)
@@ -166,7 +166,7 @@ function excel_tamizaje(excel){
 
 				paramsPatient.push(confirmacionCovid19(row.clasificacion))
 
-				paramsHistory.push(row.documento)
+				paramsHistory.push(numeroDocumento(row.documento))
 				paramsHistory.push(row.destino)
 				paramsHistory.push(row.lugar)
 				paramsHistory.push(row.clasificacion)
@@ -289,6 +289,15 @@ function parseClasificacion(data, column, row, error) {
 
 function concatApellidosNombrePG(apellidoPaterno, apellidoMaterno, nombre){
 	let result=apellidoPaterno + ' ' + apellidoMaterno + ' ' + nombre
+	return result
+}
+
+function numeroDocumento(numero){
+	numero=numero.toString()
+	if(+numero && numero.length === 7){
+		numero = numero.padStart(8,0)
+	}
+	let result=numero
 	return result
 }
 
