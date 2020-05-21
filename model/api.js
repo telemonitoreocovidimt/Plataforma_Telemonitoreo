@@ -1,5 +1,6 @@
 const { openConnection } = require("./connection")
 const moment = require('moment-timezone')
+const { PGSCHEMA } = require("./../config")
 
 function getTimeNow(restar_day=0, restar_hour=0){
     let date = new Date()
@@ -18,7 +19,7 @@ function getPatientsSurvey01(){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_current } = getTimeNow()
         let client = await openConnection()
-        let query = "select * from sp_list_patients_survey01($1)"
+        let query = `select * from ${PGSCHEMA}.sp_list_patients_survey01($1)`
         let params = [datePeru_current]
         let result = await client.query(query, params)
         client.release(true)
@@ -30,7 +31,7 @@ function getPatientsSurvey02(){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_current } = getTimeNow()
         let client = await openConnection()
-        let query = "select * from sp_list_patients_survey02($1)"
+        let query = `select * from ${PGSCHEMA}.sp_list_patients_survey02($1)`
         let params = [datePeru_current]
         let result = await client.query(query, params)
         client.release(true)
@@ -41,7 +42,7 @@ function getPatientsSurvey02(){
 function existePatient(dni_paciente){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
-        let query = "select * from development.dt_pacientes as p where p.dni = $1"
+        let query = `select * from ${PGSCHEMA}.dt_pacientes as p where p.dni = $1`
         let params = [dni_paciente]
         let result = await client.query(query, params)
         client.release(true)
@@ -53,7 +54,7 @@ function existePatient(dni_paciente){
 function save_answer(dni_paciente, variable, respuesta, asked_at, answered_at){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
-        let query = "select * from development.sp_save_answer($1, $2, $3, $4, $5)"
+        let query = `select * from ${PGSCHEMA}.sp_save_answer($1, $2, $3, $4, $5)`
         let params = [dni_paciente, variable, respuesta, asked_at, answered_at]
         let result = await client.query(query, params)
         client.release(true)
@@ -65,7 +66,7 @@ function save_answer(dni_paciente, variable, respuesta, asked_at, answered_at){
 function patient_change_status(dni_paciente, estado){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
-        let query = "select * from development.sp_patient_change_status($1, $2)"
+        let query = `select * from ${PGSCHEMA}.sp_patient_change_status($1, $2)`
         let params = [dni_paciente, estado]
         let result = await client.query(query, params)
         client.release(true)
@@ -76,7 +77,7 @@ function patient_change_status(dni_paciente, estado){
 function patient_change_risk_factor(dni_paciente, factor_riesgo){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
-        let query = "select * from development.sp_patient_change_risk_factor($1, $2)"
+        let query = `select * from ${PGSCHEMA}.sp_patient_change_risk_factor($1, $2)`
         let params = [dni_paciente, factor_riesgo]
         let result = await client.query(query, params)
         client.release(true)
@@ -87,7 +88,7 @@ function patient_change_risk_factor(dni_paciente, factor_riesgo){
 function patient_change_age(dni_paciente, age){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
-        let query = "select * from development.sp_patient_change_age($1, $2)"
+        let query = `select * from ${PGSCHEMA}.sp_patient_change_age($1, $2)`
         let params = [dni_paciente, age]
         let result = await client.query(query, params)
         client.release(true)
@@ -99,7 +100,7 @@ function validate_group_case(dni_paciente){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_init } = getTimeNow()
         let client = await openConnection()
-        let query = "select * from development.sp_validate_create_case($1, $2)"
+        let query = `select * from ${PGSCHEMA}.sp_validate_create_case($1, $2)`
         let params = [dni_paciente, datePeru_init]
         let result = await client.query(query, params)
         client.release(true)

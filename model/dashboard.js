@@ -1,4 +1,5 @@
 const { openConnection } = require("./connection")
+const { PGSCHEMA } = require("./../config")
 const moment = require('moment-timezone')
 
 
@@ -37,8 +38,8 @@ function getPatientsAlert(pass = false, client = null){
                         case when p.resultado_prueba_3 is null then '-' when p.resultado_prueba_3 = 3 then 'Positivo' when p.resultado_prueba_3 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_3, 
                         concat(extract(day from p.fecha_resultado_prueba_3), '-', extract(month from p.fecha_resultado_prueba_3), '-', extract(year from p.fecha_resultado_prueba_3)) as fecha_resultado_prueba_3, 
                         case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
-                    from development.dt_casos_dia as c
-                    inner join development.dt_pacientes as p on c.dni_paciente = p.dni
+                    from ${PGSCHEMA}.dt_casos_dia as c
+                    inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
                     where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 3 and p.grupo in ('C', 'B') order by p.edad desc;`
         let params = [datePeru_current, datePeru_init]
         let result = await client.query(query, params)
@@ -70,8 +71,8 @@ function getPatients(pass = false, client = null){
                         case when p.resultado_prueba_3 is null then '-' when p.resultado_prueba_3 = 3 then 'Positivo' when p.resultado_prueba_3 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_3, 
                         concat(extract(day from p.fecha_resultado_prueba_3), '-', extract(month from p.fecha_resultado_prueba_3), '-', extract(year from p.fecha_resultado_prueba_3)) as fecha_resultado_prueba_3, 
                         case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
-                    from development.dt_casos_dia as c
-                    inner join development.dt_pacientes as p on c.dni_paciente = p.dni
+                    from ${PGSCHEMA}.dt_casos_dia as c
+                    inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
                     where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 2 and p.grupo in ('C', 'B') order by p.edad desc;`
         let params = [datePeru_current, datePeru_init]
         let result = await client.query(query, params)
@@ -102,8 +103,8 @@ function getMyPatients(dni_medico, pass = false, client = null){
                         case when p.resultado_prueba_3 is null then '-' when p.resultado_prueba_3 = 3 then 'Positivo' when p.resultado_prueba_3 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_3, 
                         concat(extract(day from p.fecha_resultado_prueba_3), '-', extract(month from p.fecha_resultado_prueba_3), '-', extract(year from p.fecha_resultado_prueba_3)) as fecha_resultado_prueba_3, 
                         case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
-                    from development.dt_casos_dia as c
-                    inner join development.dt_pacientes as p on c.dni_paciente = p.dni
+                    from ${PGSCHEMA}.dt_casos_dia as c
+                    inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
                     where c.fecha_caso = $2 and c.estado_caso = 2 and c.dni_medico = $3 and p.grupo in ('C', 'B') order by p.edad desc;`
         let params = [datePeru_current, datePeru_init, dni_medico]
         let result = await client.query(query, params)
@@ -119,8 +120,8 @@ function countAllCaseToday(pass = false, client = null){
         let { datePeru_init } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `select count(*) from development.dt_casos_dia as pr
-                        inner join development.dt_pacientes as p
+        let query = `select count(*) from ${PGSCHEMA}.dt_casos_dia as pr
+                        inner join ${PGSCHEMA}.dt_pacientes as p
                         on pr.dni_paciente = p.dni
                         where fecha_caso = $1 and estado_caso in (1,2) and p.grupo in ('C', 'B')`
         let params = [datePeru_init]
@@ -136,7 +137,7 @@ function countAllCaseAttendedToday(pass = false, client = null){
         let { datePeru_init } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `select count(*) from development.dt_casos_dia as pr
+        let query = `select count(*) from ${PGSCHEMA}.dt_casos_dia as pr
                     where fecha_caso = $1 and estado_caso = 3`
         let params = [datePeru_init]
         let result = await client.query(query, params)
@@ -151,7 +152,7 @@ function countAllCaseAttendedToDayForDoctor(dni_doctor, pass = false, client = n
         let { datePeru_init } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `select count(*) from development.dt_casos_dia as pr
+        let query = `select count(*) from ${PGSCHEMA}.dt_casos_dia as pr
                         where fecha_caso = $1 and estado_caso = 3 and dni_medico = $2`
         let params = [datePeru_init, dni_doctor]
         let result = await client.query(query, params)
@@ -166,7 +167,7 @@ function countAllCaseAttendedToDayBetweenDoctors(pass = false, client = null){
         let { datePeru_init } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `select dni_medico, count(*)  from development.dt_casos_dia as pr
+        let query = `select dni_medico, count(*)  from ${PGSCHEMA}.dt_casos_dia as pr
                         where fecha_caso = $1 and estado_caso = 3
                         group by dni_medico`
         let params = [datePeru_init]
@@ -182,7 +183,7 @@ function takeCase(id_case, dni_doctor, pass = false, client = null){
         let { datePeru_current } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `update development.dt_casos_dia set dni_medico = $1, estado_caso = 2, fecha_tomado = $2 where id = $3`
+        let query = `update ${PGSCHEMA}.dt_casos_dia set dni_medico = $1, estado_caso = 2, fecha_tomado = $2 where id = $3`
         let params = [dni_doctor, datePeru_current, id_case]
         let result = await client.query(query, params)
         if(!pass)
@@ -196,7 +197,7 @@ function terminateCase(id_case, dni_doctor, pass = false, client = null){
         let { datePeru_current } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `update development.dt_casos_dia set dni_medico = $1, estado_caso = 3, fecha_cierre_caso = $2 where id = $3`
+        let query = `update ${PGSCHEMA}.dt_casos_dia set dni_medico = $1, estado_caso = 3, fecha_cierre_caso = $2 where id = $3`
         let params = [dni_doctor, datePeru_current, id_case]
         let result = await client.query(query, params)
         if(!pass)
@@ -209,7 +210,7 @@ function canTakeCase(dni_medico, id_case, pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
         if(!client)
             client = await openConnection()
-        let query = `select * from sp_take_case($1, $2)`
+        let query = `select * from ${PGSCHEMA}.sp_take_case($1, $2)`
         let params = [dni_medico, id_case]
         let result = await client.query(query, params)
         if(!pass)
@@ -222,7 +223,7 @@ function canTerminateCase(dni_medico, id_case, pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
         if(!client)
             client = await openConnection()
-        let query = `select * from sp_terminate_case($1, $2)`
+        let query = `select * from ${PGSCHEMA}.sp_terminate_case($1, $2)`
         let params = [dni_medico, id_case]
         let result = await client.query(query, params)
         if(!pass)
@@ -239,11 +240,11 @@ function getCase(id_case, pass = false, client = null){
         let query = `select p.*, p.nombre , p.celular, p.fijo, p.grupo, p.factor_riesgo, p.estado , 
                     concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
                     extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento, 
-                    (select pr.resultado from development.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'rapida' order by pr.fecha_resultado_prueba desc limit 1) as resultado_rapido,
-                    (select pr.resultado from development.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'molecular' order by pr.fecha_resultado_prueba desc limit 1) as resultado_molecular,
+                    (select pr.resultado from ${PGSCHEMA}.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'rapida' order by pr.fecha_resultado_prueba desc limit 1) as resultado_rapido,
+                    (select pr.resultado from ${PGSCHEMA}.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'molecular' order by pr.fecha_resultado_prueba desc limit 1) as resultado_molecular,
                     c.*
-                    from development.dt_casos_dia as c
-                    inner join development.dt_pacientes as p
+                    from ${PGSCHEMA}.dt_casos_dia as c
+                    inner join ${PGSCHEMA}.dt_pacientes as p
                     on c.dni_paciente = p.dni
                     where c.id = $2`
         let params = [datePeru_current, id_case]
@@ -258,7 +259,7 @@ function getStatusPatients(pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
         if(!client)
             client = await openConnection()
-        let query = `select id, descripcion from development.dm_estados_pacientes where flag = true`
+        let query = `select id, descripcion from ${PGSCHEMA}.dm_estados_pacientes where flag = true`
         let params = []
         let result = await client.query(query, params)
         if(!pass)
@@ -344,7 +345,7 @@ function updateCase(json, pass = false, client = null){
         }
         if(!client)
             client = await openConnection()
-        let query = `select * from sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`
+        let query = `select * from ${PGSCHEMA}.sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`
         let params = [id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas]
         let result = await client.query(query, params)
         if(!pass)
@@ -357,7 +358,7 @@ function dropCase(id_caso,pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
         if(!client)
             client = await openConnection()
-        let query = `update development.dt_casos_dia set dni_medico = null, estado_caso = 1 where id = $1`
+        let query = `update ${PGSCHEMA}.dt_casos_dia set dni_medico = null, estado_caso = 1 where id = $1`
         let params = [id_caso]
         let result = await client.query(query, params)
         if(!pass)

@@ -1,5 +1,6 @@
 const { openConnection } = require("./connection")
 const moment = require('moment-timezone')
+const { PGSCHEMA } = require("./../config")
 
 function getTimeNow(restar_day=0, restar_hour=0){
     let date = new Date()
@@ -18,14 +19,14 @@ function makeMigrations(){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_current } = getTimeNow()
         let client = await openConnection()
-        let query = `update development.dt_casos_dia set estado_caso = 4
+        let query = `update ${PGSCHEMA}.dt_casos_dia set estado_caso = 4
                         where estado_caso in (1, 2);`
         let params = []
         let result = await client.query(query, params)
-        query = `INSERT INTO development.dt_casos_dia(dni_paciente,estado_caso,fiebre,dificultad_respitar,dolor_pecho,
+        query = `INSERT INTO ${PGSCHEMA}.dt_casos_dia(dni_paciente,estado_caso,fiebre,dificultad_respitar,dolor_pecho,
                     alteracion_sensorio,colaboracion_azul_labios,tos,dolor_garganta,congestion_nasal,malestar_general,cefalea,
                     nauseas,diarrea,comentario,fecha_caso)
-                    SELECT p.dni, 1, 0,0,0,0,0,0,0,0,0,0,0,0,'', $1 FROM development.dt_pacientes p
+                    SELECT p.dni, 1, 0,0,0,0,0,0,0,0,0,0,0,0,'', $1 FROM ${PGSCHEMA}.dt_pacientes p
                     where p.estado in (2, 3) and paso_encuesta_inicial = true and not p.grupo = 'A';`
         params = [datePeru_current]
         result = await client.query(query, params)
@@ -39,10 +40,10 @@ function makeMigrationsCustomer(dni_paciente){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_current } = getTimeNow()
         let client = await openConnection()
-        let query = `INSERT INTO development.dt_casos_dia(dni_paciente,estado_caso,fiebre,dificultad_respitar,dolor_pecho,
+        let query = `INSERT INTO ${PGSCHEMA}.dt_casos_dia(dni_paciente,estado_caso,fiebre,dificultad_respitar,dolor_pecho,
                     alteracion_sensorio,colaboracion_azul_labios,tos,dolor_garganta,congestion_nasal,malestar_general,cefalea,
                     nauseas,diarrea,comentario,fecha_caso)
-                    SELECT p.dni, 1, 0,0,0,0,0,0,0,0,0,0,0,0,'', $1 FROM development.dt_pacientes p
+                    SELECT p.dni, 1, 0,0,0,0,0,0,0,0,0,0,0,0,'', $1 FROM ${PGSCHEMA}.dt_pacientes p
                     where paso_encuesta_inicial = true and not p.grupo = 'A' and p.dni = $2;`
         let params = [datePeru_current, dni_paciente]
         let result = await client.query(query, params)
@@ -56,12 +57,12 @@ function makeMigrationsNextUploaded(){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_current } = getTimeNow()
         let client = await openConnection()
-        let query = `INSERT INTO development.dt_casos_dia(dni_paciente,estado_caso,fiebre,dificultad_respitar,dolor_pecho,
+        let query = `INSERT INTO ${PGSCHEMA}.dt_casos_dia(dni_paciente,estado_caso,fiebre,dificultad_respitar,dolor_pecho,
                 alteracion_sensorio,colaboracion_azul_labios,tos,dolor_garganta,congestion_nasal,malestar_general,cefalea,
                 nauseas,diarrea,comentario,fecha_caso)
-                SELECT p.dni, 1, 0,0,0,0,0,0,0,0,0,0,0,0,'', $1 FROM development.dt_pacientes p
+                SELECT p.dni, 1, 0,0,0,0,0,0,0,0,0,0,0,0,'', $1 FROM ${PGSCHEMA}.dt_pacientes p
                 where p.estado in (2, 3) and paso_encuesta_inicial = true 
-                and not p.grupo = 'A' and not p.dni in (select dni_paciente from development.dt_casos_dia as c where c.fecha_caso = $1 group by dni_paciente);`
+                and not p.grupo = 'A' and not p.dni in (select dni_paciente from ${PGSCHEMA}.dt_casos_dia as c where c.fecha_caso = $1 group by dni_paciente);`
         let params = [datePeru_current]
         let result = await client.query(query, params)
         client.release(true)

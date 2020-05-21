@@ -105,11 +105,11 @@ async function answer_initial_survey(patient, answers, tray){
 router.get("/:survey",async (req, res)=>{
     let params = req.params
 
-    if(params.survey == 'survey01'){
+    if(params.survey === 'survey01'){
         let patients = await getPatientsSurvey01()
         res.json(arrayJsonToPatientsList(patients))
     }
-    else if(params.survey == 'survey02'){
+    else if(params.survey === 'survey02'){
         let patients = await getPatientsSurvey02()
         res.json(arrayJsonToPatientsList(patients))
     }
