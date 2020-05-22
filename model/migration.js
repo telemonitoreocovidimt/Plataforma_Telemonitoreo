@@ -23,11 +23,21 @@ function makeMigrations(){
                         where estado_caso in (1, 2);`
         let params = []
         let result = await client.query(query, params)
-        query = `INSERT INTO ${PGSCHEMA}.dt_casos_dia(dni_paciente,estado_caso,fiebre,dificultad_respitar,dolor_pecho,
-                    alteracion_sensorio,colaboracion_azul_labios,tos,dolor_garganta,congestion_nasal,malestar_general,cefalea,
-                    nauseas,diarrea,comentario,fecha_caso)
-                    SELECT p.dni, 1, 0,0,0,0,0,0,0,0,0,0,0,0,'', $1 FROM ${PGSCHEMA}.dt_pacientes p
-                    where p.estado in (2, 3) and paso_encuesta_inicial = true and not p.grupo = 'A';`
+        query = `INSERT INTO ${PGSCHEMA}.dt_casos_dia(dni_paciente,fiebre,dificultad_respitar,dolor_pecho,
+            alteracion_sensorio,colaboracion_azul_labios,tos,dolor_garganta,congestion_nasal,malestar_general,cefalea,
+            nauseas,diarrea,comentario,fecha_caso, dni_medico, estado_caso, fecha_tomado )
+            SELECT p.dni, 0,0,0,0,0,0,0,0,0,0,0,0,'', $1, 
+            (select dni_medico from ${PGSCHEMA}.dt_casos_programados
+                    where dni_paciente = p.dni 
+                    and fecha = $1
+                    and estado = 1 limit 1) as dni_medico,
+                    case when (select dni_medico from ${PGSCHEMA}.dt_casos_programados
+                    where dni_paciente = p.dni 
+                    and fecha = $1
+                    and estado = 1 limit 1) is null then 1 else 2 end,
+                    $1
+            FROM ${PGSCHEMA}.dt_pacientes p
+            where p.estado in (2, 3) and p.paso_encuesta_inicial = true and p.is_doctor = false`// and not p.grupo = 'A';`
         params = [datePeru_current]
         result = await client.query(query, params)
         client.release(true)

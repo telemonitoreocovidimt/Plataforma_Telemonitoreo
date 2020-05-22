@@ -2,7 +2,7 @@ const { Router } = require("express")
 const router = Router()
 const { getPatientsAlert, getPatients, countAllCaseToday, countAllCaseAttendedToday,
      countAllCaseAttendedToDayForDoctor, countAllCaseAttendedToDayBetweenDoctors, takeCase, canTakeCase,
-     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase } = require("./../../model/dashboard")
+     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase, getPatientForCase, removeScheduledCase, addScheduledCase, haveThisScheduledCaseForTomorrow } = require("./../../model/dashboard")
 
 router.get("/",async (req, res)=>{
 
@@ -65,7 +65,12 @@ router.get("/case/:case",async (req, res)=>{
                 let data = await canTakeCase(dni_medico, id_case)
                 let canTake = data.result
                 if(canTake[0].pasa){
-                    data = await takeCase(id_case, dni_medico, true)
+                    data = await getPatientForCase(id_case, true)
+                    let dni_paciente  = data.result[0].dni
+                    data = await haveThisScheduledCaseForTomorrow(dni_medico, dni_paciente, true, data.client)
+                    let have_this_scheduled_case = data.result.length > 0 ? true : false
+                    console.log("Have scheduled case ", have_this_scheduled_case)
+                    data = await takeCase(id_case, dni_medico, true, data.client)
                     let taked = data.result
                     data = await getCase(id_case, true, data.client)
                     let cases = data.result
@@ -78,7 +83,7 @@ router.get("/case/:case",async (req, res)=>{
                         await req.flash("danger", "Ya tiene más de 14 días, es recomendable dar de alta al paciente.")
                     }
                     await req.useFlash(res)
-                    res.render("form", {layout: 'case',islogin:true, ...cases[0], ...data, status_patients, groups, factors, test})
+                    res.render("form", {layout: 'case', have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test})
                 }
                 else{
                     await req.flash("danger", canTake[0].message)
@@ -99,23 +104,39 @@ router.get("/case/:case",async (req, res)=>{
 
 router.post("/case/:case",async (req, res)=>{
     const json = req.body
+    json.continue_tracking =  json.continue_tracking === "on" ? true : false //Parseo de input checkbox para continuar el tracking para el dia siguiente
     if(req.session.user){
+        
         let id_case = req.params.case
+        let result = await getPatientForCase(id_case)
+        console.log(result)
+        result = result.result
+        console.log(result)
         let dni_medico = req.session.user.dni
-
+        let dni_paciente  = result[0].dni
+        console.log(dni_paciente)
+        
+        //Liberar caso
         if(json.tipo_guardado == "3"){
+            await removeScheduledCase(dni_medico, dni_paciente)
             await dropCase(id_case)
             await req.flash("warning", "Caso liberado.")
             return res.redirect("/dashboard")
         }
         
+        //Cerrar caso
         let data = await canTerminateCase(dni_medico, id_case)
-        let canTerminate = data.result
+        let canTerminate = data.result /** @return { pasa: Boolean, message: String}  Valida si puede cerrarse correctamente y si no devulve un mensaje con la razón**/
         if(canTerminate[0].pasa){
-            // json.id_caso = id_case
-            let x = await updateCase({...json, id_caso: id_case})
+            let continue_tracking = json.continue_tracking
+            delete json.continue_tracking
+            if(continue_tracking)
+                await addScheduledCase(dni_medico, dni_paciente)
+            else
+                await removeScheduledCase(dni_medico, dni_paciente)
+            let x = await updateCase({...json, id_caso: id_case}) //Actualizar los campos del caso
             if(json.tipo_guardado == "2"){
-                await terminateCase(id_case, dni_medico)
+                await terminateCase(id_case, dni_medico) //Actualizar estado de caso a cerrado
                 await req.flash("success", "Caso grabado y cerrado exitosamente.")
                 res.redirect("/dashboard")
             }

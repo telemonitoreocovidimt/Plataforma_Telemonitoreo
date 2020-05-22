@@ -1,6 +1,6 @@
 const { Router } = require("express")
 const router = Router()
-const { getPatientsSurvey01, getPatientsSurvey02, existePatient, save_answer, patient_change_status, patient_change_risk_factor, patient_change_age, validate_group_case } = require("./../../model/api")
+const { getPatientsSurvey01, getPatientsSurvey02, existePatient, save_answer, patient_change_status, patient_change_risk_factor, patient_change_age, validate_group_case, patient_is_doctor } = require("./../../model/api")
 const { makeMigrationsCustomer } = require("./../../model/migration")
 
 function arrayJsonToPatientsList(patients){
@@ -66,13 +66,13 @@ async function answer_daily_survey(patient, answers, tray){
 }
 
 async function answer_initial_survey(patient, answers, tray){
-  console.log(patient)
   let patient_id = patient.dni
   if(answers.length == 0)
     return
   //Varibles for update factor and age
   let is_risk_factor = null
   let patient_age = 0
+  let is_doctor = false
 
   //Save questions
   for(let i in answers){
@@ -82,8 +82,11 @@ async function answer_initial_survey(patient, answers, tray){
     let answered_at = answers[i].answered_at
 
     //Insert aswers
+    console.log("Save answer")
+    console.log(patient_id, variable, answer, asked_at, answered_at)
     let rows = await save_answer(patient_id, variable, answer, asked_at, answered_at)
-    if(variable == "edad_paciente")
+    console.log("Answer saved")
+    if(variable == "edad_paciente") //Validate age of patient
       patient_age = parseInt(answers[i].answer)
     if(variable == "comorbilidades" && answer.toUpperCase() == "SI"){
       is_risk_factor = true;
@@ -91,14 +94,25 @@ async function answer_initial_survey(patient, answers, tray){
     if(variable == "comorbilidades" && answer.toUpperCase() == "NO"){
       is_risk_factor = false;
     }
+    if(variable === "es_profesional_salud" && answer.toUpperCase() === "SI"){
+      is_doctor = true
+    }
   }
+  console.log(is_risk_factor)
+  console.log(patient_age)
+  console.log(is_doctor)
   if (patient_age != 0){
     if(is_risk_factor != null){
-      await patient_change_age(patient_id, patient_age)
-      await patient_change_risk_factor(patient_id, is_risk_factor)
-      await validate_group_case(patient_id)
+      await patient_change_age(patient_id, patient_age) //Update age and flag "paso_encuesta_inicial"
+      await patient_change_risk_factor(patient_id, is_risk_factor) //Change risk factor and change group
+      console.log("Is doctor : ", is_doctor)
+      if(is_doctor){
+        await patient_is_doctor(patient_id)
+      }
+      else{
+        await validate_group_case(patient_id) //Create case if group C with risk factor or if is group A or B
+      }
     }
-
   }
 }
 
@@ -121,13 +135,10 @@ router.get("/:survey",async (req, res)=>{
 router.post("/save_answers", async (req, res)=>{
   if(req.body.identity_document){
     let patient = await existePatient(req.body.identity_document)
-    console.log(patient)
     if(patient.length){
       let dni_patient = req.body.identity_document
       let tray = req.body.tray
       let answers = req.body.answers
-      console.log(req.body)
-      console.log(answers)
       if(answers == null || answers.length == 0){
         res.json({"success": "bad", "message": "No se detectó respuestas."})
       }else{
@@ -143,7 +154,8 @@ router.post("/save_answers", async (req, res)=>{
           answer_daily_survey(patient[0], answers, tray)
           res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
           
-        }else{
+        }
+        else{
           res.json({"success": "bad", "message": "Encuesta inválida"})
         }
         

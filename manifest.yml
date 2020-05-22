@@ -1,5 +1,5 @@
 ---
 applications:
- - name: DASHBOARD-CAYETANO
+ - name: DASHBOARD-CAYETANO-DEV
    random-route: true
    memory: 512M

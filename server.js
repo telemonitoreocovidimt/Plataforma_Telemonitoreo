@@ -4,7 +4,7 @@ const app = express()
 const session = require('express-session')
 const pgSession = require('connect-pg-simple')(session)
 const morgan = require("morgan")
-const { PORT } = require("./config")
+const { PORT, PGSCHEMA } = require("./config")
 const formData = require("express-form-data")
 const exphbs = require("express-handlebars")
 const { pool } = require("./model/connection")
@@ -20,8 +20,6 @@ const options = {
   autoClean: true
 };
 
-
-
 app.use(formData.parse(options));
 app.use(formData.format());
 app.use(formData.stream());
@@ -36,31 +34,14 @@ app.use(session({
     store: new pgSession({
         pool: pool,
         tableName: 'session',
-        schemaName: 'development'
+        schemaName: PGSCHEMA
     }),
     resave: true,
     saveUninitialized: true,
     cookie: { secure: false }
 }))
 
-// app.use(require("flash")());
-
 app.use(require("./middleware_flash")())
-
-// app.use(function (req, res, next) {
-//     assert(req.session, 'a req.session is required!')
-//     res.locals.flash = []
-//     req.flash = res.flash = push
-//     next()
-// })
-
-// function push(type, message){
-//     let res = this.res || this
-//     res.locals.flash.push({
-//         type,
-//         message
-//     })
-// }
 
 app.use(express.urlencoded({extended:true}))
 

@@ -56,6 +56,7 @@ function save_answer(dni_paciente, variable, respuesta, asked_at, answered_at){
         let client = await openConnection()
         let query = `select * from ${PGSCHEMA}.sp_save_answer($1, $2, $3, $4, $5)`
         let params = [dni_paciente, variable, respuesta, asked_at, answered_at]
+        console.log(params)
         let result = await client.query(query, params)
         client.release(true)
         resolve(result.rows)
@@ -109,6 +110,17 @@ function validate_group_case(dni_paciente){
 }
 
 
+async function patient_is_doctor(dni_paciente){
+    console.log("Patient is doctor")
+    console.log(dni_paciente)
+    let client = await openConnection()
+    let query = `select * from ${PGSCHEMA}.sp_patient_is_doctor($1)`
+    let params = [dni_paciente]
+    let result = await client.query(query, params)
+    client.release(true)
+    return result.rows
+} 
+
 //existePatient(req.body.patient_code) sp_save_answer
 //development.sp_save_answer(patient_id, answer.variable, answer.answer, answer.asked_at, answer.answered_at) save_answer
 // development.sp_patient_change_status(patient_id, 2) patient_change_status
@@ -121,5 +133,6 @@ module.exports = {
     patient_change_status,
     patient_change_risk_factor,
     patient_change_age,
-    validate_group_case
+    validate_group_case,
+    patient_is_doctor
 }

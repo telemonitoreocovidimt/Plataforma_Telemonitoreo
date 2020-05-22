@@ -208,7 +208,14 @@
             </tr>
             <tr>
                 <td colSpan="2" class="comment">
-                    <textarea id="comentario" class="textarea" name="comentario" placeholder="Ingrese sus comentarios">{{ comentario }}</textarea>
+                    <textarea style="width: 100%;margin: 0px;padding:1%" id="comentario" class="textarea" name="comentario" placeholder="Ingrese sus comentarios">{{ comentario }}</textarea>
+                </td>
+            </tr>
+            <tr class="tr_general">
+                {{ have_this_scheduled_case }}
+                <td><label for="estado">¿Usted continuara haciendo el seguimiento?</label></td>
+                <td class="td_select" style="display: flex; justify-content: center; align-items: center;">
+                    <input name="continue_tracking" {{#if have_this_scheduled_case }} checked {{/if}} type="checkbox" data-toggle="toggle" data-on="Si" data-off="No" data-onstyle="success" data-offstyle="danger">
                 </td>
             </tr>
         </tbody>

@@ -40,7 +40,7 @@ function getPatientsAlert(pass = false, client = null){
                         case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
                     from ${PGSCHEMA}.dt_casos_dia as c
                     inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
-                    where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 3 and p.grupo in ('C', 'B') order by p.edad desc;`
+                    where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 3 and p.grupo in ('C', 'B', 'A') order by p.edad desc;`//('C', 'B') order by p.edad desc;
         let params = [datePeru_current, datePeru_init]
         let result = await client.query(query, params)
 
@@ -73,7 +73,7 @@ function getPatients(pass = false, client = null){
                         case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
                     from ${PGSCHEMA}.dt_casos_dia as c
                     inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
-                    where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 2 and p.grupo in ('C', 'B') order by p.edad desc;`
+                    where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 2 and p.grupo in ('C', 'B', 'A') order by p.edad desc;` //('C', 'B') order by p.edad desc;
         let params = [datePeru_current, datePeru_init]
         let result = await client.query(query, params)
         if(!pass)
@@ -105,7 +105,7 @@ function getMyPatients(dni_medico, pass = false, client = null){
                         case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
                     from ${PGSCHEMA}.dt_casos_dia as c
                     inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
-                    where c.fecha_caso = $2 and c.estado_caso = 2 and c.dni_medico = $3 and p.grupo in ('C', 'B') order by p.edad desc;`
+                    where c.fecha_caso = $2 and c.estado_caso = 2 and c.dni_medico = $3 and p.grupo in ('C', 'B', 'A') order by p.edad desc;`//('C', 'B') order by p.edad desc;
         let params = [datePeru_current, datePeru_init, dni_medico]
         let result = await client.query(query, params)
         if(!pass)
@@ -123,7 +123,7 @@ function countAllCaseToday(pass = false, client = null){
         let query = `select count(*) from ${PGSCHEMA}.dt_casos_dia as pr
                         inner join ${PGSCHEMA}.dt_pacientes as p
                         on pr.dni_paciente = p.dni
-                        where fecha_caso = $1 and estado_caso in (1,2) and p.grupo in ('C', 'B')`
+                        where fecha_caso = $1 and estado_caso in (1,2) and p.grupo in ('C', 'B', 'A')`//('C', 'B')
         let params = [datePeru_init]
         let result = await client.query(query, params)
         if(!pass)
@@ -199,6 +199,34 @@ function terminateCase(id_case, dni_doctor, pass = false, client = null){
             client = await openConnection()
         let query = `update ${PGSCHEMA}.dt_casos_dia set dni_medico = $1, estado_caso = 3, fecha_cierre_caso = $2 where id = $3`
         let params = [dni_doctor, datePeru_current, id_case]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function addScheduledCase(dni_doctor, dni_paciente, pass = false, client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow(-1)
+        if(!client)
+            client = await openConnection()
+        let query = `select * from ${PGSCHEMA}.sp_add_scheduled_case($1, $2, $3)`
+        let params = [dni_doctor, dni_paciente, datePeru_init]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function removeScheduledCase(dni_doctor, dni_paciente, pass = false, client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow(-1)
+        if(!client)
+            client = await openConnection()
+        let query = `select * from ${PGSCHEMA}.sp_remove_scheduled_case($1, $2, $3)`
+        let params = [dni_doctor, dni_paciente, datePeru_init]
         let result = await client.query(query, params)
         if(!pass)
             client.release(true)
@@ -367,6 +395,41 @@ function dropCase(id_caso,pass = false, client = null){
     })
 }
 
+function getPatientForCase(id_case, pass = false, client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+            client = await openConnection()
+        let query = `SELECT p.* FROM ${PGSCHEMA}.dt_casos_dia as cd
+                    INNER JOIN ${PGSCHEMA}.dt_pacientes as p
+                    on cd.dni_paciente = p.dni
+                    WHERE cd.id = $1;`
+        let params = [id_case]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function haveThisScheduledCaseForTomorrow(dni_doctor, dni_paciente, pass = false, client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow(-1)
+        if(!client)
+            client = await openConnection()
+        let query = `select * from ${PGSCHEMA}.dt_casos_programados as cp 
+                    where cp.dni_medico = $1 
+                    and cp.dni_paciente = $2 
+                    and cp.fecha = $3
+                    and cp.estado = 1`
+        let params = [dni_doctor, dni_paciente, datePeru_init]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
 module.exports = {
     getPatientsAlert,
     getPatients,
@@ -382,5 +445,9 @@ module.exports = {
     terminateCase,
     updateCase,
     getMyPatients,
-    dropCase
+    dropCase,
+    addScheduledCase,
+    removeScheduledCase,
+    getPatientForCase,
+    haveThisScheduledCaseForTomorrow
 }
