@@ -213,8 +213,8 @@
             </tr>
             <tr class="tr_general">
                 {{ have_this_scheduled_case }}
-                <td><label for="estado">¿Usted continuara haciendo el seguimiento?</label></td>
-                <td class="td_select" style="display: flex; justify-content: center; align-items: center;">
+                <td style="padding-top: 20px !important;"><label for="estado">Yo voy a continuar el seguimiento</label></td>
+                <td class="td_select" style="display: flex; justify-content: left; align-items: center;">
                     <input name="continue_tracking" {{#if have_this_scheduled_case }} checked {{/if}} type="checkbox" data-toggle="toggle" data-on="Si" data-off="No" data-onstyle="success" data-offstyle="danger">
                 </td>
             </tr>
