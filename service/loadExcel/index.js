@@ -313,6 +313,9 @@ function resultadoMuestra(resultado){
 		else if(resultado.toUpperCase() === 'POSITIVO'){
 			result = 2
 		}
+		else if(resultado.toUpperCase() === 'PENDIENTE'){
+			result = 3
+		}
 	}
 	return result
 }

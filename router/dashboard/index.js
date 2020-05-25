@@ -78,7 +78,7 @@ router.get("/case/:case",async (req, res)=>{
                     let status_patients = data.result
                     let groups = [{ id:"A", descripcion:"A"}, { id:"B", descripcion:"B"}, { id:"C", descripcion:"C"}]
                     let factors = [{ id:true, descripcion:"SI"}, { id:false, descripcion:"NO"}]
-                    let test = [{ id:"1", descripcion:"Negativo"}, { id:"2", descripcion:"Reactivo"}, { id:"3", descripcion:"Positivo"}]
+                    let test = [{ id:"1", descripcion:"Negativo"}, { id:"2", descripcion:"Positivo"}, { id:"3", descripcion:"Pendiente"}]
                     if(cases[0].tiempo_seguimiento > 14){
                         await req.flash("danger", "Ya tiene más de 14 días, es recomendable dar de alta al paciente.")
                     }
