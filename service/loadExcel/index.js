@@ -269,6 +269,7 @@ function parseTipoMuestra(data, column, row, error) {
 }
 
 function parseResultadoMuestra(data, column, row, error) {
+	console.log(column + " " + data);
 	if(data !== null && data !== undefined && 
 		data.toUpperCase() !== 'POSITIVO' && 
 		data.toUpperCase() !== 'REACTIVO' && 
@@ -316,6 +317,8 @@ function resultadoMuestra(resultado){
 		else if(resultado.toUpperCase() === 'PENDIENTE'){
 			result = 3
 		}
+	}else{
+		result = 3
 	}
 	return result
 }

@@ -26,20 +26,20 @@
             {{#each my_cases}}
                 <tr class="border border-secondary">
                     <td>{{ this.nombre }}</td>
-                    <td>{{ this.sexo }}</td>
-                    <td>{{ this.edad }}</td>
-                    <td>{{ this.grupo }}</td>
-                    <td>{{ this.factor_riesgo }}</td>
-                    <td>{{ this.fecha_inicio_sintomas }}</td>
+                    <td style="text-align:center;">{{ this.sexo }}</td>
+                    <td style="text-align:center;">{{ this.edad }}</td>
+                    <td style="text-align:center;">{{ this.grupo }}</td>
+                    <td style="text-align:center;">{{ this.factor_riesgo }}</td>
+                    <td style="text-align:center;">{{ this.fecha_inicio_sintomas }}</td>
                     <!--td>{{ this.fecha_toma_muestra }}</td-->
-                    <td>{{ this.tiempo_seguimiento }}</td>
+                    <td style="text-align:center;">{{ this.tiempo_seguimiento }}</td>
                     <!--td>{{ this.tipo_prueba_1 }}</td>
                     <td>{{ this.resultado_prueba_1 }}</td>
                     <td>{{ this.tipo_prueba_2 }}</td>
                     <td>{{ this.resultado_prueba_2 }}</td>
                     <td>{{ this.tipo_prueba_3 }}</td>
                     <td>{{ this.resultado_prueba_3 }}</td-->
-                    <td><a href="/dashboard/case/{{ this.id_case }}"><button><small>Tomar caso</small></button></a></td>
+                    <td style="text-align:center;"><a href="/dashboard/case/{{ this.id_case }}"><button><small>Tomar caso</small></button></a></td>
                 </tr>
             {{/each}}
     </tbody>
