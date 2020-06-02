@@ -39,6 +39,18 @@ function getPatientsSurvey02(){
     })
 }
 
+function getPatientsSurvey03(){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_current } = getTimeNow()
+        let client = await openConnection()
+        let query = `select * from ${PGSCHEMA}.sp_list_patients_survey03($1)`
+        let params = [datePeru_current]
+        let result = await client.query(query, params)
+        client.release(true)
+        resolve(result.rows)
+    })
+}
+
 function existePatient(dni_paciente){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
@@ -128,6 +140,7 @@ async function patient_is_doctor(dni_paciente){
 module.exports = {
     getPatientsSurvey01,
     getPatientsSurvey02,
+    getPatientsSurvey03,
     existePatient,
     save_answer,
     patient_change_status,
