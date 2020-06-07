@@ -299,7 +299,7 @@ function getStatusPatients(pass = false, client = null){
 function updateCase(json, pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
         let { id_caso, grupo, factor_riesgo, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, estado, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, 
-            tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas } = json
+            tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas,nota_grupo,condicion_egreso } = json
 
         // let resultado_prueba_1 = null
         // let resultado_prueba_2 = null
@@ -373,8 +373,8 @@ function updateCase(json, pass = false, client = null){
         }
         if(!client)
             client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`
-        let params = [id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas]
+        let query = `select * from ${PGSCHEMA}.sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21,$22,$23)`
+        let params = [id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas,nota_grupo,condicion_egreso]
         let result = await client.query(query, params)
         if(!pass)
             client.release(true)
@@ -429,6 +429,25 @@ function haveThisScheduledCaseForTomorrow(dni_doctor, dni_paciente, pass = false
     })
 }
 
+function getComentarios(dni, pass = false, client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+            client = await openConnection()
+        let query = `SELECT TO_CHAR(cd.fecha_caso,'DD/MM/YYYY') as fecha_caso,cd.comentario FROM ${PGSCHEMA}.dt_casos_dia as cd
+                    INNER JOIN ${PGSCHEMA}.dt_pacientes as p
+                    on cd.dni_paciente = p.dni
+                    WHERE cd.dni_paciente = $1 and  comentario is not null and comentario <> '' order by cd.fecha_caso desc;`;
+
+     
+        let params = [dni]
+        let result = await client.query(query, params);
+       
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
 
 module.exports = {
     getPatientsAlert,
@@ -449,5 +468,6 @@ module.exports = {
     addScheduledCase,
     removeScheduledCase,
     getPatientForCase,
-    haveThisScheduledCaseForTomorrow
+    haveThisScheduledCaseForTomorrow,
+    getComentarios
 }

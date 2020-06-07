@@ -1,6 +1,6 @@
 const { Router } = require("express")
 const router = Router()
-const { getPatientsSurvey01, getPatientsSurvey02, getPatientsSurvey03, existePatient, save_answer, patient_change_status, patient_change_risk_factor, patient_change_age, validate_group_case, patient_is_doctor } = require("./../../model/api")
+const { getPatientsSurvey01, getPatientsSurvey02, existePatient, save_answer, patient_change_status, patient_change_risk_factor, patient_change_age, validate_group_case, patient_is_doctor } = require("./../../model/api")
 const { makeMigrationsCustomer } = require("./../../model/migration")
 
 function arrayJsonToPatientsList(patients){
@@ -26,39 +26,6 @@ function arrayJsonToPatientsList(patients){
         }
     }
     return format
-}
-
-async function answer_final_survey(patient, answers, tray){
-  
-  let patient_id = patient.dni
-  let need_doctor = false
-
-  for(const i in answers){
-    let variable = answers[i].variable
-    let answer = answers[i].answer
-    let asked_at = answers[i].asked_at
-    let answered_at = answers[i].answered_at
-    let rows = await save_answer(patient_id, variable, answer, asked_at, answered_at)
-    // if((variable == "dificultad_para_respirar" || variable == "dolor_pecho" ||
-    //     variable == "confusion_desorientacion" || variable == "labios_azules") && 
-    //     answer.toUpperCase() == "SI"){
-    //     patientToUrgency++
-    // }
-    // if((variable == "fiebre_hoy" || variable == "diarrea") && answer.toUpperCase() == "SI") {
-    //     patientToNormalTray++;
-    // }
-    if(variable === "necesita_medico" && answer.toUpperCase() === "SI"){
-      need_doctor = true
-    }
-  }
-
-
-  if(need_doctor){
-    //pasa a bandeja normal
-    let x = await patient_change_status(patient_id, 2)
-    await makeMigrationsCustomer(patient_id)
-  }
-  
 }
 
 async function answer_daily_survey(patient, answers, tray){
@@ -160,10 +127,6 @@ router.get("/:survey",async (req, res)=>{
         let patients = await getPatientsSurvey02()
         res.json(arrayJsonToPatientsList(patients))
     }
-    else if(params.survey === 'survey03'){
-      let patients = await getPatientsSurvey03()
-      res.json(arrayJsonToPatientsList(patients))
-  }
     else{
         res.json({"status":"bad"})
     }
@@ -189,13 +152,6 @@ router.post("/save_answers", async (req, res)=>{
 
           //ENCUESTA DIARIA
           answer_daily_survey(patient[0], answers, tray)
-          res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
-          
-        }
-        else if(req.body.survey == "encuesta_final_covid_19_hch"){
-
-          //ENCUESTA FINAL
-          answer_final_survey(patient[0], answers, tray)
           res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
           
         }

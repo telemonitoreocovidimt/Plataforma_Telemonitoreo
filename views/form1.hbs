@@ -1,0 +1,374 @@
+{{#each flash}}
+<div class="alert alert-{{this.type}}">{{this.message}}</div>
+{{/each}}
+
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">CASO</h1>
+</div>
+<form method="POST">
+    <div class="row">
+        <div class="col-xl-3 col-lg-3">
+            <div class="card card-comments shadow mb-4 border-left-warning">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Comentarios</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="case-comments ml-auto">
+                        {{#each comments}}
+                        <li class=" d-flex align-items-center">
+                            <div>
+                                <div class="small text-gray-500">{{ this.fecha_caso }}</div>
+                                <span>{{ this.comentario }}</span>
+                            </div>
+                        </li>
+                        {{/each}}
+                        
+                    </ul>
+
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-xl-6 col-lg-6">
+            <div class="form-inputs-list">
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">DATOS PACIENTE</h6>
+                        <div class="call-action">
+                            <a href="tel://{{celular}}" class="btn btn-success btn-circle btn-sm">
+                                <i class="fas fa-phone-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="inputEmail4">Paciente:</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre"
+                                    disabled value="{{nombre}}">
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="inputEmail4">DNI:</label>
+                                <input type="text" class="form-control" name="dni" id="dni" disabled value="{{dni}}" />
+                            </div>
+                            <div class="form-group col-md-5">
+                                <label for="inputEmail4">Teléfono</label>
+                                <input type="text" class="form-control" name="celular" id="celular"
+                                    value="{{celular}}" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-2">
+                                <label for="inputEmail4">Grupo:</label>
+                                <select class="form-control" id="grupo" name="grupo">
+                                    <option value="">Seleccionar</option>
+                                    {{#each groups}}
+                                    <option value="{{ this.id }}" {{compare this.id ../grupo "selected"}}>{{ this.id }}
+                                    </option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputEmail4">Factor de riesgo:</label>
+                                <select class="form-control" id="factor_riesgo" name="factor_riesgo">
+                                    <option value="">Seleccionar</option>
+                                    {{#each factors}}
+                                    <option value="{{ this.id }}" {{compare this.id ../factor_riesgo "selected"}}>
+                                        {{ this.descripcion }}</option>
+                                    {{/each}}
+                                </select>
+
+                            </div>
+                            <div class="form-group col-md-5">
+                                <label for="inputEmail4">Tipo Bandeja:</label>
+                                <select class="form-control" id="estado" name="estado">
+                                    <option value="">Seleccionar</option>
+                                    {{#each status_patients}}
+                                    <option value="{{ this.id }}" {{compare this.id ../estado "selected"}}>
+                                        {{ this.descripcion }}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="fecha_inicio_sintomas">Fecha de inicio de sintómas:</label>
+                                <input class="form-control" type="date" id="fecha_inicio_sintomas"
+                                    name="fecha_inicio_sintomas" value="{{ fecha_inicio_sintomas }}" />
+
+                            </div>
+                            <div class="form-group col-md-5">
+
+                                <label for="tiempo_seguimiento">Día de seguimiento</label>
+                                <input class="form-control" type="text" id="tiempo_seguimiento"
+                                    name="tiempo_seguimiento" placeholder="5" value="{{ tiempo_seguimiento }}"
+                                    disabled />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                {{#if tipo_prueba_1}}
+                                <tr class="tr_general">
+                                    <td><label for="resultado_prueba_1">Resultado de prueba 1 -
+                                            {{tipo_prueba_1}}:</label></td>
+                                    <td class="td_select">
+                                        <select name="resultado_prueba_1" class="browser-default custom-select mb-4"
+                                            id="resultado_prueba_1">
+                                            <option value="">Seleccionar</option>
+                                            {{#each test}}
+                                            <option value="{{ this.id }}"
+                                                {{compare this.id ../resultado_prueba_1 "selected"}}>
+                                                {{ this.descripcion }}</option>
+                                            {{/each}}
+                                        </select>
+                                    </td>
+                                </tr>
+                                {{/if}}
+                                {{#if tipo_prueba_2}}
+                                <tr class="tr_general">
+                                    <td><label for="resultado_prueba_2">Resultado de prueba 2 -
+                                            {{tipo_prueba_2}}:</label></td>
+                                    <td class="td_select">
+                                        <select name="resultado_prueba_2" class="browser-default custom-select mb-4"
+                                            id="resultado_prueba_2">
+                                            <option value="">Seleccionar</option>
+                                            {{#each test}}
+                                            <option value="{{ this.id }}"
+                                                {{compare this.id ../resultado_prueba_2 "selected"}}>
+                                                {{ this.descripcion }}</option>
+                                            {{/each}}
+                                        </select>
+                                    </td>
+                                </tr>
+                                {{/if}}
+                                {{#if tipo_prueba_3}}
+                                <tr class="tr_general">
+                                    <td><label for="textInput">Resultado de prueba 3 - {{tipo_prueba_2}}:</label></td>
+                                    <td class="td_select">
+                                        <select name="resultado_prueba_3" class="browser-default custom-select mb-4"
+                                            id="select">
+                                            <option value="">Seleccionar</option>
+                                            {{#each test}}
+                                            <option value="{{ this.id }}"
+                                                {{compare this.id ../resultado_prueba_2 "selected"}}>
+                                                {{ this.descripcion }}</option>
+                                            {{/each}}
+                                        </select>
+                                    </td>
+                                </tr>
+                                {{/if}}
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="inputEmail4">Condición de egreso:</label>
+                                <select class="form-control" id="egreso" name="condicion_egreso">
+                                    <option value="">Seleccionar</option>
+                                            {{#each condicionesEgreso}}
+                                            <option value="{{ this.id }}"
+                                                {{compare this.id ../condicion_egreso "selected"}}>
+                                                {{ this.descripcion }}</option>
+                                            {{/each}}
+                                </select>
+                            </div>
+
+                        </div>
+                        <input type="hidden" name="tipo_guardado" id="tipo_guardado">
+
+
+
+                    </div>
+                </div>
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Sintomas</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Fiebre:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" max="3" min="0" id="fiebre" name="fibre"
+                                    value="{{ fiebre }}" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Dificultad para respirar:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="dificultad_respitar" max="3" min="0"
+                                    id="dificultad_respitar" value="{{ dificultad_respitar }}" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Dolor de pecho:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="dolor_pecho" max="3" min="0"
+                                    id="dolor_pecho" value="{{ dolor_pecho }}" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Alteración del sensorio:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="alteracion_sensorio" max="3" min="0"
+                                    id="alteracion_sensorio" value="{{ alteracion_sensorio }}" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Coloración azul (labios):</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="colaboracion_azul_labios" max="3"
+                                    min="0" id="colaboracion_azul_labios" value="{{ colaboracion_azul_labios }}" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Tos:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="tos" max="3" min="0" id="tos"
+                                    value="{{ tos }}" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Dolor de garganta:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="dolor_garganta" max="3" min="0"
+                                    id="dolor_garganta" value="{{ dolor_garganta }}" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Congestión nasal:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="congestion_nasal" max="3" min="0"
+                                    id="congestion_nasal" value="{{ congestion_nasal }}" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Malestar general:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="malestar_general" max="3" min="0"
+                                    id="malestar_general" value="{{ malestar_general }}" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Cefálea:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="cefalea" max="3" min="0" id="cefalea"
+                                    value="{{ cefalea }}" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Nauseas/Vómitos:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="nauseas" max="3" min="0" id="nauseas"
+                                    value="{{ nauseas }}" />
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-6 col-form-label">Diarrea:</label>
+                            <div class="col-sm-2">
+
+                                <input class="form-control" type="number" name="diarrea" max="3" min="0" id="diarrea"
+                                    class="form-modal" value="{{ diarrea }}" />
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Comentario</h6>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-group">
+
+
+                            <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%" id="comentario"
+                                name="comentario" placeholder="Ingrese sus comentarios"></textarea>
+                        </div>
+
+
+                    </div>
+                </div>
+                
+
+            </div>
+                                <div class="form-group d-flex justify-content-between">
+                        <input class="btn btn-primary" type="submit" value="Cerrar"
+                            onclick="document.getElementById('tipo_guardado').value=2">
+                        <input class="btn btn-warning" type="submit" value="Liberar"
+                            onclick="document.getElementById('tipo_guardado').value=3">
+                    </div>
+        </div>
+        <div class="col-xl-3 col-lg-3">
+
+            <div class="card  mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Guardar</h6>
+                </div>
+                <div class="card-body">
+
+
+                   
+
+
+                    <div class="form-group custom-switch">
+                        <input type="checkbox" class="custom-control-input" name="continue_tracking" id="customSwitch1"
+                            {{#if have_this_scheduled_case }} checked {{/if}} data-toggle="toggle" data-on="Si"
+                            data-off="No" data-onstyle="success" data-offstyle="danger" />
+                        <label class="custom-control-label" for="customSwitch1">Continuar el seguimiento</label>
+                    </div>
+
+                        <div class="form-group">
+
+                            <label for="inputPassword">Nota de grupo:</label>
+                            <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%" id="comentario"
+                                name="nota_grupo" maxlength="50" placeholder="Ingrese la nota de grupo">{{ nota_grupo }}</textarea>
+                        </div>
+ <div class="custom-control d-flex justify-content-end">
+                    <input class="btn btn-success" type="submit" value="Guardar"
+                        onclick="document.getElementById('tipo_guardado').value=1">
+                       </div>
+
+                </div>
+            </div>
+
+
+        </div>
+
+
+
+    </div>
+
+</form>

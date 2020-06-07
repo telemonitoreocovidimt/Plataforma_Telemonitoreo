@@ -2,7 +2,55 @@ const { Router } = require("express")
 const router = Router()
 const { getPatientsAlert, getPatients, countAllCaseToday, countAllCaseAttendedToday,
      countAllCaseAttendedToDayForDoctor, countAllCaseAttendedToDayBetweenDoctors, takeCase, canTakeCase,
-     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase, getPatientForCase, removeScheduledCase, addScheduledCase, haveThisScheduledCaseForTomorrow } = require("./../../model/dashboard")
+     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase, getPatientForCase, removeScheduledCase, addScheduledCase, haveThisScheduledCaseForTomorrow,getComentarios } = require("./../../model/dashboard")
+
+router.get("/old",async (req, res)=>{
+
+    if(req.session.user){
+        let data = await getPatientsAlert(true)
+        let cases_alert = data.result
+        data = await getPatients(true, data.client)
+        let cases = data.result
+        data = await getMyPatients(req.session.user.dni, true, data.client)
+        let my_cases = data.result
+        data = await countAllCaseToday(true, data.client)
+        let cases_for_attent = data.result
+        data = await countAllCaseAttendedToday(true, data.client)
+        let cases_attented = data.result
+        data = await countAllCaseAttendedToDayForDoctor(req.session.user.dni, true, data.client)
+        let cases_attented_for_me = data.result
+        data = await countAllCaseAttendedToDayBetweenDoctors(false, data.client)
+        
+       
+        let count = 0
+        let sum = 0
+        data.result.forEach((json)=>{
+            count++
+            sum+=parseInt(json.count)
+        })
+        let cases_attented_promean = 0;
+        if ( count && sum ){
+            cases_attented_promean = parseInt(sum/count)
+        }
+
+        await req.useFlash(res)
+        res.render("dashboard", {  layout: 'main',
+            islogin:true,
+            ...req.session.user, 
+            cases_alert, 
+            cases,
+            my_cases,
+            cases_attented_for_me : cases_attented_for_me[0].count , 
+            cases_attented_promean, 
+            cases_for_attent: cases_for_attent[0].count,
+            cases_attented : cases_attented[0].count
+        })
+    }
+    else{
+        await req.flash("danger", "Usted no ha iniciado sesión.")
+        res.redirect("/")
+    }
+})
 
 router.get("/",async (req, res)=>{
 
@@ -11,7 +59,57 @@ router.get("/",async (req, res)=>{
         let cases_alert = data.result
         data = await getPatients(true, data.client)
         let cases = data.result
+        /*
         data = await getMyPatients(req.session.user.dni, true, data.client)
+        let my_cases = data.result*/
+        data = await countAllCaseToday(true, data.client)
+        let cases_for_attent = data.result
+        data = await countAllCaseAttendedToday(true, data.client)
+        let cases_attented = data.result
+        data = await countAllCaseAttendedToDayForDoctor(req.session.user.dni, true, data.client)
+        let cases_attented_for_me = data.result
+        data = await countAllCaseAttendedToDayBetweenDoctors(false, data.client)
+        let count = 0
+        let sum = 0
+        data.result.forEach((json)=>{
+            count++
+            sum+=parseInt(json.count)
+        })
+        let cases_attented_promean = 0;
+        if ( count && sum ){
+            cases_attented_promean = parseInt(sum/count)
+        }
+
+        await req.useFlash(res)
+        res.render("dashboard1", {  layout: 'main1',
+            islogin:true,
+            ...req.session.user, 
+            cases_alert, 
+            cases,
+           
+            cases_attented_for_me : cases_attented_for_me[0].count , 
+            cases_attented_promean, 
+            cases_for_attent: cases_for_attent[0].count,
+            cases_attented : cases_attented[0].count
+        })
+    }
+    else{
+        await req.flash("danger", "Usted no ha iniciado sesión.")
+        res.redirect("/")
+    }
+})
+
+
+router.get("/mibandeja",async (req, res)=>{
+
+    if(req.session.user){
+        
+        let data = await getPatientsAlert(true)
+        let cases_alert = data.result
+        data = await getPatients(true, data.client)
+        let cases = data.result 
+        
+         data = await getMyPatients(req.session.user.dni, true, data.client)
         let my_cases = data.result
         data = await countAllCaseToday(true, data.client)
         let cases_for_attent = data.result
@@ -32,11 +130,9 @@ router.get("/",async (req, res)=>{
         }
 
         await req.useFlash(res)
-        res.render("dashboard", { 
+        res.render("mycases", {  layout: 'main1',
             islogin:true,
             ...req.session.user, 
-            cases_alert, 
-            cases,
             my_cases,
             cases_attented_for_me : cases_attented_for_me[0].count , 
             cases_attented_promean, 
@@ -79,11 +175,16 @@ router.get("/case/:case",async (req, res)=>{
                     let groups = [{ id:"A", descripcion:"A"}, { id:"B", descripcion:"B"}, { id:"C", descripcion:"C"}]
                     let factors = [{ id:true, descripcion:"SI"}, { id:false, descripcion:"NO"}]
                     let test = [{ id:"1", descripcion:"Negativo"}, { id:"2", descripcion:"Positivo"}, { id:"3", descripcion:"Pendiente"}]
+                    let condicionesEgreso = [{ id:"1", descripcion:"Recuperado"}, { id:"2", descripcion:"Trasladado al Hospital"}, { id:"3", descripcion:"Trasladado Hospital UCI" },{ id:"4", descripcion:"Fallecido" }]
                     if(cases[0].tiempo_seguimiento > 14){
                         await req.flash("danger", "Ya tiene más de 14 días, es recomendable dar de alta al paciente.")
                     }
+
+                    data = await getComentarios(dni_paciente);
+                    let comments = data.result
+                
                     await req.useFlash(res)
-                    res.render("form", {layout: 'case', have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test})
+                    res.render("form1", {layout: 'main1', have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments})
                 }
                 else{
                     await req.flash("danger", canTake[0].message)

@@ -1,18 +1,24 @@
-<div class="container" style="margin: 0px !important;padding: 0.25rem !important;">
-    <table class="table table-hover">
+              <div class="card shadow mb-4">
+                <div class="card-header  bg-gradient-warning py-3">
+                  <h6 class="m-0 font-weight-bold text-white">CASOS PENDIENTES POR ATENDER</h6>
+                </div>
+                <div class="card-body">
+                  
+                  <div class="table-responsive">
+                 <table class="table table-hover table-bordered dataTable">
         <thead>
-            <tr class="tittle tb-head-second">
-                <th colSpan="15">LISTA DE CASOS PENDIENTES POR ATENDER</th>
-            </tr>
+
             <tr class="text-center tb-head">
                 <th scope="col">Nombre de Paciente</th>
                 <th scope="col">Sexo</th>
                 <th scope="col">Edad</th>
                 <th scope="col">Grupo</th>
                 <th scope="col">Factor de Riesgo</th>
-                <th scope="col">Fecha Inicio de Sintomas</th>
+                <!--<th scope="col">Fecha Inicio de Sintomas</th>-->
                 <!--th scope="col">Fecha Toma de Muestras</th-->
                 <th scope="col">Día seguimiento</th>
+                <th scope="col">Tomó el caso ayer</th>
+                <th scope="col">Note de grupo</th>
                 <!--th scope="col">Tipo de prueba 1</th>
                 <th scope="col">Resultado prueba 1</th>
                 <th scope="col">Tipo de prueba 2</th>
@@ -30,18 +36,34 @@
                     <td style="text-align:center;">{{ this.edad }}</td>
                     <td style="text-align:center;">{{ this.grupo }}</td>
                     <td style="text-align:center;">{{ this.factor_riesgo }}</td>
-                    <td style="text-align:center;">{{ this.fecha_inicio_sintomas }}</td>
+                    <!--<td style="text-align:center;">{{ this.fecha_inicio_sintomas }}</td>-->
                     <!--td>{{ this.fecha_toma_muestra }}</td-->
                     <td style="text-align:center;">{{ this.tiempo_seguimiento }}</td>
+                    <td style="text-align:center;"></td>
+                    <td style="text-align:center;"></td>
                     <!--td>{{ this.tipo_prueba_1 }}</td>
                     <td>{{ this.resultado_prueba_1 }}</td>
                     <td>{{ this.tipo_prueba_2 }}</td>
                     <td>{{ this.resultado_prueba_2 }}</td>
                     <td>{{ this.tipo_prueba_3 }}</td>
                     <td>{{ this.resultado_prueba_3 }}</td-->
-                    <td style="text-align:center;"><a href="/dashboard/case/{{ this.id_case }}"><button><small>Tomar caso</small></button></a></td>
+                    <td style="text-align:center;">
+                        
+
+                        <a href="/dashboard/case/{{ this.id_case }}" class="btn btn-success btn-icon-split">
+
+                    <span class="text">Tomar</span>
+                  </a>
+                        </td>
                 </tr>
             {{/each}}
         </tbody>
+
     </table>
-</div>
+        </div>
+                </div>
+              </div>
+
+
+
+    

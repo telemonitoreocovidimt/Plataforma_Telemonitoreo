@@ -1,9 +1,12 @@
-<div class="container" style="margin: 0px !important;padding: 0.25rem !important;">
-  <table class="table table-hover">
+              <div class="card shadow   mb-4">
+                <div class="card-header bg-gradient-primary  py-3">
+                  <h6 class="m-0 font-weight-bold text-white">CASOS ASIGNADOS</h6>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                  <table class="table table-hover table-bordered dataTable">
     <thead>
-      <tr class="tittle tb-head-second">
-        <th colSpan="15">LISTA DE CASOS ASIGNADOS</th>
-      </tr>
+     
       <tr class="text-center tb-head">
         <th scope="col">Nombre de Paciente</th>
         <th scope="col">Sexo</th>
@@ -39,9 +42,23 @@
                     <td>{{ this.resultado_prueba_2 }}</td>
                     <td>{{ this.tipo_prueba_3 }}</td>
                     <td>{{ this.resultado_prueba_3 }}</td-->
-                    <td style="text-align:center;"><a href="/dashboard/case/{{ this.id_case }}"><button><small>Tomar caso</small></button></a></td>
+                    <td style="text-align:center;">
+                      
+                      
+                     
+                                            <a href="/dashboard/case/{{ this.id_case }}" class="btn btn-success btn-icon-split">
+
+                    <span class="text">Tomar</span>
+                  </a>
+                      
+                      </td>
                 </tr>
             {{/each}}
     </tbody>
   </table>
-</div>
+  </div>
+                </div>
+              </div>
+  
+  
+  
