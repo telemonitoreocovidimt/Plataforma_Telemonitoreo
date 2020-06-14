@@ -449,6 +449,32 @@ function getComentarios(dni, pass = false, client = null){
 }
 
 
+function getNoteByPatient(_dni = '', pass = false, client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+            client = await openConnection()
+        let query = `select ${PGSCHEMA}.sp_get_nota_patient($1) as note`
+        let params = [_dni]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function updateNoteByPatient(_dni = '', _note = '',pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+            client = await openConnection()
+        let query = `select ${PGSCHEMA}.sp_update_nota_patient($1, $2) as status`
+        let params = [_dni, _note]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
 module.exports = {
     getPatientsAlert,
     getPatients,
@@ -469,5 +495,7 @@ module.exports = {
     removeScheduledCase,
     getPatientForCase,
     haveThisScheduledCaseForTomorrow,
-    getComentarios
+    getComentarios,
+    getNoteByPatient,
+    updateNoteByPatient
 }

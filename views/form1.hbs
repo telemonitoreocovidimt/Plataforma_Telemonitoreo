@@ -315,7 +315,7 @@
 
 
                             <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%" id="comentario"
-                                name="comentario" placeholder="Ingrese sus comentarios"></textarea>
+                                name="comentario" placeholder="Ingrese sus comentarios" maxlength="50" >{{ comentario }}</textarea>
                         </div>
 
 
@@ -351,7 +351,7 @@
                     </div>
 
                         <div class="form-group">
-
+                            {{ nota_grupo }}
                             <label for="inputPassword">Nota de grupo:</label>
                             <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%" id="comentario"
                                 name="nota_grupo" maxlength="50" placeholder="Ingrese la nota de grupo">{{ nota_grupo }}</textarea>
