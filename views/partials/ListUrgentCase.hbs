@@ -13,9 +13,12 @@
                 <th scope="col">Edad</th>
                 <th scope="col">Grupo</th>
                 <th scope="col">Factor de Riesgo</th>
-                <th scope="col">Fecha Inicio de Sintomas</th>
+                <th scope="col">Fecha de atención</th>
+                <!--<th scope="col">Fecha Inicio de Sintomas</th>-->
                 <!--th scope="col">Fecha Toma de Muestras</th-->
                 <th scope="col">Día seguimiento</th>
+                <th scope="col">Tomó el caso ayer</th>
+                <th scope="col">Nota para el grupo</th>
                 <!--th scope="col">Tipo de prueba 1</th>
                 <th scope="col">Resultado prueba 1</th>
                 <th scope="col">Tipo de prueba 2</th>
@@ -36,6 +39,8 @@
                     <td style="text-align:center;">{{ this.fecha_inicio_sintomas }}</td>
                     <!--td>{{ this.fecha_toma_muestra }}</td-->
                     <td style="text-align:center;">{{ this.tiempo_seguimiento }}</td>
+                    <td style="text-align:center;">{{ this.patient_yesterday }}</td></td>
+                    <td style="text-align:center;">{{ this.nota_grupo }}</td></td>
                     <!--td>{{ this.tipo_prueba_1 }}</td>
                     <td>{{ this.resultado_prueba_1 }}</td>
                     <td>{{ this.tipo_prueba_2 }}</td>

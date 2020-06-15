@@ -16,7 +16,7 @@ function getTimeNow(restar_day=0, restar_hour=0){
     return {datePeru_init, datePeru_finish, datePeru_current}
 }
 
-function getPatientsAlert(pass = false, client = null){
+function getPatientsAlert(dni_medico, pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_init, datePeru_current } = getTimeNow()
         if(!client)
@@ -37,11 +37,22 @@ function getPatientsAlert(pass = false, client = null){
                         case when p.fecha_prueba_3 is null then '-' else concat(extract(day from p.fecha_prueba_3), '-', extract(month from p.fecha_prueba_3), '-', extract(year from p.fecha_prueba_3)) end as fecha_prueba_3,
                         case when p.resultado_prueba_3 is null then '-' when p.resultado_prueba_3 = 3 then 'Positivo' when p.resultado_prueba_3 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_3, 
                         concat(extract(day from p.fecha_resultado_prueba_3), '-', extract(month from p.fecha_resultado_prueba_3), '-', extract(year from p.fecha_resultado_prueba_3)) as fecha_resultado_prueba_3, 
-                        case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
+                        case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3,
+                        case when (select count(*) from ${PGSCHEMA}.dt_casos_dia as cd 
+                            where cd.dni_paciente = c.dni_paciente
+                            and cd.fecha_caso::date = $2::date - '1 day'::interval 
+                            and cd.dni_medico = $3)::int > 0 then 'SI'
+                            else 'NO' end as had_patient_yesterday,
+                        (select mv.nombre from ${PGSCHEMA}.dt_casos_dia as cd
+                                inner join ${PGSCHEMA}.dm_medicos_voluntarios as mv
+                                on cd.dni_medico = mv.dni
+                                where cd.dni_paciente = c.dni_paciente
+                                and cd.fecha_caso::date = $2::date - '1 day'::interval LIMIT 1)::text as patient_yesterday,
+                        p.nota_grupo as nota_grupo
                     from ${PGSCHEMA}.dt_casos_dia as c
                     inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
                     where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 3 and p.grupo in ('C', 'B', 'A') order by p.edad desc;`//('C', 'B') order by p.edad desc;
-        let params = [datePeru_current, datePeru_init]
+        let params = [datePeru_current, datePeru_init, dni_medico]
         let result = await client.query(query, params)
 
         if(!pass)
@@ -50,7 +61,7 @@ function getPatientsAlert(pass = false, client = null){
     })
 }
 
-function getPatients(pass = false, client = null){
+function getPatients(dni_medico, pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_init, datePeru_current } = getTimeNow()
         if(!client)
@@ -70,11 +81,22 @@ function getPatients(pass = false, client = null){
                         case when p.fecha_prueba_3 is null then '-' else concat(extract(day from p.fecha_prueba_3), '-', extract(month from p.fecha_prueba_3), '-', extract(year from p.fecha_prueba_3)) end as fecha_prueba_3,
                         case when p.resultado_prueba_3 is null then '-' when p.resultado_prueba_3 = 3 then 'Positivo' when p.resultado_prueba_3 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_3, 
                         concat(extract(day from p.fecha_resultado_prueba_3), '-', extract(month from p.fecha_resultado_prueba_3), '-', extract(year from p.fecha_resultado_prueba_3)) as fecha_resultado_prueba_3, 
-                        case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
+                        case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3,
+                        case when (select count(*) from ${PGSCHEMA}.dt_casos_dia as cd 
+                            where cd.dni_paciente = c.dni_paciente
+                            and cd.fecha_caso::date = $2::date - '1 day'::interval 
+                            and cd.dni_medico = $3)::int > 0 then 'SI'
+                            else 'NO' end as had_patient_yesterday,
+                        (select mv.nombre from ${PGSCHEMA}.dt_casos_dia as cd
+                                inner join ${PGSCHEMA}.dm_medicos_voluntarios as mv
+                                on cd.dni_medico = mv.dni
+                                where cd.dni_paciente = c.dni_paciente
+                                and cd.fecha_caso::date = $2::date - '1 day'::interval LIMIT 1)::text as patient_yesterday,
+                        p.nota_grupo as nota_grupo
                     from ${PGSCHEMA}.dt_casos_dia as c
                     inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
                     where c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 2 and p.grupo in ('C', 'B', 'A') order by p.edad desc;` //('C', 'B') order by p.edad desc;
-        let params = [datePeru_current, datePeru_init]
+        let params = [datePeru_current, datePeru_init, dni_medico]
         let result = await client.query(query, params)
         if(!pass)
             client.release(true)
@@ -102,7 +124,18 @@ function getMyPatients(dni_medico, pass = false, client = null){
                         case when p.fecha_prueba_3 is null then '-' else concat(extract(day from p.fecha_prueba_3), '-', extract(month from p.fecha_prueba_3), '-', extract(year from p.fecha_prueba_3)) end as fecha_prueba_3,
                         case when p.resultado_prueba_3 is null then '-' when p.resultado_prueba_3 = 3 then 'Positivo' when p.resultado_prueba_3 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_3, 
                         concat(extract(day from p.fecha_resultado_prueba_3), '-', extract(month from p.fecha_resultado_prueba_3), '-', extract(year from p.fecha_resultado_prueba_3)) as fecha_resultado_prueba_3, 
-                        case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3
+                        case when p.tipo_prueba_3 is null then '-' else p.tipo_prueba_3 end as tipo_prueba_3,
+                        case when (select count(*) from ${PGSCHEMA}.dt_casos_dia as cd 
+                            where cd.dni_paciente = c.dni_paciente
+                            and cd.fecha_caso::date = $2::date - '1 day'::interval 
+                            and cd.dni_medico = $3)::int > 0 then 'SI'
+                            else 'NO' end as had_patient_yesterday,
+                        (select mv.nombre from ${PGSCHEMA}.dt_casos_dia as cd
+                            inner join ${PGSCHEMA}.dm_medicos_voluntarios as mv
+                            on cd.dni_medico = mv.dni
+                            where cd.dni_paciente = c.dni_paciente
+                            and cd.fecha_caso::date = $2::date - '1 day'::interval LIMIT 1)::text as patient_yesterday,                            
+                        p.nota_grupo as nota_grupo
                     from ${PGSCHEMA}.dt_casos_dia as c
                     inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
                     where c.fecha_caso = $2 and c.estado_caso = 2 and c.dni_medico = $3 and p.grupo in ('C', 'B', 'A') order by p.edad desc;`//('C', 'B') order by p.edad desc;
@@ -304,7 +337,6 @@ function updateCase(json, pass = false, client = null){
         // let resultado_prueba_1 = null
         // let resultado_prueba_2 = null
         // let resultado_prueba_3 = null
-
         if(id_caso){
             id_caso = parseInt(id_caso)
         }
@@ -370,6 +402,9 @@ function updateCase(json, pass = false, client = null){
         }
         if(!fecha_inicio_sintomas){
             fecha_inicio_sintomas = null
+        }
+        if(condicion_egreso || condicion_egreso == ''){
+            condicion_egreso = null
         }
         if(!client)
             client = await openConnection()

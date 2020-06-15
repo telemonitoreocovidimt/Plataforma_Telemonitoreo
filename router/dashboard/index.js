@@ -55,9 +55,9 @@ router.get("/old",async (req, res)=>{
 router.get("/",async (req, res)=>{
 
     if(req.session.user){
-        let data = await getPatientsAlert(true)
+        let data = await getPatientsAlert(req.session.user.dni, true)
         let cases_alert = data.result
-        data = await getPatients(true, data.client)
+        data = await getPatients(req.session.user.dni, true, data.client)
         let cases = data.result
         /*
         data = await getMyPatients(req.session.user.dni, true, data.client)
@@ -165,7 +165,6 @@ router.get("/case/:case",async (req, res)=>{
                     let dni_paciente  = data.result[0].dni
                     data = await haveThisScheduledCaseForTomorrow(dni_medico, dni_paciente, true, data.client)
                     let have_this_scheduled_case = data.result.length > 0 ? true : false
-                    console.log("Have scheduled case ", have_this_scheduled_case)
                     data = await takeCase(id_case, dni_medico, true, data.client)
                     let taked = data.result
                     data = await getCase(id_case, true, data.client)
@@ -176,14 +175,15 @@ router.get("/case/:case",async (req, res)=>{
                     let groups = [{ id:"A", descripcion:"A"}, { id:"B", descripcion:"B"}, { id:"C", descripcion:"C"}]
                     let factors = [{ id:true, descripcion:"SI"}, { id:false, descripcion:"NO"}]
                     let test = [{ id:"1", descripcion:"Negativo"}, { id:"2", descripcion:"Positivo"}, { id:"3", descripcion:"Pendiente"}]
-                    let condicionesEgreso = [{ id:"1", descripcion:"Recuperado"}, { id:"2", descripcion:"Trasladado al Hospital"}, { id:"3", descripcion:"Trasladado Hospital UCI" },{ id:"4", descripcion:"Fallecido" }]
+                    let condicionesEgreso = [{ id:"1", descripcion:"Recuperado"}, { id:"2", descripcion:"Hospitalizado"},{ id:"4", descripcion:"Fallecido" }, { id:"3", descripcion:"No desea seguimiento" }, { id:"5", descripcion:"Va a ser seguido por otro grupo" }]
                     if(cases[0].tiempo_seguimiento > 14){
                         await req.flash("danger", "Ya tiene más de 14 días, es recomendable dar de alta al paciente.")
                     }
 
                     data = await getComentarios(dni_paciente);
                     let comments = data.result
-                    
+                    console.log("Caso tomado :")
+                    console.log(cases[0])
                     await req.useFlash(res)
                     res.render("form1", {layout: 'main1', have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments})
                 }
@@ -211,15 +211,16 @@ router.post("/case/:case",async (req, res)=>{
         
         let id_case = req.params.case
         let result = await getPatientForCase(id_case)
-        console.log(result)
+        
         result = result.result
-        console.log(result)
+        
         let dni_medico = req.session.user.dni
         let dni_paciente  = result[0].dni
-        console.log(dni_paciente)
+        
         
         //Liberar caso
         if(json.tipo_guardado == "3"){
+            
             await removeScheduledCase(dni_medico, dni_paciente)
             await dropCase(id_case)
             await req.flash("warning", "Caso liberado.")
@@ -229,6 +230,7 @@ router.post("/case/:case",async (req, res)=>{
         //Cerrar caso
         let data = await canTerminateCase(dni_medico, id_case)
         let canTerminate = data.result /** @return { pasa: Boolean, message: String}  Valida si puede cerrarse correctamente y si no devulve un mensaje con la razón**/
+        
         if(canTerminate[0].pasa){
             let continue_tracking = json.continue_tracking
             delete json.continue_tracking
@@ -236,13 +238,17 @@ router.post("/case/:case",async (req, res)=>{
                 await addScheduledCase(dni_medico, dni_paciente)
             else
                 await removeScheduledCase(dni_medico, dni_paciente)
+            
+            
             let x = await updateCase({...json, id_caso: id_case}) //Actualizar los campos del caso
             if(json.tipo_guardado == "2"){
+                
                 await terminateCase(id_case, dni_medico) //Actualizar estado de caso a cerrado
                 await req.flash("success", "Caso grabado y cerrado exitosamente.")
                 res.redirect("/dashboard")
             }
             else{
+                
                 await req.flash("success", "Caso grabado exitosamente.")
                 res.redirect("/dashboard")
             }
