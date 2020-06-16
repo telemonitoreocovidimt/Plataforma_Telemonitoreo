@@ -242,7 +242,8 @@ router.post("/case/:case",async (req, res)=>{
             else
                 await removeScheduledCase(dni_medico, dni_paciente)
             
-            
+            console.log("updateCase");
+            console.log(json);
             let x = await updateCase({...json, id_caso: id_case}) //Actualizar los campos del caso
             if(json.tipo_guardado == "2"){
                 
