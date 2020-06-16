@@ -43,7 +43,7 @@ function getPatientsAlert(dni_medico, pass = false, client = null){
                             and cd.fecha_caso::date = $2::date - '1 day'::interval 
                             and cd.dni_medico = $3)::int > 0 then 'SI'
                             else 'NO' end as had_patient_yesterday,
-                        (select mv.nombre from ${PGSCHEMA}.dt_casos_dia as cd
+                        (select concat(mv.nombre, ' ', mv.apellido) from ${PGSCHEMA}.dt_casos_dia as cd
                                 inner join ${PGSCHEMA}.dm_medicos_voluntarios as mv
                                 on cd.dni_medico = mv.dni
                                 where cd.dni_paciente = c.dni_paciente
@@ -87,7 +87,7 @@ function getPatients(dni_medico, pass = false, client = null){
                             and cd.fecha_caso::date = $2::date - '1 day'::interval 
                             and cd.dni_medico = $3)::int > 0 then 'SI'
                             else 'NO' end as had_patient_yesterday,
-                        (select mv.nombre from ${PGSCHEMA}.dt_casos_dia as cd
+                        (select concat(mv.nombre, ' ', mv.apellido) from ${PGSCHEMA}.dt_casos_dia as cd
                                 inner join ${PGSCHEMA}.dm_medicos_voluntarios as mv
                                 on cd.dni_medico = mv.dni
                                 where cd.dni_paciente = c.dni_paciente
@@ -130,7 +130,7 @@ function getMyPatients(dni_medico, pass = false, client = null){
                             and cd.fecha_caso::date = $2::date - '1 day'::interval 
                             and cd.dni_medico = $3)::int > 0 then 'SI'
                             else 'NO' end as had_patient_yesterday,
-                        (select mv.nombre from ${PGSCHEMA}.dt_casos_dia as cd
+                        (select concat(mv.nombre, ' ', mv.apellido) from ${PGSCHEMA}.dt_casos_dia as cd
                             inner join ${PGSCHEMA}.dm_medicos_voluntarios as mv
                             on cd.dni_medico = mv.dni
                             where cd.dni_paciente = c.dni_paciente
@@ -403,8 +403,11 @@ function updateCase(json, pass = false, client = null){
         if(!fecha_inicio_sintomas){
             fecha_inicio_sintomas = null
         }
-        if(condicion_egreso || condicion_egreso == ''){
+        if(condicion_egreso == ''){
             condicion_egreso = null
+        }
+        else{
+            condicion_egreso = parseInt(condicion_egreso)
         }
         if(!client)
             client = await openConnection()

@@ -157,6 +157,7 @@
                                 <tr class="tr_general">
                                     <td><label for="textInput">Resultado de prueba 3 - {{tipo_prueba_2}}:</label></td>
                                     <td class="td_select">
+                                        {{ resultado_prueba_2 }}
                                         <select name="resultado_prueba_3" class="browser-default custom-select mb-4"
                                             id="select">
                                             <option value="">Seleccionar</option>
@@ -326,10 +327,12 @@
             </div>
                                 <div class="form-group d-flex justify-content-between" style="flex-wrap:wrap">
                                     <input class="btn btn-success" type="submit" value="VOY A SEGUIRLO MÁS TARDE"
-                        onclick="document.getElementById('tipo_guardado').value=1" style="margin:3%">
+                        onclick="document.getElementById('tipo_guardado').value=1" style="margin:3%;width: 200px;
+    white-space: normal;">
                         
                         <input class="btn btn-warning" type="submit" value="QUE ALGUIEN MÁS LO SIGA HOY"
-                            onclick="document.getElementById('tipo_guardado').value=3" style="margin:3%">
+                            onclick="document.getElementById('tipo_guardado').value=3" style="margin:3%;width: 200px;
+    white-space: normal;1">
                     </div>
         </div>
         <div class="col-xl-3 col-lg-3">
@@ -352,14 +355,14 @@
                     </div>
 
                         <div class="form-group">
-                            {{ nota_grupo }}
                             <label for="inputPassword">Nota de grupo:</label>
                             <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%" id="comentario"
                                 name="nota_grupo" maxlength="50" placeholder="Ingrese la nota de grupo">{{ nota_grupo }}</textarea>
                         </div>
                         <div class="custom-control d-flex justify-content-end">
                         <input class="btn btn-primary" type="submit" value="TERMINAR SEGUIMIENTO POR HOY"
-                            onclick="document.getElementById('tipo_guardado').value=2">
+                            onclick="document.getElementById('tipo_guardado').value=2" style="width: 200px;
+    white-space: normal;1">
                        </div>
 
                 </div>

@@ -163,6 +163,9 @@ router.get("/case/:case",async (req, res)=>{
                 if(canTake[0].pasa){
                     data = await getPatientForCase(id_case, true)
                     let dni_paciente  = data.result[0].dni
+                    console.log("Datos del paciente")
+                    console.log(data.result[0])
+                    let condicion_egreso = data.result[0].condicion_egreso
                     data = await haveThisScheduledCaseForTomorrow(dni_medico, dni_paciente, true, data.client)
                     let have_this_scheduled_case = data.result.length > 0 ? true : false
                     data = await takeCase(id_case, dni_medico, true, data.client)
@@ -185,7 +188,7 @@ router.get("/case/:case",async (req, res)=>{
                     console.log("Caso tomado :")
                     console.log(cases[0])
                     await req.useFlash(res)
-                    res.render("form1", {layout: 'main1', have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments})
+                    res.render("form1", {layout: 'main1', have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
                 }
                 else{
                     await req.flash("danger", canTake[0].message)
