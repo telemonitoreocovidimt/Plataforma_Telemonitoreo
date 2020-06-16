@@ -2,6 +2,9 @@ const { Router } = require("express")
 const router = Router()
 const { getPatientsSurvey01, getPatientsSurvey02, existePatient, save_answer, patient_change_status, patient_change_risk_factor, patient_change_age, validate_group_case, patient_is_doctor } = require("./../../model/api")
 const { makeMigrationsCustomer } = require("./../../model/migration")
+const { casos_dia, encuestas_iniciales, encuestas_diarias } = require("./../../controllers/report")
+const { check } = require("express-validator")
+const { isValidDate } = require("./../../useful")
 
 function arrayJsonToPatientsList(patients){
     let list_patients = []
@@ -170,4 +173,24 @@ router.post("/save_answers", async (req, res)=>{
   }
 })
 
+let message_error_date = "Tipo de dato invalido, es necesario una fecha."
+let array_validation =  [
+  check('from').notEmpty(),
+  check('from').custom(isValidDate).withMessage(message_error_date),
+  check('from').toDate(),
+  check('to').notEmpty(),
+  check('to').custom(isValidDate).withMessage(message_error_date),
+  check('to').toDate(),
+]
+
+router.get("/report/case/:from/:to", array_validation, casos_dia)
+
+router.get("/report/initial_survey/:from/:to", array_validation, encuestas_iniciales)
+
+router.get("/report/daily_survey/:from/:to", array_validation, encuestas_diarias)
+
 module.exports = router
+
+// http://localhost:3000/api/v1/report/case/2020-01-20/2020-12-20
+// http://localhost:3000/api/v1/report/initial_survey/2020-01-20/2020-12-20
+// http://localhost:3000/api/v1/report/daily_survey/2020-01-20/2020-12-20
