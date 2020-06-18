@@ -193,7 +193,8 @@
 
                     </div>
                 </div>
-                <div class="card shadow mb-4">
+
+                {{!-- <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Sintomas</h6>
                     </div>
@@ -301,11 +302,255 @@
                                     class="form-modal" value="{{ diarrea }}" />
                             </div>
                         </div>
+                    </div>
+                </div> --}}
 
 
+                <div class="card shadow mb-12">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Seguimiento clínico diario del caso</h6>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-group row" style="flex-wrap: nowrap;padding: 1% 2%;">
+                            <div style="min-width: 120px;display:flex;">
+                                <ul style="padding: 0px; list-style: none;">
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Fecha
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Día
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        <strong>Funciones Vitales</strong>
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        FR
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Temperatura
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        <strong>Signos de Alarma</strong>
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Disnea
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Taquipnea (>= 22 pm)
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Saturación de oxígeno < 92%
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Alteración de la conciencia
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Otros
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        <strong>Síntomas</strong>
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Tos
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Dolor de garganta
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Congestión nasal
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Fiebre
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Malestar
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Dificultad respiratoria
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Diarrea
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Náusea/Vómito
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Cefalea
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Otros
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        <strong style="position: absolute;">Evolución según criterios clínicos  (L=Leve; M=Moderada; S=Severa)</strong>
+                                    </li>
+                                    <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                        Estado
+                                    </li>
+                                </ul>
+                            </div>
+                            <div style="width:calc(100% - 120px);overflow: auto;">
+                                <div id="containet_form_check" style="display: flex;">
+                                    {{#each previous_cases}}
+                                    <div style="margin: 0px 20px;">
+                                        <ul style="padding: 0px; list-style: none;">
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>{{ this.fecha_caso_char }}</strong></li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>{{ this.day_index }}</strong> </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.fr_fv }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.temp_fv }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.disnea_sa }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.taqui_sa }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.saturacion_sa }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.alteracion_sa }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.otros_sa }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.tos }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.dolor_garganta }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.congestion_nasal }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.fiebre }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.malestar_general }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.dificultad_respitar }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.diarrea }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.nauseas }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.cefalea }}checked{{/if}}  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.otros }}checked{{/if}}  />
+                                            </li>
+
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <select disabled class="browser-default custom-select mb-4" >
+                                                    {{#each ../estado_seguimiento}}
+                                                        <option value="{{ this.id }}"
+                                                        {{compare this.id ../estado_evo "selected"}}>
+                                                        {{ this.descripcion }}</option>
+                                                    {{/each}}
+                                                </select>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    {{/each}}
+                                    <div style="margin: 0px 20px;">
+                                        <ul style="padding: 0px; list-style: none;">
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>{{ to_day }}</strong></li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>{{ tiempo_seguimiento }}</strong> </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if fr_fv }} checked {{/if}}  name="fr_fv"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if temp_fv }} checked {{/if}}  name="temp_fv"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if disnea_sa }} checked {{/if}}  name="disnea_sa"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if taqui_sa }} checked {{/if}}  name="taqui_sa"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if saturacion_sa }} checked {{/if}}  name="saturacion_sa"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if alteracion_sa }} checked {{/if}}  name="alteracion_sa"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if otros_sa }} checked {{/if}}  name="otros_sa"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if tos }} checked {{/if}}  name="tos"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if dolor_garganta }} checked {{/if}}  name="dolor_garganta"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if congestion_nasal }} checked {{/if}}  name="congestion_nasal"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if fiebre }} checked {{/if}}  name="fiebre"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if malestar_general }} checked {{/if}}  name="malestar_general"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if dificultad_respitar }} checked {{/if}}  name="dificultad_respitar"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if diarrea }} checked {{/if}}  name="diarrea"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if nauseas }} checked {{/if}}  name="nauseas"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if cefalea }} checked {{/if}}  name="cefalea"  />
+                                            </li>
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <input  class="form-control" type="checkbox" {{#if otros }} checked {{/if}}  name="otros"  />
+                                            </li>
+
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+
+                                            <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                                <select name="estado_evo" class="browser-default custom-select mb-4">
+                                                    {{#each estado_seguimiento}}
+                                                        <option value="{{ this.id }}"
+                                                            {{compare this.id ../estado_evo "selected"}}>
+                                                            {{ this.descripcion }}</option>
+                                                    {{/each}}
+                                                </select>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <script>
+                                    window.onload = ()=>{
+                                        const scroll = document.getElementById("containet_form_check")
+                                        scroll.parentNode.scrollTo(scroll.scrollWidth, 0)
+                                    }
+                                </script>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
+
+
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Comentario</h6>

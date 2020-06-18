@@ -1,6 +1,7 @@
 const { openConnection } = require("./connection")
 const { PGSCHEMA } = require("./../config")
 const moment = require('moment-timezone')
+// const { parse } = require("dotenv/types")
 
 
 function getTimeNow(restar_day=0, restar_hour=0){
@@ -298,7 +299,7 @@ function getCase(id_case, pass = false, client = null){
         let { datePeru_current } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `select p.*, p.nombre , p.celular, p.fijo, p.grupo, p.factor_riesgo, p.estado , 
+        let query = `select TO_CHAR($1::date,'YYYY/MM/DD') as to_day , p.*, p.nombre , p.celular, p.fijo, p.grupo, p.factor_riesgo, p.estado , 
                     concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
                     extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento, 
                     (select pr.resultado from ${PGSCHEMA}.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'rapida' order by pr.fecha_resultado_prueba desc limit 1) as resultado_rapido,
@@ -331,12 +332,13 @@ function getStatusPatients(pass = false, client = null){
 
 function updateCase(json, pass = false, client = null){
     return new Promise(async (resolve, reject)=>{
-        let { id_caso, grupo, factor_riesgo, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, estado, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, 
-            tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas,nota_grupo,condicion_egreso } = json
+        let { id_caso, grupo, factor_riesgo, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, estado, fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, 
+            tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas,nota_grupo,condicion_egreso, temp_fv, fr_fv, disnea_sa, taqui_sa, saturacion_sa, alteracion_sa, otros_sa, otros, estado_evo } = json
 
         // let resultado_prueba_1 = null
         // let resultado_prueba_2 = null
         // let resultado_prueba_3 = null
+
         if(id_caso){
             id_caso = parseInt(id_caso)
         }
@@ -364,45 +366,145 @@ function updateCase(json, pass = false, client = null){
         else{
             resultado_prueba_3 = null
         }
-        if(fibre){
-            fibre = parseInt(fibre)
+
+        /**
+         * Seguimiento
+         */
+        if(fiebre){
+            fiebre = 1
+        }
+        else{
+            fiebre = 0
         }
         if(dificultad_respitar){
-            dificultad_respitar = parseInt(dificultad_respitar)
+            dificultad_respitar = 1
+        }
+        else{
+            dificultad_respitar = 0
         }
         if(dolor_pecho){
-            dolor_pecho = parseInt(dolor_pecho)
+            dolor_pecho = 1
+        }
+        else{
+            dolor_pecho = 0
         }
         if(alteracion_sensorio){
-            alteracion_sensorio = parseInt(alteracion_sensorio)
+            alteracion_sensorio = 1
+        }
+        else{
+            alteracion_sensorio = 0
         }
         if(colaboracion_azul_labios){
-            colaboracion_azul_labios = parseInt(colaboracion_azul_labios)
+            colaboracion_azul_labios = 1
+        }
+        else{
+            colaboracion_azul_labios = 0
         }
         if(tos){
-            tos = parseInt(tos)
+            tos = 1
+        }
+        else{
+            tos = 0
         }
         if(dolor_garganta){
-            dolor_garganta = parseInt(dolor_garganta)
+            dolor_garganta = 1
+        }
+        else{
+            dolor_garganta = 0
         }
         if(congestion_nasal){
-            congestion_nasal = parseInt(congestion_nasal)
+            congestion_nasal = 1
+        }
+        else{
+            congestion_nasal = 0
         }
         if(malestar_general){
-            malestar_general = parseInt(malestar_general)
+            malestar_general = 1
+        }
+        else{
+            malestar_general = 0
         }
         if(cefalea){
-            cefalea = parseInt(cefalea)
+            cefalea = 1
+        }
+        else{
+            cefalea = 0
         }
         if(nauseas){
-            nauseas = parseInt(nauseas)
+            nauseas = 1
+        }
+        else{
+            nauseas = 0
         }
         if(diarrea){
-            diarrea = parseInt(diarrea)
+            diarrea = 1
         }
+        else{
+            diarrea = 0
+        }
+
         if(!fecha_inicio_sintomas){
             fecha_inicio_sintomas = null
         }
+
+        /**
+         * Seguimiento
+        */
+       if(temp_fv){
+           temp_fv = true
+       }
+       else{
+           temp_fv = false
+       }
+       if(fr_fv){
+           fr_fv = true
+       }
+       else{
+           fr_fv = false
+       }
+       if(disnea_sa){
+           disnea_sa = true
+       }
+       else{
+           disnea_sa = false
+       }
+       if(taqui_sa){
+           taqui_sa = true
+       }
+       else{
+           taqui_sa = false
+       }
+       if(saturacion_sa){
+           saturacion_sa = true
+       }
+       else{
+           saturacion_sa = false
+       }
+       if(alteracion_sa){
+           alteracion_sa = true
+       }
+       else{
+           alteracion_sa = false
+       }
+       if(otros_sa){
+           otros_sa = true
+       }
+       else{
+           otros_sa = false
+       }
+       if(otros){
+           otros = true
+       }
+       else{
+           otros = false
+       }
+       if(estado_evo){
+           estado_evo = parseInt(estado_evo)
+       }
+       else{
+           estado_evo = 0
+       }
+
         if(condicion_egreso == ''){
             condicion_egreso = null
         }
@@ -412,8 +514,21 @@ function updateCase(json, pass = false, client = null){
         if(!client)
             client = await openConnection()
         let query = `select * from ${PGSCHEMA}.sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21,$22,$23)`
-        let params = [id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fibre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas,nota_grupo,condicion_egreso]
+        let params = [id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas,nota_grupo,condicion_egreso]
         let result = await client.query(query, params)
+        query = `update ${PGSCHEMA}.dt_casos_dia set
+            temp_fv = $1,
+            fr_fv = $2,
+            disnea_sa = $3,
+            taqui_sa = $4,
+            saturacion_sa = $5,
+            alteracion_sa = $6,
+            otros_sa = $7,
+            otros = $8,
+            estado_evo = $9
+            where id = $10;`
+        params = [temp_fv, fr_fv, disnea_sa, taqui_sa, saturacion_sa, alteracion_sa, otros_sa, otros, estado_evo, id_caso]
+        let result2 = await client.query(query, params)
         if(!pass)
             client.release(true)
         resolve({result : result.rows, client})
@@ -513,6 +628,25 @@ function updateNoteByPatient(_dni = '', _note = '',pass = false,client = null){
     })
 }
 
+function getPreviousCases(dni_patient, pass = false, client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+            client = await openConnection()
+        let query = `select *, TO_CHAR(c.fecha_caso,'YYYY/MM/DD') as fecha_caso_char, extract(day from (c.fecha_caso - p.fecha_creacion)) as day_index
+        from development.dt_casos_dia as c
+        inner join development.dt_pacientes as p
+        on c.dni_paciente = p.dni
+        where c.dni_paciente = $2 
+        and c.fecha_caso::date < $1::date order by c.fecha_caso asc`
+        let params = [datePeru_init, dni_patient]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
 module.exports = {
     getPatientsAlert,
     getPatients,
@@ -535,5 +669,6 @@ module.exports = {
     haveThisScheduledCaseForTomorrow,
     getComentarios,
     getNoteByPatient,
-    updateNoteByPatient
+    updateNoteByPatient,
+    getPreviousCases
 }

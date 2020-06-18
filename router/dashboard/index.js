@@ -2,7 +2,7 @@ const { Router } = require("express")
 const router = Router()
 const { getPatientsAlert, getPatients, countAllCaseToday, countAllCaseAttendedToday,
      countAllCaseAttendedToDayForDoctor, countAllCaseAttendedToDayBetweenDoctors, takeCase, canTakeCase,
-     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase, getPatientForCase, removeScheduledCase, addScheduledCase, haveThisScheduledCaseForTomorrow,getComentarios,getNoteByPatient, updateNoteByPatient } = require("./../../model/dashboard")
+     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase, getPatientForCase, removeScheduledCase, addScheduledCase, haveThisScheduledCaseForTomorrow,getComentarios,getNoteByPatient, updateNoteByPatient, getPreviousCases } = require("./../../model/dashboard")
 
 router.get("/old",async (req, res)=>{
 
@@ -172,9 +172,10 @@ router.get("/case/:case",async (req, res)=>{
                     let taked = data.result
                     data = await getCase(id_case, true, data.client)
                     let cases = data.result
-                    data = await getStatusPatients(false, data.client)
+                    data = await getStatusPatients(true, data.client)
                     let status_patients = data.result
-
+                    data = await getPreviousCases(dni_paciente,false, data.client)
+                    let previous_cases = data.result
                     let groups = [{ id:"A", descripcion:"A"}, { id:"B", descripcion:"B"}, { id:"C", descripcion:"C"}]
                     let factors = [{ id:true, descripcion:"SI"}, { id:false, descripcion:"NO"}]
                     let test = [{ id:"1", descripcion:"Negativo"}, { id:"2", descripcion:"Positivo"}, { id:"3", descripcion:"Pendiente"}]
@@ -182,13 +183,15 @@ router.get("/case/:case",async (req, res)=>{
                     if(cases[0].tiempo_seguimiento > 14){
                         await req.flash("danger", "Ya tiene más de 14 días, es recomendable dar de alta al paciente.")
                     }
-
+                    let estado_seguimiento = [{ id:"0", descripcion:"-"}, { id:"1", descripcion:"L"}, { id:"2", descripcion:"M"}, { id:"3", descripcion:"S"}]
                     data = await getComentarios(dni_paciente);
                     let comments = data.result
                     console.log("Caso tomado :")
                     console.log(cases[0])
                     await req.useFlash(res)
-                    res.render("form1", {layout: 'main1', have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
+                    console.log("Casos anteriores !!!")
+                    console.log(previous_cases)
+                    res.render("form1", {layout: 'main1',estado_seguimiento, previous_cases, have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
                 }
                 else{
                     await req.flash("danger", canTake[0].message)
@@ -209,6 +212,7 @@ router.get("/case/:case",async (req, res)=>{
 
 router.post("/case/:case",async (req, res)=>{
     const json = req.body
+    console.log(json)
     json.continue_tracking =  json.continue_tracking === "on" ? true : false //Parseo de input checkbox para continuar el tracking para el dia siguiente
     if(req.session.user){
         
