@@ -87,4 +87,6 @@ app.use("/load-excel", require("./router/loadExcel/index"))
 
 app.use("/api/v1/", require("./router/api/index"))
 
-app.listen( PORT || 3000)
+app.listen( PORT, ()=>{
+    console.log(`Server on port ${PORT}`)
+})

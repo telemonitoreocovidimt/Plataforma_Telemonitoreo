@@ -1,7 +1,7 @@
 const json2xls = require('json2xls')
 const { validationResult } = require('express-validator')
 const { getRangeCase, getRangeDailySurvey, getRangeInitialSurvey } = require("./../model/report")
-const { dateToDateString } = require("./../useful")
+const { dateToDateString, dateToTimeStampString } = require("./../useful")
 
 async function casos_dia(req, res){
 
@@ -9,15 +9,22 @@ async function casos_dia(req, res){
     if(!error.isEmpty())
         return res.status(200).json(error.array())
 
-    let from = req.params.from
-    let to = req.params.to
+    let from = dateToDateString(req.params.from)
+    let to = dateToDateString(req.params.to)
     
     let listCase = await getRangeCase(from, to)
+
+    listCase = listCase.map(function(_case){
+        _case['Fecha del caso'] = dateToDateString(_case['Fecha del caso'])
+        return _case
+    })
+
     if(!listCase.length)
-        listCase = [{"Nota":"No hay resultados, ingrese otro rango de fecha"}]
+        listCase = [{"":"No hay resultados, ingrese otro rango de fecha"}]
+    
     let excel = json2xls(listCase)
     res.setHeader('Content-Type', 'application/vnd.openxmlformats')
-  	res.setHeader("Content-Disposition", "attachment; filename=" + `Report_case_${dateToDateString(from)}_${dateToDateString(to)}.xlsx`)
+  	res.setHeader("Content-Disposition", "attachment; filename=" + `Report_case_${from}_${to}.xlsx`)
     res.end(excel, 'binary')
 }
 
@@ -26,16 +33,23 @@ async function encuestas_iniciales(req, res){
     let error = validationResult(req)
     if(!error.isEmpty())
         return res.status(200).json(error.array())
-        
-    let from = req.params.from
-    let to = req.params.to
     
-    let listCase = await getRangeInitialSurvey(from, to)
-    if(!listCase.length)
-        listCase = [{"":"No hay resultados"}]
-    let excel = json2xls(listCase)
+    let from = dateToDateString(req.params.from)
+    let to = dateToDateString(req.params.to)
+    
+    let listInitialSurvey = await getRangeInitialSurvey(from, to)
+    
+    listInitialSurvey = listInitialSurvey.map(function(_survey){
+        _survey['Fin de encuesta'] = dateToTimeStampString(_survey['Fin de encuesta'])
+        return _survey
+    })
+    
+    if(!listInitialSurvey.length)
+        listInitialSurvey = [{"":"No hay resultados, ingrese otro rango de fecha"}]
+        
+    let excel = json2xls(listInitialSurvey)
     res.setHeader('Content-Type', 'application/vnd.openxmlformats')
-    res.setHeader("Content-Disposition", "attachment; filename=" + `Report_initial_survey_${dateToDateString(from)}_${dateToDateString(to)}.xlsx`)
+    res.setHeader("Content-Disposition", "attachment; filename=" + `Report_initial_survey_${from}_${to}.xlsx`)
     res.end(excel, 'binary')
 }
 
@@ -46,15 +60,20 @@ async function encuestas_diarias(req, res){
     if(!error.isEmpty())
         return res.status(200).json(error.array())
         
-    let from = req.params.from
-    let to = req.params.to
+    let from = dateToDateString(req.params.from)
+    let to = dateToDateString(req.params.to)
     
-    let listCase = await getRangeDailySurvey(from, to)
-    if(!listCase.length)
-        listCase = [{"":"No hay resultados"}]
-    let excel = json2xls(listCase)
+    let listDailySurvey = await getRangeDailySurvey(from, to)
+    listDailySurvey = listDailySurvey.map(function(_survey){
+        _survey['Fecha del caso'] = dateToTimeStampString(_survey['Fecha del caso'])
+        return _survey
+    })
+    
+    if(!listDailySurvey.length)
+        listDailySurvey = [{"":"No hay resultados, ingrese otro rango de fecha"}]
+    let excel = json2xls(listDailySurvey)
     res.setHeader('Content-Type', 'application/vnd.openxmlformats')
-    res.setHeader("Content-Disposition", "attachment; filename=" + `Report_daily_survey_${dateToDateString(from)}_${dateToDateString(to)}.xlsx`)
+    res.setHeader("Content-Disposition", "attachment; filename=" + `Report_daily_survey_${from}_${to}.xlsx`)
     res.end(excel, 'binary')
 }
 
