@@ -59,9 +59,74 @@ function dateRangeToTimeStanpStringRange(from, to){
     }
 }
 
+function getGroups(data, lastdata=[]){
+
+    const els_drop = {
+    }
+    
+    const els_update = {
+    }
+    
+    const others = {
+    }
+    
+    for(let x in data){
+        let e = x.split("tra_")
+        if(e.length > 1){
+            e = e[1]
+            e = e.split("_")
+            let j = e[0].split("none")
+            if(j.length > 1){
+                if(!others[j[1]])
+                    others[j[1]] = {}
+               others[j[1]][e[1]] = data[x] == "" ? null:data[x]
+            }
+            else{
+                if(!els_drop[e[0]])
+                    els_drop[e[0]] = {}
+               els_drop[e[0]][e[1]] = data[x] == "" ? null:data[x]
+            }
+        }
+    }
+
+    for(let item of lastdata){
+
+        if(els_drop[item.id]){
+            els_update[item.id] = els_drop[item.id]
+            delete els_drop[item.id]
+        }
+        else{
+            els_drop[item.id] = item
+        }
+    }
+
+    const for_drop = jsonToArray(els_drop)
+    const for_add = jsonToArray(others)
+    const for_update = jsonToArray(els_update)
+    console.log("Elementos para eliminar: ", for_drop)
+    console.log("Elementos para agregar: ", for_add)
+    console.log("Elementos para actualizar : ", for_update)
+
+    return {
+        for_drop,
+        for_add,
+        for_update
+    }
+}
+
+function jsonToArray(json){
+    let array = []
+    for(let key in json){
+        array.push(json[key])
+    }
+    return array
+}
+
+
 module.exports = {
     isValidDate,
     dateToDateString,
     dateToTimeStampString,
-    dateRangeToTimeStanpStringRange
+    dateRangeToTimeStanpStringRange,
+    getGroups
 }

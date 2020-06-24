@@ -647,6 +647,76 @@ function getPreviousCases(dni_patient, pass = false, client = null){
     })
 }
 
+
+
+
+
+/**
+ * Funciones para tratamiento
+ */
+
+function getTreatment(id_caso_dia ,pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `select id, id_tratamiento as type, nombre as name, 
+                    TO_CHAR(fecha_desde,'YYYY-MM-DD') as init, TO_CHAR(fecha_hasta,'YYYY-MM-DD') as finish,
+                    observacion as observation  
+                    from ${PGSCHEMA}.dt_tratamientos_caso_dia where id_caso_dia = $1`
+        let params = [id_caso_dia]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function deleteTreatment(id_caso_dia, id_tratamiento, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `delete from ${PGSCHEMA}.dt_tratamientos_caso_dia where id_caso_dia = $1 and id_tratamiento = $2`
+        let params = [id_caso_dia, id_tratamiento]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function updateTreatment(id, id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion,  pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `update ${PGSCHEMA}.dt_tratamientos_caso_dia set
+                            nombre = $4,
+                            fecha_desde = $5,
+                            fecha_hasta = $6,
+                            observacion = $7
+                    where id = $1 and id_tratamiento = $3 and id_caso_dia = $2`
+        let params = [id, id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function insertTreatment(id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion,  pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `insert into ${PGSCHEMA}.dt_tratamientos_caso_dia (id_tratamiento, id_caso_dia, nombre, fecha_desde, fecha_hasta, observacion)
+                        values ($2, $1, $3, $4, $5, $6)`
+        let params = [id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
 module.exports = {
     getPatientsAlert,
     getPatients,
@@ -670,5 +740,9 @@ module.exports = {
     getComentarios,
     getNoteByPatient,
     updateNoteByPatient,
-    getPreviousCases
+    getPreviousCases,
+    getTreatment,
+    deleteTreatment,
+    updateTreatment,
+    insertTreatment
 }

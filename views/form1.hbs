@@ -1,13 +1,32 @@
 {{#each flash}}
 <div class="alert alert-{{this.type}}">{{this.message}}</div>
 {{/each}}
-
+<style>
+    .relative {
+        position: relative;
+    }
+    .right {
+        right: 0;
+    }
+    .top {
+        top: 0;
+    }
+    .absolute {
+        position: absolute;
+    }
+    .cancel {
+        color: tomato;
+        transform: scale(2);
+        cursor: pointer;
+    }
+</style>
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">CASO</h1>
 </div>
 <form method="POST">
     <div class="row">
+
         <div class="col-xl-3 col-lg-3">
             <div class="card card-comments shadow mb-4 border-left-warning">
                 <div class="card-header py-3">
@@ -194,119 +213,7 @@
                     </div>
                 </div>
 
-                {{!-- <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Sintomas</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Fiebre:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" max="3" min="0" id="fiebre" name="fibre"
-                                    value="{{ fiebre }}" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Dificultad para respirar:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="dificultad_respitar" max="3" min="0"
-                                    id="dificultad_respitar" value="{{ dificultad_respitar }}" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Dolor de pecho:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="dolor_pecho" max="3" min="0"
-                                    id="dolor_pecho" value="{{ dolor_pecho }}" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Alteración del sensorio:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="alteracion_sensorio" max="3" min="0"
-                                    id="alteracion_sensorio" value="{{ alteracion_sensorio }}" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Coloración azul (labios):</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="colaboracion_azul_labios" max="3"
-                                    min="0" id="colaboracion_azul_labios" value="{{ colaboracion_azul_labios }}" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Tos:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="tos" max="3" min="0" id="tos"
-                                    value="{{ tos }}" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Dolor de garganta:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="dolor_garganta" max="3" min="0"
-                                    id="dolor_garganta" value="{{ dolor_garganta }}" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Congestión nasal:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="congestion_nasal" max="3" min="0"
-                                    id="congestion_nasal" value="{{ congestion_nasal }}" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Malestar general:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="malestar_general" max="3" min="0"
-                                    id="malestar_general" value="{{ malestar_general }}" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Cefálea:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="cefalea" max="3" min="0" id="cefalea"
-                                    value="{{ cefalea }}" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Nauseas/Vómitos:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="nauseas" max="3" min="0" id="nauseas"
-                                    value="{{ nauseas }}" />
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="inputPassword" class="col-sm-6 col-form-label">Diarrea:</label>
-                            <div class="col-sm-2">
-
-                                <input class="form-control" type="number" name="diarrea" max="3" min="0" id="diarrea"
-                                    class="form-modal" value="{{ diarrea }}" />
-                            </div>
-                        </div>
-                    </div>
-                </div> --}}
-
-
-                <div class="card shadow mb-12">
+                <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Seguimiento clínico diario del caso</h6>
                     </div>
@@ -550,6 +457,29 @@
                     </div>
                 </div>
 
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Tratamiento</h6>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <select id="combo_box_tratamiento" class="browser-default custom-select mb-2" >
+                                    </select>
+                                    <input id="button_agregar_tratamiento" type="button" class="btn btn-primary bg-primary" value="Agregar tratamiento">
+                                </div>
+
+                                <div class="form-group col-md-12" id="container_treatments">
+                                 
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
 
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
@@ -567,19 +497,14 @@
 
                     </div>
                 </div>
-                
 
             </div>
-                                <div class="form-group d-flex justify-content-between" style="flex-wrap:wrap">
-                                    <input class="btn btn-success" type="submit" value="VOY A SEGUIRLO MÁS TARDE"
-                        onclick="document.getElementById('tipo_guardado').value=1" style="margin:3%;width: 200px;
-    white-space: normal;">
-                        
-                        <input class="btn btn-warning" type="submit" value="QUE ALGUIEN MÁS LO SIGA HOY"
-                            onclick="document.getElementById('tipo_guardado').value=3" style="margin:3%;width: 200px;
-    white-space: normal;1">
-                    </div>
+           <div class="form-group d-flex justify-content-between" style="flex-wrap:wrap">
+                <input class="btn btn-success" type="submit" value="VOY A SEGUIRLO MÁS TARDE" onclick="document.getElementById('tipo_guardado').value=1" style="margin:3%;width: 200px; white-space: normal;">
+                <input class="btn btn-warning" type="submit" value="QUE ALGUIEN MÁS LO SIGA HOY" onclick="document.getElementById('tipo_guardado').value=3" style="margin:3%;width: 200px; white-space: normal;1">
+            </div>
         </div>
+
         <div class="col-xl-3 col-lg-3">
 
             <div class="card  mb-4">
@@ -621,3 +546,177 @@
     </div>
 
 </form>
+
+
+<script>
+
+    const options = {
+        "1": {
+            "name": "Hidroxicloroquina",
+            "life": 1
+        },
+        "2": {
+            "name": "Azitromicina",
+            "life": 1
+        },
+        "3": {
+            "name": "Prednisona",
+            "life": 1
+        },
+        "4": {
+            "name": "Enoxaheparina",
+            "life": 1
+        },
+        "5": {
+            "name": "Aspirina",
+            "life": 1
+        },
+        "6": {
+            "name": "Warfarina",
+            "life": 1
+        },
+        "7": {
+            "name": "Otros",
+            "life": 1000
+        }
+    }
+
+    var countInputsNone = 0
+
+    function arrayJsonToTreatmentsStruct(array){
+        let json = {}
+        for(let item of array){
+            json[item.id] = item
+        }
+        return json
+    }
+
+    const treatments = arrayJsonToTreatmentsStruct(JSON.parse(`{{{ treatments_string }}}`))
+
+    function printOptions(el, options){
+        let html = ''
+        for(let option in options){
+            if(options[option].life > 0)
+                html+= `<option value="${option}">${options[option].name}</option>`
+        }
+        el.innerHTML = html
+    }
+
+    function substractLife(id, life=1){
+        options[id].life = options[id].life - life
+    }
+
+    function plusLife(id, life=1){
+        options[id].life = options[id].life + life
+    }
+
+    function normalizerOptions(){
+        for(let key in treatments){
+            let treatment = treatments[key]
+            let id = treatment.type //ID de tratamiento (Al mismo tiempo es el tipo de tratamiento)
+            if(options[id]){
+                substractLife(id, life=1)
+            }
+        }
+    }
+
+    function printTreatments(el){
+        
+        let html = ''
+        
+        for(let key in treatments){
+            let treatment = treatments[key]
+            let card_head = `<div class="card-header py-3">
+                                <input type="hidden" id="input_tra_${key}_name" name="input_tra_${key}_name" value="${treatment.name}"/>
+                                <p class="m-0 font-weight-bold text-primary">${treatment.name}</p>
+                                <i class="fas fa-times-circle top right absolute cancel" onclick="remove_treatment('${key}', ${treatment.type})"></i>
+                            </div>`
+
+            if(treatment.type == 7)
+                card_head = `<div class="card-header py-3 form-inline">
+                                <label for="" class="m-0 font-weight-bold text-primary mr-2">Otros : </label>
+                                <input class="form-control col-md-5" id="input_tra_${key}_name" name="input_tra_${key}_name" type="text" value="${treatment.name}"/>
+                                <i class="fas fa-times-circle top right absolute cancel" onclick="remove_treatment('${key}', ${treatment.type})"></i>
+                            </div>`
+
+            let card = `<div class="card shadow mb-4 relative">
+                            <input type="hidden" id="input_tra_${key}_type" name="input_tra_${key}_type" value="${treatment.type}"/>
+                            <input type="hidden" id="input_tra_${key}_id" name="input_tra_${key}_id" value="${key}"/>
+                            ${card_head}
+                            <div class="card-body">
+                                <div class="form-inline mb-2">
+                                    <div class="form-group col-md-6">
+                                        <label for="">Fecha de inicio :</label>
+                                        <input class="form-control" id="input_tra_${key}_from" name="input_tra_${key}_from" type="date" value="${treatment.init}" />
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label for="">Fecha de fin :</label>
+                                        <input class="form-control" type="date" id="input_tra_${key}_to" name="input_tra_${key}_to" value="${treatment.finish}" />
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label for="">Observaciones :</label>
+                                    <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%"
+                                        id="input_tra_${key}_obs" name="input_tra_${key}_obs" placeholder="Ingrese sus comentarios" maxlength="50" >${treatment.observation}</textarea>
+                                </div>
+                            </div>
+                        </div>`
+            html+=card
+        }
+
+        el.innerHTML = html
+    }
+
+    function saveState(){
+        for(let key in treatments){
+            let name = document.getElementById(`input_tra_${key}_name`).value
+            let init = document.getElementById(`input_tra_${key}_from`).value
+            let finish = document.getElementById(`input_tra_${key}_to`).value
+            let observation = document.getElementById(`input_tra_${key}_obs`).value
+            treatments[key].name = name
+            treatments[key].init = init
+            treatments[key].finish = finish
+            treatments[key].observation = observation
+        }
+    }
+
+    function remove_treatment(key, type){
+        saveState()
+        plusLife(type)
+        delete treatments[key]
+        printTreatments(container_treatments)
+        printOptions(combo_box_tratamiento, options)
+    }
+
+    function add_treatment(key, type, name=""){
+        treatments[key] = {
+            type: type,
+            name: name,
+            init: "",
+            finish: "",
+            observation: ""
+        }
+    }
+    
+    window.onload = ()=>{
+        const combo_box_tratamiento = document.getElementById("combo_box_tratamiento")
+        const button_agregar_tratamiento = document.getElementById("button_agregar_tratamiento")
+        const container_treatments = document.getElementById("container_treatments")
+        normalizerOptions()
+        printOptions(combo_box_tratamiento, options)
+        printTreatments(container_treatments)
+        button_agregar_tratamiento.addEventListener("click", ()=>{
+            saveState()
+            let id = combo_box_tratamiento.value
+            let name = combo_box_tratamiento.selectedOptions[0].text
+            substractLife(id)
+            let key = "none" + countInputsNone
+            countInputsNone++
+            add_treatment(key, id, name)
+            printOptions(combo_box_tratamiento, options)
+            printTreatments(container_treatments)
+        })
+    }
+
+</script>

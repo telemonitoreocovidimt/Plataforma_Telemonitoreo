@@ -2,7 +2,13 @@ const { Router } = require("express")
 const router = Router()
 const { getPatientsAlert, getPatients, countAllCaseToday, countAllCaseAttendedToday,
      countAllCaseAttendedToDayForDoctor, countAllCaseAttendedToDayBetweenDoctors, takeCase, canTakeCase,
-     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase, getPatientForCase, removeScheduledCase, addScheduledCase, haveThisScheduledCaseForTomorrow,getComentarios,getNoteByPatient, updateNoteByPatient, getPreviousCases } = require("./../../model/dashboard")
+     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase, getPatientForCase, removeScheduledCase, addScheduledCase, haveThisScheduledCaseForTomorrow,getComentarios,getNoteByPatient, updateNoteByPatient, getPreviousCases, getTreatment,
+     deleteTreatment,
+     updateTreatment,
+     insertTreatment } = require("./../../model/dashboard")
+
+const { getGroups } = require("./../../useful")
+const { openConnection } = require("././../../model/connection")
 
 router.get("/old",async (req, res)=>{
 
@@ -99,7 +105,6 @@ router.get("/",async (req, res)=>{
     }
 })
 
-
 router.get("/mibandeja",async (req, res)=>{
 
     if(req.session.user){
@@ -163,8 +168,6 @@ router.get("/case/:case",async (req, res)=>{
                 if(canTake[0].pasa){
                     data = await getPatientForCase(id_case, true)
                     let dni_paciente  = data.result[0].dni
-                    console.log("Datos del paciente")
-                    console.log(data.result[0])
                     let condicion_egreso = data.result[0].condicion_egreso
                     data = await haveThisScheduledCaseForTomorrow(dni_medico, dni_paciente, true, data.client)
                     let have_this_scheduled_case = data.result.length > 0 ? true : false
@@ -174,8 +177,15 @@ router.get("/case/:case",async (req, res)=>{
                     let cases = data.result
                     data = await getStatusPatients(true, data.client)
                     let status_patients = data.result
-                    data = await getPreviousCases(dni_paciente,false, data.client)
+                    data = await getPreviousCases(dni_paciente,true, data.client)
                     let previous_cases = data.result
+
+                    //Tratamiento
+                    data = await getTreatment(id_case ,false , data.client)
+                    let treatments = data.result
+                    
+                    console.log(treatments)
+                    let treatments_string = JSON.stringify(treatments)
                     let groups = [{ id:"A", descripcion:"A"}, { id:"B", descripcion:"B"}, { id:"C", descripcion:"C"}]
                     let factors = [{ id:true, descripcion:"SI"}, { id:false, descripcion:"NO"}]
                     let test = [{ id:"1", descripcion:"Negativo"}, { id:"2", descripcion:"Positivo"}, { id:"3", descripcion:"Pendiente"}]
@@ -186,12 +196,8 @@ router.get("/case/:case",async (req, res)=>{
                     let estado_seguimiento = [{ id:"0", descripcion:"-"}, { id:"1", descripcion:"L"}, { id:"2", descripcion:"M"}, { id:"3", descripcion:"S"}]
                     data = await getComentarios(dni_paciente);
                     let comments = data.result
-                    console.log("Caso tomado :")
-                    console.log(cases[0])
                     await req.useFlash(res)
-                    console.log("Casos anteriores !!!")
-                    console.log(previous_cases)
-                    res.render("form1", {layout: 'main1',estado_seguimiento, previous_cases, have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
+                    res.render("form1", {layout: 'main1', treatments_string, estado_seguimiento, previous_cases, have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
                 }
                 else{
                     await req.flash("danger", canTake[0].message)
@@ -213,6 +219,10 @@ router.get("/case/:case",async (req, res)=>{
 router.post("/case/:case",async (req, res)=>{
     const json = req.body
     console.log(json)
+    
+    // return res.redirect('back')
+
+    
     json.continue_tracking =  json.continue_tracking === "on" ? true : false //Parseo de input checkbox para continuar el tracking para el dia siguiente
     if(req.session.user){
         
@@ -223,7 +233,27 @@ router.post("/case/:case",async (req, res)=>{
         
         let dni_medico = req.session.user.dni
         let dni_paciente  = result[0].dni
-        
+
+        //Guardar tratamiento
+        let data = await getTreatment(id_case ,true)
+        let treatments = data.result
+        let client = data.client
+        // console.log(treatments)
+        const parse_treatment = getGroups(json, treatments)
+        // console.log(parse_treatment)
+        await Promise.all(parse_treatment.for_drop.map(async function(item){
+            let rs = await deleteTreatment(id_case, item.type, true, client)
+            return item
+        }))
+        await Promise.all(parse_treatment.for_update.map(async function(item){
+            let rs = await updateTreatment(item.id, id_case, item.type, item.name, item.from, item.to, item.obs, true, client)
+            return item
+        }))
+        await Promise.all(parse_treatment.for_add.map(async function(item){
+            let rs = await insertTreatment(id_case, item.type, item.name, item.from, item.to, item.obs, true, client)
+            return item
+        }))
+        client.release(true)
         
         //Liberar caso
         if(json.tipo_guardado == "3"){
@@ -235,7 +265,7 @@ router.post("/case/:case",async (req, res)=>{
         }
         
         //Cerrar caso
-        let data = await canTerminateCase(dni_medico, id_case)
+        data = await canTerminateCase(dni_medico, id_case)
         let canTerminate = data.result /** @return { pasa: Boolean, message: String}  Valida si puede cerrarse correctamente y si no devulve un mensaje con la razón**/
         
         if(canTerminate[0].pasa){
@@ -246,19 +276,19 @@ router.post("/case/:case",async (req, res)=>{
             else
                 await removeScheduledCase(dni_medico, dni_paciente)
             
-            console.log("updateCase");
-            console.log(json);
             let x = await updateCase({...json, id_caso: id_case}) //Actualizar los campos del caso
             if(json.tipo_guardado == "2"){
                 
                 await terminateCase(id_case, dni_medico) //Actualizar estado de caso a cerrado
                 await req.flash("success", "Caso grabado y cerrado exitosamente.")
                 res.redirect("/dashboard")
+                // res.redirect('back')
             }
             else{
                 
                 await req.flash("success", "Caso grabado exitosamente.")
                 res.redirect("/dashboard")
+                // res.redirect('back')
             }
         }
         else{
