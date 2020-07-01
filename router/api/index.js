@@ -5,6 +5,52 @@ const { makeMigrationsCustomer } = require("./../../model/migration")
 const { casos_dia, encuestas_iniciales, encuestas_diarias } = require("./../../controllers/report")
 const { check } = require("express-validator")
 const { isValidDate } = require("./../../useful")
+const { listContactByDNI, getPatientContactByDNI, getContactByDNI, getMonitoreoContactsByDNI } = require("./../../model/dashboard")
+
+async function getContact(req, res){
+  
+  let dni = req.query.dni
+  let data = {
+    "dni": dni,
+    "edad": "",
+    "factor_riesgo": false,
+    "seguimiento": "NO",
+    "nombre": "",
+    "observacion": "",
+    "parentesco": "",
+    "dia":1,
+    "monitoreo": "",
+    "monitoreos":[]
+  }
+  if(dni){
+    let rs = await getPatientContactByDNI(dni)
+    console.log(rs)
+    if(rs.result.length > 0){
+      data = rs.result[0]
+    }
+    else{
+      rs = await getContactByDNI(dni)
+      console.log(rs)
+      if(rs.result.length > 0){
+        data = rs.result[0]
+      }
+    }
+
+    rs = await getMonitoreoContactsByDNI(dni)
+    console.log(rs)
+    data["monitoreos"] = rs.result
+  }
+  
+  for(let key in data){
+    if(data[key] == null)
+      data[key] = ""
+  }
+
+  res.json({
+    success:true,
+    data
+  })
+}
 
 function arrayJsonToPatientsList(patients){
     let list_patients = []
@@ -188,6 +234,9 @@ router.get("/report/case/:from/:to", array_validation, casos_dia)
 router.get("/report/initial_survey/:from/:to", array_validation, encuestas_iniciales)
 
 router.get("/report/daily_survey/:from/:to", array_validation, encuestas_diarias)
+
+// /api/v1/ajax/contact?dni
+router.get("/ajax/contact", getContact)
 
 module.exports = router
 

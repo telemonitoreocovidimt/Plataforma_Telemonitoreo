@@ -717,6 +717,334 @@ function insertTreatment(id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha
 }
 
 
+
+/**
+ * Contactos funciones
+ */
+
+function getContactByPatient(dni_patient, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+            client = await openConnection()
+        let query = `select c.dni,
+                c.edad,
+                c.factor_riesgo,
+                'CONTACTO' as seguimiento,
+                c.nombre,
+                c.observacion,
+                cp.parentesco,
+                (select $2::date - fecha_creacion::date + 1 from ${PGSCHEMA}.dt_contactos where dni = cp.dni_contacto and fecha_creacion = $2::date limit 1)::int as dia,
+               
+                (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos where dni_contacto = cp.dni_contacto and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
+                from ${PGSCHEMA}.dt_contactos_pacientes as cp
+                                        inner join ${PGSCHEMA}.dt_contactos as c
+                                        on cp.dni_contacto = c.dni
+                                        where cp.dni_paciente = $1;`
+        let params = [dni_patient, datePeru_init]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
+function getContactByid(dni_contact,  pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `select * from ${PGSCHEMA}.dt_contactos
+                        where dni = $1 limit 1;`
+        let params = [dni_contact]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
+function insertContact(dni_contact, parentesco, name, age, factor, obs,  pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `insert into ${PGSCHEMA}.dt_contactos(
+                        dni,
+                        parentesco,
+                        nombre,
+                        edad,
+                        factor_riesgo,
+                        observacion
+                    ) values($1, $2, $3, $4, $5, $6);`
+        let params = [dni_contact, parentesco, name, age, factor, obs]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function updateRelationshipContactPatient(dni_contact, dni_patient, parentesco,  pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `update ${PGSCHEMA}.dt_contactos_pacientes
+                    set parentesco = $3 where dni_contacto = $1 and dni_paciente = $2;`
+        let params = [dni_contact, dni_patient, parentesco]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function insertRelationshipContactPatient(dni_contact, dni_patient, parentesco, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `insert into ${PGSCHEMA}.dt_contactos_pacientes(
+            dni_contacto,
+            dni_paciente,
+            parentesco
+        )
+        values ($1, $2, $3);`
+        let params = [dni_contact, dni_patient, parentesco]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
+function getRelationshipContactPatient(dni_contact, dni_patient,  pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `select * from ${PGSCHEMA}.dt_contactos_pacientes
+        where dni_contacto = $1 and dni_paciente = $2; `
+        let params = [dni_contact, dni_patient]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
+function deleteRelationshipContactPatient(dni_contact, dni_patient,  pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+        client = await openConnection()
+        let query = `delete from ${PGSCHEMA}.dt_contactos_pacientes where dni_contacto = $1 and dni_paciente = $2;`
+        let params = [dni_contact, dni_patient]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
+
+function updateContact(dni_contact, parentesco, name, age, factor, obs,  pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+            client = await openConnection()
+        let query = `update ${PGSCHEMA}.dt_contactos set
+                        parentesco = $2,
+                        nombre = $3,
+                        edad = $4,
+                        factor_riesgo = $5,
+                        observacion = $6
+                    where dni = $1;`
+        let params = [dni_contact, parentesco, name, age, factor, obs]
+        console.log(query)
+        console.log(params)
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        console.log("Rows : ", result)
+        resolve({result : result.rows, client})
+    })
+}
+
+function updateContactMonitor(dni_contact, status, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+            client = await openConnection()
+        let query = `update ${PGSCHEMA}.dt_monitoreo_contactos set
+                id_status = $3
+                where fecha_monitoreo::date = $2::date and dni_contacto = $1`
+        let params = [dni_contact, datePeru_init, status]
+        console.log(params)
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function insertContactMonitor(dni_contact, status, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+            client = await openConnection()
+        let query = `insert into ${PGSCHEMA}.dt_monitoreo_contactos
+        (dni_contacto, fecha_monitoreo, id_status)
+        values ($1, $2, $3)`
+        let params = [dni_contact, datePeru_init, status]
+        console.log(params)
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
+function getContactMonitorToDay(dni_contact, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+            client = await openConnection()
+        let query = `select * from ${PGSCHEMA}.dt_monitoreo_contactos
+        where fecha_monitoreo::date = $2::date and dni_contacto = $1`
+        let params = [dni_contact, datePeru_init]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
+
+function listContact(dni_paciente,  pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+        client = await openConnection()
+        let query = `select cp.dni_contacto as dni,
+            case when (select edad from development.dt_pacientes where dni = cp.dni_contacto limit 1)::int is null then c.edad
+            else (select edad from development.dt_pacientes where dni = cp.dni_contacto limit 1)::int end as edad,
+            c.factor_riesgo,
+            case when (select count(*) from development.dt_pacientes where dni = cp.dni_contacto)::int > 0 then 'PACIENTE'
+            else 'CONTACTO' end as seguimiento,
+            c.nombre,
+            c.observacion,
+            cp.parentesco,
+            (select $2::date - fecha_creacion::date + 1 from development.dt_contactos where dni = cp.dni_contacto and fecha_creacion = $2::date limit 1)::int as dia,
+            (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos where dni_contacto = cp.dni_contacto and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
+            from development.dt_contactos_pacientes as cp
+            left join development.dt_contactos as c
+            on cp.dni_contacto = c.dni
+            where cp.dni_paciente = $1;`
+        let params = [dni_paciente, datePeru_init]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function listContactByDNI(dni_contact, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+            client = await openConnection()
+        let query = `select *,
+                    dc.fecha_creacion - $2::date + 1 as dia,
+                    (select case
+                        when (select count(*) from development.dt_pacientes where dni = dc.dni)::int > 0 then 'PACIENTE'
+                        when (select count(*) from development.dt_contactos_pacientes where dni_paciente = dc.dni)::int > 0 then 'CONTACTO'
+                        else 'NO' end)::text as seguimiento,
+                    (select id_status::char(1) from development.dt_monitoreo_contactos as mc
+                    where mc.dni_contacto = dc.dni and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
+                    from development.dt_contactos as dc
+                    where dc.dni = $1`
+        let params = [dni_contact, datePeru_init]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
+
+//Ajax search DNI
+
+function getPatientContactByDNI(dni_contact, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+            client = await openConnection()
+        let query = `select p.dni,
+                case when c.edad is null then p.edad else c.edad end,
+                p.factor_riesgo,
+                'PACIENTE' as seguimiento,
+                p.nombre,
+                c.observacion,
+                '' as parentesco,
+                (select $2::date - fecha_creacion::date from ${PGSCHEMA}.dt_contactos_pacientes where dni_contacto = c.dni and fecha_creacion = $2::date limit 1)::int as dia,
+                (select flag from ${PGSCHEMA}.dt_contactos_pacientes where dni_contacto = c.dni and fecha_creacion = $2::date limit 1)::char(1) as monitoreo
+                from ${PGSCHEMA}.dt_pacientes as p
+                left join ${PGSCHEMA}.dt_contactos as c
+                on p.dni = c.dni
+                where p.dni = $1;`
+        let params = [dni_contact, datePeru_init]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function getContactByDNI(dni_contact, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+            client = await openConnection()
+
+        let query = `select c.dni,
+                c.edad,
+                c.factor_riesgo,
+                'CONTACTO' as seguimiento,
+                c.nombre,
+                c.observacion,
+                '' as parentesco,
+                $2::date - fecha_creacion::date + 1 as dia,
+                (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos where dni_contacto = c.dni and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
+                from ${PGSCHEMA}.dt_contactos as c
+                where c.dni = $1 limit 1;`
+        let params = [dni_contact, datePeru_init]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+function getMonitoreoContactsByDNI(dni_contact, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        if(!client)
+            client = await openConnection()
+        let query = `select $2::date - fecha_monitoreo + 1 as dia, 
+        id_status as monitoreo  from ${PGSCHEMA}.dt_monitoreo_contactos
+        where dni_contacto = $1 and fecha_monitoreo < $2::date;`
+        let params = [dni_contact, datePeru_init]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result.rows, client})
+    })
+}
+
+
 module.exports = {
     getPatientsAlert,
     getPatients,
@@ -744,5 +1072,20 @@ module.exports = {
     getTreatment,
     deleteTreatment,
     updateTreatment,
-    insertTreatment
+    insertTreatment,
+    listContactByDNI,
+    getPatientContactByDNI,
+    getContactByDNI,
+    getMonitoreoContactsByDNI,
+    getContactByPatient,
+    deleteRelationshipContactPatient,
+    updateRelationshipContactPatient,
+    updateContact,
+    updateContactMonitor,
+    insertContact,
+    getContactByid,
+    insertRelationshipContactPatient,
+    insertContactMonitor,
+    getContactMonitorToDay,
+    listContact
 }

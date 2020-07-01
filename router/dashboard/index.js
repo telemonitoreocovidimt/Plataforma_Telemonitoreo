@@ -5,9 +5,21 @@ const { getPatientsAlert, getPatients, countAllCaseToday, countAllCaseAttendedTo
      getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase, getPatientForCase, removeScheduledCase, addScheduledCase, haveThisScheduledCaseForTomorrow,getComentarios,getNoteByPatient, updateNoteByPatient, getPreviousCases, getTreatment,
      deleteTreatment,
      updateTreatment,
-     insertTreatment } = require("./../../model/dashboard")
+     insertTreatment,
+     getContactByPatient,
+     updateRelationshipContactPatient,
+     updateContact,
+     updateContactMonitor,
+     insertContact,
+     getContactByid,
+     insertRelationshipContactPatient,
+     insertContactMonitor,
+     getContactMonitorToDay,
+     getMonitoreoContactsByDNI,
+     deleteRelationshipContactPatient,
+     listContact } = require("./../../model/dashboard")
 
-const { getGroups } = require("./../../useful")
+const { getGroups, getGroupsContacts } = require("./../../useful")
 const { openConnection } = require("././../../model/connection")
 
 router.get("/old",async (req, res)=>{
@@ -181,10 +193,20 @@ router.get("/case/:case",async (req, res)=>{
                     let previous_cases = data.result
 
                     //Tratamiento
-                    data = await getTreatment(id_case ,false , data.client)
+                    data = await getTreatment(id_case ,true , data.client)
                     let treatments = data.result
-                    
+
+                    data = await listContact(dni_paciente, true , data.client)
+                    let contacts = data.result
+                    let contacts_json = {}
+                    await Promise.all(contacts.map(async function(item){
+                        let monitors = await getMonitoreoContactsByDNI(item.dni, true, data.client)
+                        contacts_json[item.dni] = item
+                        contacts_json[item.dni]["monitoreos"] = monitors.result
+                    }))
                     console.log(treatments)
+                    console.log(contacts)
+                    contacts_json = JSON.stringify(contacts_json)
                     let treatments_string = JSON.stringify(treatments)
                     let groups = [{ id:"A", descripcion:"A"}, { id:"B", descripcion:"B"}, { id:"C", descripcion:"C"}]
                     let factors = [{ id:true, descripcion:"SI"}, { id:false, descripcion:"NO"}]
@@ -197,7 +219,7 @@ router.get("/case/:case",async (req, res)=>{
                     data = await getComentarios(dni_paciente);
                     let comments = data.result
                     await req.useFlash(res)
-                    res.render("form1", {layout: 'main1', treatments_string, estado_seguimiento, previous_cases, have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
+                    res.render("form1", {layout: 'main1', contacts_json, treatments_string, estado_seguimiento, previous_cases, have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
                 }
                 else{
                     await req.flash("danger", canTake[0].message)
@@ -240,6 +262,9 @@ router.post("/case/:case",async (req, res)=>{
         let client = data.client
         // console.log(treatments)
         const parse_treatment = getGroups(json, treatments)
+
+
+        
         // console.log(parse_treatment)
         await Promise.all(parse_treatment.for_drop.map(async function(item){
             let rs = await deleteTreatment(id_case, item.type, true, client)
@@ -254,6 +279,74 @@ router.post("/case/:case",async (req, res)=>{
             return item
         }))
         client.release(true)
+
+
+
+
+        //Guardar contacto
+        
+        data = await listContact(dni_paciente, true)
+        let contacts = data.result
+        client = data.client
+        const parse_contacts = getGroupsContacts(json, contacts)
+        console.log("Contactos antes : ", contacts)
+        console.log("Parse contacts : ", parse_contacts)
+
+        await Promise.all(parse_contacts.for_drop.map(async function(item){
+            let rs = await deleteRelationshipContactPatient(item.dni, dni_paciente, true, client)
+            return item
+        }))
+        await Promise.all(parse_contacts.for_update.map(async function(item){
+            let rs = await updateRelationshipContactPatient(item.dni, dni_paciente, item.parent, true, client)
+            console.log("ITEM UPDATE : ", item)
+            item.factor = item.factor == "SI"
+            item.age = parseInt(item.age == "" ? null : item.age)
+            console.log(item.id, "", item.name, item.age, item.factor, item.obs)
+            
+            rs = await updateContact(item.id, "", item.name, item.age, item.factor, item.obs, true, client)
+            console.log(rs.result)
+
+            if(item.monitor && item.monitor != ""){
+                rs = await getContactMonitorToDay(item.id, true, client)
+                if(rs.result.length){
+                    rs = await updateContactMonitor(item.id, item.monitor, true, client)
+                }
+                else{
+                    rs = await insertContactMonitor(item.id, item.monitor, true, client)
+                }
+            }
+            return item
+        }))
+        await Promise.all(parse_contacts.for_add.map(async function(item){
+            let rs = await getContactByid(item.dni, true, client)
+            item.factor = item.factor == "SI"
+            item.age = item.age == "" ? null : item.age
+            if(rs.result.length){
+                rs = await updateContact(item.dni, "", item.name, item.age, item.factor, item.obs, true, client)
+            }
+            else{
+                rs = await insertContact(item.dni, "", item.name, item.age, item.factor, item.obs, true, client)
+            }
+            rs = await insertRelationshipContactPatient(item.dni, dni_paciente, item.parent, true, client)
+            
+            if(item.monitor && item.monitor != ""){
+                rs = await getContactMonitorToDay(item.dni, true, client)
+                if(rs.result.length){
+                    rs = await updateContactMonitor(item.dni, item.monitor, true, client)
+                }
+                else{
+                    rs = await insertContactMonitor(item.dni, item.monitor, true, client)
+                }
+            }
+            
+            return item
+        }))
+
+        client.release(true)
+
+
+
+
         
         //Liberar caso
         if(json.tipo_guardado == "3"){

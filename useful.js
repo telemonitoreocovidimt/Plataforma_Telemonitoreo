@@ -122,11 +122,72 @@ function jsonToArray(json){
     return array
 }
 
+function getGroupsContacts(data, lastdata=[]){
+
+    const els_drop = {
+    }
+    
+    const els_update = {
+    }
+    
+    const others = {
+    }
+    
+    // const array_insert = []
+    // const array_update = []
+    // const array_delete = []
+    
+    for(let x in data){
+        let e = x.split("cont_")
+        if(e.length > 1){
+            e = e[1]
+            e = e.split("_")
+            let j = e[0].split("none")
+            if(j.length > 1){
+                if(!others[j[1]])
+                    others[j[1]] = {}
+               others[j[1]][e[1]] = data[x]
+            }
+            else{
+                if(!els_drop[e[0]])
+                    els_drop[e[0]] = {}
+               els_drop[e[0]][e[1]] = data[x]
+            }
+        }
+    }
+    
+
+    for(let item of lastdata){
+
+        if(els_drop[item.dni]){
+            els_update[item.dni] = els_drop[item.dni]
+            delete els_drop[item.dni]
+        }
+        else{
+            els_drop[item.dni] = item
+        }
+
+    }
+
+    const for_drop = jsonToArray(els_drop)
+    const for_add = jsonToArray(others)
+    const for_update = jsonToArray(els_update)
+    console.log("Elementos para eliminar: ", for_drop)
+    console.log("Elementos para agregar: ", for_add)
+    console.log("Elementos para actualizar : ", for_update)
+
+    return {
+        for_drop,
+        for_add,
+        for_update
+    }
+}
 
 module.exports = {
     isValidDate,
     dateToDateString,
     dateToTimeStampString,
     dateRangeToTimeStanpStringRange,
-    getGroups
+    getGroups,
+    getGroupsContacts
 }

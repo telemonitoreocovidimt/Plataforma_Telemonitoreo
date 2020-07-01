@@ -445,12 +445,6 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <script>
-                                    window.onload = ()=>{
-                                        const scroll = document.getElementById("containet_form_check")
-                                        scroll.parentNode.scrollTo(scroll.scrollWidth, 0)
-                                    }
-                                </script>
                             </div>
                         </div>
 
@@ -480,6 +474,32 @@
 
                     </div>
                 </div>
+
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Contactos</h6>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <input id="text_box_contacto" class="browser-default mb-2 form-control" type="text" placeholder="Ingrese DNI"/>
+                                    <input id="button_agregar_contacto" type="button" class="btn btn-primary bg-primary" value="Agregar Contacto">
+                                </div>
+
+                                <div class="form-group col-md-12" id="container_contact">
+                                    
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
 
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
@@ -546,6 +566,8 @@
     </div>
 
 </form>
+
+
 
 
 <script>
@@ -699,7 +721,7 @@
         }
     }
     
-    window.onload = ()=>{
+    function init_treatments (){
         const combo_box_tratamiento = document.getElementById("combo_box_tratamiento")
         const button_agregar_tratamiento = document.getElementById("button_agregar_tratamiento")
         const container_treatments = document.getElementById("container_treatments")
@@ -719,4 +741,236 @@
         })
     }
 
+</script>
+
+
+<script>
+    var countInputsNoneContact = 0
+    var container_contact
+    //const contacts = {}
+    const contacts = JSON.parse(`{{{ contacts_json }}}`)
+    const monitor_options = ["", "A", "S","H", "F"]
+
+    function remove_contact(key){
+        saveStatusContacts() //Guardar el estado de los inputs para volver a generar HTML
+        delete contacts[key]
+        generateCardContact(container_contact)
+    }
+
+    function add_contact(key, data=null){
+        saveStatusContacts() //Guardar el estado de los inputs para volver a generar HTML
+        if(data)
+            contacts[key] = data
+        else
+            contacts[key] = {
+                "dni": "",
+                "edad": "",
+                "factor_riesgo": false,
+                "seguimiento": false,
+                "nombre": "",
+                "observacion": "",
+                "parentesco": "",
+                "dia":2,
+                "monitoreo": "",
+                "monitoreos":[]
+            }
+        generateCardContact(container_contact)
+    }
+    
+    function saveStatusContacts(){
+        for(let key in contacts){
+            
+            let name = document.getElementById(`input_cont_${key}_name`).value
+            
+            let dni = document.getElementById(`input_cont_${key}_dni`).value
+            
+            let age = document.getElementById(`input_cont_${key}_age`).value
+            
+            let factor = document.getElementById(`input_cont_${key}_factor`).value
+            
+            let observation = document.getElementById(`input_cont_${key}_obs`).value
+            
+            let parent = document.getElementById(`input_cont_${key}_parent`).value
+            
+            let follow = document.getElementById(`input_cont_${key}_follow`).value
+            
+
+            let monitor = document.getElementById(`input_cont_${key}_monitor`) ? document.getElementById(`input_cont_${key}_monitor`).value : ""
+
+            
+            console.log(
+                name,
+                dni,
+                age,
+                factor,
+                observation,
+                parent,
+                follow,
+                monitor
+            )
+            contacts[key]["dni"] = dni
+            contacts[key]["edad"] = age
+            contacts[key]["monitoreo"] = monitor
+            contacts[key]["factor_riesgo"] = factor
+            contacts[key]["nombre"] = name
+            contacts[key]["observacion"] = observation
+            contacts[key]["seguimiento"] = follow
+            contacts[key]["parentesco"] = parent
+        }
+    }
+    
+    function validateOptionMonitoreo(key){
+        let html = ''
+        for(let item of monitor_options){
+            html+= key != null && item == key.toUpperCase() ? `<option value="${item}" selected>${item}</option>` : `<option value="${item}">${item}</option>`
+        }
+        return html
+    }
+
+    function generateCardContact(el){
+        let html = '' //Texto base para almacenar HTML en texto
+        
+        //Iterar JSON por KEY
+        for(let key in contacts){
+            let contact = contacts[key] //Obtener Elemento "Contact" desde JSON
+
+            //let follow = contact.seguimiento ? `<option value="NO">NO</option><option value="SI" selected>SI</option>` : `<option value="NO" selected>NO</option><option value="SI">SI</option>`
+            let factor = contact.factor_riesgo ? `<option value="NO">NO</option><option value="SI" selected>SI</option>` : `<option value="NO" selected>NO</option><option value="SI">SI</option>`
+            
+            let factor_text = contact.factor_riesgo ? 'SI': 'NO'
+
+            let html_name = contact.seguimiento.toUpperCase() != "NO" ? 
+                        `<input disabled required class="form-control col-md-11" type="text" value="${contact.nombre}" />
+                        <input id="input_cont_${key}_name" name="input_cont_${key}_name" type="hidden" value="${contact.nombre}" />`
+                        : `<input  required class="form-control col-md-11" id="input_cont_${key}_name" name="input_cont_${key}_name" type="text" value="${contact.nombre}" />`
+            let html_age = contact.seguimiento.toUpperCase() != "NO" && contact.edad != null && contact.edad != ""? 
+                        `<input required disabled class="form-control col-md-11" type="text" value="${contact.edad}" />
+                        <input  id="input_cont_${key}_age" name="input_cont_${key}_age" type="hidden" value="${contact.edad}" />`
+                        : `<input required class="form-control col-md-11" id="input_cont_${key}_age" name="input_cont_${key}_age" type="text" value="${contact.edad}" />`
+            let html_factor = contact.seguimiento.toUpperCase() != "NO" ? 
+                        `<input type="hidden" value="${factor_text}" id="input_cont_${key}_factor" name="input_cont_${key}_factor" />
+                        <select disabled  class="browser-default custom-select col-md-11 form-control">
+                                        ${factor}
+                         </select>`
+                        : `<select required id="input_cont_${key}_factor" name="input_cont_${key}_factor" class="browser-default custom-select col-md-11 form-control">
+                                        ${factor}
+                         </select>`
+
+            
+            let last_monitors = '' //Texto base para almacenar Combos Boxs anteriores
+            
+            //Generar HTML TEXTO de combo box de monitoreos pasados
+            for(let monitor of contact.monitoreos){
+                let _html = validateOptionMonitoreo(monitor.monitoreo) //Validar Options de monitoreo segun KEY [  | A | S | H | F]
+                last_monitors += `<div style="margin: 0px 20px;">
+                                    <ul style="padding: 0px; list-style: none;">
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>${monitor.dia}</strong></li>
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                            <select disabled class="browser-default custom-select mb-4">
+                                                ${_html}
+                                            </select>
+                                        </li>
+                                    </ul>
+                                </div>`
+            }
+
+            let monitor = validateOptionMonitoreo(contact.monitoreo) //Options validados segun KEY [  | A | S | H | F]
+
+            let _html_monitor = `<div class="form-group row" style="flex-wrap: nowrap;padding: 1% 2%;overflow: auto;">
+                                ${last_monitors}
+                                <div style="margin: 0px 20px;">
+                                    <ul style="padding: 0px; list-style: none;">
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>${contact.dia}</strong></li>
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                            <select id="input_cont_${key}_monitor" name="input_cont_${key}_monitor" class="browser-default custom-select mb-4">
+                                                ${monitor}
+                                            </select>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <label for="" class="m-0 font-weight-bold text-primary">(Vacío=Pendiente; A=Asintomático; S=Sintomático; H=Hospitalizado; F=Fallecido)</label>`
+            _html_monitor = contact.seguimiento.toUpperCase() != "PACIENTE" ? _html_monitor : ""
+            html+=`<div class="card shadow mb-4 relative">
+                        <input type="hidden" id="input_cont_${key}_id" name="input_cont_${key}_id" value="${key}"/>
+                        <div class="card-header py-3 form-inline">
+                            <div class="form-group col-md-6">
+                                    <label for="" class="m-0 font-weight-bold text-primary">Parentesco :</label>
+                                    <input required class="form-control col-md-11" id="input_cont_${key}_parent" name="input_cont_${key}_parent" type="text" value="${contact.parentesco}" />
+                            </div>
+                            <div class="form-group col-md-6">
+                                    <label for="" class="m-0 font-weight-bold text-primary">Nombre :</label>
+                                    ${html_name}
+                            </div>
+                            <i class="fas fa-times-circle top right absolute cancel" onclick="remove_contact('${key}')"></i>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-inline mb-2">
+                                <div class="form-group col-md-6">
+                                    <label for="">En seguimiento ?</label>
+                                    <input disabled id="input_cont_${key}_follow" name="input_cont_${key}_follow" class="form-control col-md-11" type="text" value="${contact.seguimiento}" />
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="">DNI :</label>
+                                    <input required type="hidden" id="input_cont_${key}_dni" name="input_cont_${key}_dni" value="${contact.dni}" />
+                                    <input disabled class="form-control col-md-11" type="text"  value="${contact.dni}" />
+                                </div>
+                            </div>
+                            <div class="form-inline mb-2">
+                                <div class="form-group col-md-6">
+                                    <label for="">Edad :</label>
+                                    ${html_age}
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="">Factor de riesgo :</label>
+                                    ${html_factor}
+                                </div>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label for="">Observaciones :</label>
+                                <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%"
+                                    id="input_cont_${key}_obs" name="input_cont_${key}_obs" placeholder="Ingrese sus observaciones" maxlength="50" >${contact.observacion}</textarea>
+                            </div>
+                            ${_html_monitor}
+                        </div>
+                    </div>`
+        }
+        el.innerHTML = html
+    }
+
+    function initContacts(){
+        const text_box_contacto = document.getElementById("text_box_contacto") //Obtener text box "Ingrese DNI"
+        const button_agregar_contacto = document.getElementById("button_agregar_contacto") // Botón "Validar DNI"
+        container_contact = document.getElementById("container_contact") // Contenedor de "Cards contactos" 
+        generateCardContact(container_contact) //Convertir JSON en HTML Cards
+        button_agregar_contacto.addEventListener("click", async ()=>{
+            button_agregar_contacto.disabled = true
+            let dni = text_box_contacto.value
+            let rs = await fetch(`/api/v1/ajax/contact?dni=${dni}`)
+            let json = await rs.json()
+            console.log(contacts)
+            console.log("Resultado AJAX : ", json.data)
+            if(json.success){
+                //contacts[json.data.dni] = json.data
+                countInputsNoneContact++
+                let key = "none"+countInputsNoneContact
+                add_contact(key, json.data)
+                console.log("Despues de agregar", contacts)
+                //generateCardContact(container_contact)
+            }
+            button_agregar_contacto.disabled = false
+        })
+    }
+    
+</script>
+
+<script>
+    window.onload  = ()=>{
+        init_treatments()
+        initContacts()
+        const scroll = document.getElementById("containet_form_check")
+        scroll.parentNode.scrollTo(scroll.scrollWidth, 0)
+    }
 </script>
