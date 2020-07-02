@@ -5,7 +5,8 @@ const { makeMigrationsCustomer } = require("./../../model/migration")
 const { casos_dia, encuestas_iniciales, encuestas_diarias } = require("./../../controllers/report")
 const { check } = require("express-validator")
 const { isValidDate } = require("./../../useful")
-const { listContactByDNI, getPatientContactByDNI, getContactByDNI, getMonitoreoContactsByDNI } = require("./../../model/dashboard")
+const { listContactByDNI, getPatientContactByDNI, getContactByDNI, getMonitoreoContactsByDNI, addPermissionContact,
+  removePermissionContact } = require("./../../model/dashboard")
 
 async function getContact(req, res){
   
@@ -24,20 +25,17 @@ async function getContact(req, res){
   }
   if(dni){
     let rs = await getPatientContactByDNI(dni)
-    console.log(rs)
     if(rs.result.length > 0){
       data = rs.result[0]
     }
     else{
       rs = await getContactByDNI(dni)
-      console.log(rs)
       if(rs.result.length > 0){
         data = rs.result[0]
       }
     }
 
     rs = await getMonitoreoContactsByDNI(dni)
-    console.log(rs)
     data["monitoreos"] = rs.result
   }
   
@@ -50,6 +48,28 @@ async function getContact(req, res){
     success:true,
     data
   })
+}
+
+async function takeContact(req, res){
+  let body = req.body
+  let dni_contact = body.dni_contact
+  let dni_patient = body.dni_patient
+  console.log("dni_contact", dni_contact)
+  console.log("dni_patient", dni_patient)
+  if(dni_contact && dni_patient){
+    let data = await removePermissionContact(dni_contact, true)
+    console.log("Remove : ", data.result)
+    data = await addPermissionContact(dni_contact, dni_patient, false, data.client)
+    console.log("Add : ", data.result)
+    res.json({
+      success: data.result.rowCount > 0
+    })
+  }
+  else{
+    res.json({
+      success:false
+    })
+  }
 }
 
 function arrayJsonToPatientsList(patients){
@@ -237,6 +257,8 @@ router.get("/report/daily_survey/:from/:to", array_validation, encuestas_diarias
 
 // /api/v1/ajax/contact?dni
 router.get("/ajax/contact", getContact)
+
+router.put("/ajax/contact", takeContact)
 
 module.exports = router
 

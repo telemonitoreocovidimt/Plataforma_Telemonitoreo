@@ -4,3 +4,4 @@ update_db.sql
 script.sql
 test.sql
 package-lock.json
+nodemon.json

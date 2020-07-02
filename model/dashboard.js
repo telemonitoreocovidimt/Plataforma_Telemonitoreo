@@ -634,8 +634,8 @@ function getPreviousCases(dni_patient, pass = false, client = null){
         if(!client)
             client = await openConnection()
         let query = `select *, TO_CHAR(c.fecha_caso,'YYYY/MM/DD') as fecha_caso_char, extract(day from (c.fecha_caso - p.fecha_creacion)) as day_index
-        from development.dt_casos_dia as c
-        inner join development.dt_pacientes as p
+        from ${PGSCHEMA}.dt_casos_dia as c
+        inner join ${PGSCHEMA}.dt_pacientes as p
         on c.dni_paciente = p.dni
         where c.dni_paciente = $2 
         and c.fecha_caso::date < $1::date order by c.fecha_caso asc`
@@ -806,9 +806,10 @@ function insertRelationshipContactPatient(dni_contact, dni_patient, parentesco, 
         let query = `insert into ${PGSCHEMA}.dt_contactos_pacientes(
             dni_contacto,
             dni_paciente,
+            flag,
             parentesco
         )
-        values ($1, $2, $3);`
+        values ($1, $2, false, $3);`
         let params = [dni_contact, dni_patient, parentesco]
         let result = await client.query(query, params)
         if(!pass)
@@ -928,20 +929,21 @@ function listContact(dni_paciente,  pass = false,client = null){
         if(!client)
         client = await openConnection()
         let query = `select cp.dni_contacto as dni,
-            case when (select edad from development.dt_pacientes where dni = cp.dni_contacto limit 1)::int is null then c.edad
-            else (select edad from development.dt_pacientes where dni = cp.dni_contacto limit 1)::int end as edad,
-            c.factor_riesgo,
-            case when (select count(*) from development.dt_pacientes where dni = cp.dni_contacto)::int > 0 then 'PACIENTE'
-            else 'CONTACTO' end as seguimiento,
-            c.nombre,
-            c.observacion,
-            cp.parentesco,
-            (select $2::date - fecha_creacion::date + 1 from development.dt_contactos where dni = cp.dni_contacto and fecha_creacion = $2::date limit 1)::int as dia,
-            (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos where dni_contacto = cp.dni_contacto and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
-            from development.dt_contactos_pacientes as cp
-            left join development.dt_contactos as c
-            on cp.dni_contacto = c.dni
-            where cp.dni_paciente = $1;`
+                case when (select edad from ${PGSCHEMA}.dt_pacientes where dni = cp.dni_contacto limit 1)::int is null then c.edad
+                else (select edad from ${PGSCHEMA}.dt_pacientes where dni = cp.dni_contacto limit 1)::int end as edad,
+                c.factor_riesgo,
+                case when (select count(*) from ${PGSCHEMA}.dt_pacientes where dni = cp.dni_contacto)::int > 0 then 1
+                when cp.flag then 2
+                else 3 end as seguimiento,
+                c.nombre,
+                c.observacion,
+                cp.parentesco,
+                ($2::date - c.fecha_creacion::date + 1)::int as dia,
+                (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos where dni_contacto = cp.dni_contacto and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
+                from ${PGSCHEMA}.dt_contactos_pacientes as cp
+                left join ${PGSCHEMA}.dt_contactos as c
+                on cp.dni_contacto = c.dni
+                where cp.dni_paciente = $1;`
         let params = [dni_paciente, datePeru_init]
         let result = await client.query(query, params)
         if(!pass)
@@ -958,12 +960,12 @@ function listContactByDNI(dni_contact, pass = false,client = null){
         let query = `select *,
                     dc.fecha_creacion - $2::date + 1 as dia,
                     (select case
-                        when (select count(*) from development.dt_pacientes where dni = dc.dni)::int > 0 then 'PACIENTE'
-                        when (select count(*) from development.dt_contactos_pacientes where dni_paciente = dc.dni)::int > 0 then 'CONTACTO'
+                        when (select count(*) from ${PGSCHEMA}.dt_pacientes where dni = dc.dni)::int > 0 then 'PACIENTE'
+                        when (select count(*) from ${PGSCHEMA}.dt_contactos_pacientes where dni_paciente = dc.dni)::int > 0 then 'CONTACTO'
                         else 'NO' end)::text as seguimiento,
-                    (select id_status::char(1) from development.dt_monitoreo_contactos as mc
+                    (select id_status::char(1) from ${PGSCHEMA}.dt_monitoreo_contactos as mc
                     where mc.dni_contacto = dc.dni and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
-                    from development.dt_contactos as dc
+                    from ${PGSCHEMA}.dt_contactos as dc
                     where dc.dni = $1`
         let params = [dni_contact, datePeru_init]
         let result = await client.query(query, params)
@@ -983,18 +985,19 @@ function getPatientContactByDNI(dni_contact, pass = false,client = null){
         if(!client)
             client = await openConnection()
         let query = `select p.dni,
-                case when c.edad is null then p.edad else c.edad end,
-                p.factor_riesgo,
-                'PACIENTE' as seguimiento,
-                p.nombre,
-                c.observacion,
-                '' as parentesco,
-                (select $2::date - fecha_creacion::date from ${PGSCHEMA}.dt_contactos_pacientes where dni_contacto = c.dni and fecha_creacion = $2::date limit 1)::int as dia,
-                (select flag from ${PGSCHEMA}.dt_contactos_pacientes where dni_contacto = c.dni and fecha_creacion = $2::date limit 1)::char(1) as monitoreo
-                from ${PGSCHEMA}.dt_pacientes as p
-                left join ${PGSCHEMA}.dt_contactos as c
-                on p.dni = c.dni
-                where p.dni = $1;`
+                    case when c.edad is null then p.edad else c.edad end,
+                    p.factor_riesgo,
+                    1 as seguimiento,
+                    p.nombre,
+                    c.observacion,
+                    '' as parentesco,
+                    ($2::date - c.fecha_creacion::date + 1)::int as dia,
+                    (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos 
+                        where dni_contacto = c.dni and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
+                    from ${PGSCHEMA}.dt_pacientes as p
+                    left join ${PGSCHEMA}.dt_contactos as c
+                    on p.dni = c.dni
+                    where p.dni = $1;`
         let params = [dni_contact, datePeru_init]
         let result = await client.query(query, params)
         if(!pass)
@@ -1012,11 +1015,11 @@ function getContactByDNI(dni_contact, pass = false,client = null){
         let query = `select c.dni,
                 c.edad,
                 c.factor_riesgo,
-                'CONTACTO' as seguimiento,
+                3 as seguimiento,
                 c.nombre,
                 c.observacion,
                 '' as parentesco,
-                $2::date - fecha_creacion::date + 1 as dia,
+                ($2::date - fecha_creacion::date + 1) as dia,
                 (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos where dni_contacto = c.dni and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
                 from ${PGSCHEMA}.dt_contactos as c
                 where c.dni = $1 limit 1;`
@@ -1033,8 +1036,10 @@ function getMonitoreoContactsByDNI(dni_contact, pass = false,client = null){
         let { datePeru_init } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `select $2::date - fecha_monitoreo + 1 as dia, 
-        id_status as monitoreo  from ${PGSCHEMA}.dt_monitoreo_contactos
+        let query = `select (c.fecha_creacion::date - mc.fecha_monitoreo + 1) as dia, 
+        mc.id_status as monitoreo  from ${PGSCHEMA}.dt_monitoreo_contactos as mc
+        INNER join ${PGSCHEMA}.dt_contactos as c
+        on mc.dni_contacto = c.dni
         where dni_contacto = $1 and fecha_monitoreo < $2::date;`
         let params = [dni_contact, datePeru_init]
         let result = await client.query(query, params)
@@ -1044,6 +1049,34 @@ function getMonitoreoContactsByDNI(dni_contact, pass = false,client = null){
     })
 }
 
+
+function removePermissionContact(dni_contact, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+            client = await openConnection()
+        let query = `update ${PGSCHEMA}.dt_contactos_pacientes set
+                        flag = false where dni_contacto = $1;`
+        let params = [dni_contact]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result, client})
+    })
+}
+
+function addPermissionContact(dni_contact, dni_patient, pass = false,client = null){
+    return new Promise(async (resolve, reject)=>{
+        if(!client)
+            client = await openConnection()
+        let query = `update ${PGSCHEMA}.dt_contactos_pacientes set
+                        flag = true where dni_contacto = $1 and dni_paciente = $2;`
+        let params = [dni_contact, dni_patient]
+        let result = await client.query(query, params)
+        if(!pass)
+            client.release(true)
+        resolve({result : result, client})
+    })
+}
 
 module.exports = {
     getPatientsAlert,
@@ -1087,5 +1120,7 @@ module.exports = {
     insertRelationshipContactPatient,
     insertContactMonitor,
     getContactMonitorToDay,
-    listContact
+    listContact,
+    addPermissionContact,
+    removePermissionContact
 }
