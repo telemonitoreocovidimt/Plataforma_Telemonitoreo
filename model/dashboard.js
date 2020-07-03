@@ -1036,7 +1036,7 @@ function getMonitoreoContactsByDNI(dni_contact, pass = false,client = null){
         let { datePeru_init } = getTimeNow()
         if(!client)
             client = await openConnection()
-        let query = `select (c.fecha_creacion::date - mc.fecha_monitoreo + 1) as dia, 
+        let query = `select (mc.fecha_monitoreo - c.fecha_creacion::date + 1) as dia, 
         mc.id_status as monitoreo  from ${PGSCHEMA}.dt_monitoreo_contactos as mc
         INNER join ${PGSCHEMA}.dt_contactos as c
         on mc.dni_contacto = c.dni

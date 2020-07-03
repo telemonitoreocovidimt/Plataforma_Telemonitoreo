@@ -1,6 +1,6 @@
 const { Router } = require("express")
 const router = Router()
-const { getPatientsSurvey01, getPatientsSurvey02, existePatient, save_answer, patient_change_status, patient_change_risk_factor, patient_change_age, validate_group_case, patient_is_doctor } = require("./../../model/api")
+const { getPatientsSurvey01, exists_case_patient, getPatientsSurvey02, getPatientsSurvey03, existePatient, save_answer, patient_change_status, patient_change_risk_factor, patient_change_age, validate_group_case, patient_is_doctor } = require("./../../model/api")
 const { makeMigrationsCustomer } = require("./../../model/migration")
 const { casos_dia, encuestas_iniciales, encuestas_diarias } = require("./../../controllers/report")
 const { check } = require("express-validator")
@@ -72,6 +72,29 @@ async function takeContact(req, res){
   }
 }
 
+async function movePatient(req, res){
+  let dni_patient = req.body.dni_patient
+  if(dni_patient){
+
+    let rs = await patient_change_status(dni_patient, 2)
+    rs = await exists_case_patient(dni_patient)
+    
+
+    if(rs.length){
+      await makeMigrationsCustomer(dni_patient)
+    }
+    
+    return res.json({
+      success: rs.length > 0
+    })
+  }
+  else{
+    return res.json({
+      success:false
+    })
+  }
+}
+
 function arrayJsonToPatientsList(patients){
     let list_patients = []
     patients.forEach(patient => {
@@ -131,6 +154,47 @@ async function answer_daily_survey(patient, answers, tray){
     let x = await patient_change_status(patient_id, 2)
     await makeMigrationsCustomer(patient_id)
   }
+  
+}
+
+async function answer_final_survey(patient, answers, tray){
+  
+  let patient_id = patient.dni
+  let need_doctor = false
+
+  for(const i in answers){
+    let variable = answers[i].variable
+    let answer = answers[i].answer
+    let asked_at = answers[i].asked_at
+    let answered_at = answers[i].answered_at
+    let rows = await save_answer(patient_id, variable, answer, asked_at, answered_at)
+    // if((variable == "dificultad_para_respirar" || variable == "dolor_pecho" ||
+    //     variable == "confusion_desorientacion" || variable == "labios_azules") && 
+    //     answer.toUpperCase() == "SI"){
+    //     patientToUrgency++
+    // }
+    // if((variable == "fiebre_hoy" || variable == "diarrea") && answer.toUpperCase() == "SI") {
+    //     patientToNormalTray++;
+    // }
+    if(variable === "necesita_medico" && answer.toUpperCase() === "SI"){
+      need_doctor = true
+    }
+  }
+
+  if(tray == 3){
+    //pasa a urgencia
+    let x = await patient_change_status(patient_id, 3)
+    await makeMigrationsCustomer(patient_id)
+  }
+  else if(need_doctor || tray == 2){
+    //pasa a bandeja normal
+    let x = await patient_change_status(patient_id, 2)
+    await makeMigrationsCustomer(patient_id)
+  }
+
+  
+
+ 
   
 }
 
@@ -196,6 +260,10 @@ router.get("/:survey",async (req, res)=>{
         let patients = await getPatientsSurvey02()
         res.json(arrayJsonToPatientsList(patients))
     }
+    else if(params.survey === 'survey03'){
+      let patients = await getPatientsSurvey03()
+      res.json(arrayJsonToPatientsList(patients))
+    }
     else{
         res.json({"status":"bad"})
     }
@@ -221,6 +289,13 @@ router.post("/save_answers", async (req, res)=>{
 
           //ENCUESTA DIARIA
           answer_daily_survey(patient[0], answers, tray)
+          res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
+          
+        }
+        else if(req.body.survey == "encuesta_final_covid_19_hch"){
+
+          //ENCUESTA FINAL
+          answer_final_survey(patient[0], answers, tray)
           res.json({"success": "ok", "message": "Preguntas en proceso de grabado."})
           
         }
@@ -259,6 +334,8 @@ router.get("/report/daily_survey/:from/:to", array_validation, encuestas_diarias
 router.get("/ajax/contact", getContact)
 
 router.put("/ajax/contact", takeContact)
+
+router.post("/tray/move/normal", movePatient)
 
 module.exports = router
 

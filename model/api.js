@@ -39,6 +39,18 @@ function getPatientsSurvey02(){
     })
 }
 
+function getPatientsSurvey03(){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_current } = getTimeNow()
+        let client = await openConnection()
+        let query = `select * from ${PGSCHEMA}.sp_list_patients_survey03($1)`
+        let params = [datePeru_current]
+        let result = await client.query(query, params)
+        client.release(true)
+        resolve(result.rows)
+    })
+}
+
 function existePatient(dni_paciente){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
@@ -63,12 +75,26 @@ function save_answer(dni_paciente, variable, respuesta, asked_at, answered_at){
     })
 }
 
-
 function patient_change_status(dni_paciente, estado){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
         let query = `select * from ${PGSCHEMA}.sp_patient_change_status($1, $2)`
         let params = [dni_paciente, estado]
+        let result = await client.query(query, params)
+        client.release(true)
+        resolve(result.rows)
+    })
+}
+
+
+
+function exists_case_patient(dni_paciente){
+    return new Promise(async (resolve, reject)=>{
+        let { datePeru_init } = getTimeNow()
+        let client = await openConnection()
+        let query = `select * from ${PGSCHEMA}.dt_casos_dia
+                        where dni_paciente = $1 and fecha_caso = $2`
+        let params = [dni_paciente, datePeru_init]
         let result = await client.query(query, params)
         client.release(true)
         resolve(result.rows)
@@ -128,11 +154,13 @@ async function patient_is_doctor(dni_paciente){
 module.exports = {
     getPatientsSurvey01,
     getPatientsSurvey02,
+    getPatientsSurvey03,
     existePatient,
     save_answer,
     patient_change_status,
     patient_change_risk_factor,
     patient_change_age,
     validate_group_case,
-    patient_is_doctor
+    patient_is_doctor,
+    exists_case_patient
 }
