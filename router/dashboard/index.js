@@ -39,7 +39,6 @@ router.get("/old",async (req, res)=>{
         let cases_attented_for_me = data.result
         data = await countAllCaseAttendedToDayBetweenDoctors(false, data.client)
         
-       
         let count = 0
         let sum = 0
         data.result.forEach((json)=>{
@@ -104,7 +103,6 @@ router.get("/",async (req, res)=>{
             ...req.session.user, 
             cases_alert, 
             cases,
-           
             cases_attented_for_me : cases_attented_for_me[0].count , 
             cases_attented_promean, 
             cases_for_attent: cases_for_attent[0].count,
@@ -204,6 +202,7 @@ router.get("/case/:case",async (req, res)=>{
                         contacts_json[item.dni] = item
                         contacts_json[item.dni]["monitoreos"] = monitors.result
                     }))
+                    data.client.release(true)
                     console.log(treatments)
                     console.log(contacts)
                     contacts_json = JSON.stringify(contacts_json)
