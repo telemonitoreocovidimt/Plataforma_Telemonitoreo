@@ -799,7 +799,7 @@ function updateRelationshipContactPatient(dni_contact, dni_patient, parentesco, 
     })
 }
 
-function insertRelationshipContactPatient(dni_contact, dni_patient, parentesco, pass = false,client = null){
+function insertRelationshipContactPatient(dni_contact, dni_patient, parentesco, status, pass = false,client = null){
     return new Promise(async (resolve, reject)=>{
         if(!client)
         client = await openConnection()
@@ -809,8 +809,8 @@ function insertRelationshipContactPatient(dni_contact, dni_patient, parentesco, 
             flag,
             parentesco
         )
-        values ($1, $2, false, $3);`
-        let params = [dni_contact, dni_patient, parentesco]
+        values ($1, $2, $4, $3);`
+        let params = [dni_contact, dni_patient, parentesco, status]
         let result = await client.query(query, params)
         if(!pass)
             client.release(true)
@@ -931,7 +931,10 @@ function listContact(dni_paciente,  pass = false,client = null){
         let query = `select cp.dni_contacto as dni,
                 case when (select edad from ${PGSCHEMA}.dt_pacientes where dni = cp.dni_contacto limit 1)::int is null then c.edad
                 else (select edad from ${PGSCHEMA}.dt_pacientes where dni = cp.dni_contacto limit 1)::int end as edad,
-                c.factor_riesgo,
+                
+                case when (select factor_riesgo from ${PGSCHEMA}.dt_pacientes where dni = cp.dni_contacto limit 1)::boolean is null then c.factor_riesgo
+                else (select factor_riesgo from ${PGSCHEMA}.dt_pacientes where dni = cp.dni_contacto limit 1)::boolean end as factor_riesgo,
+
                 case when (select count(*) from ${PGSCHEMA}.dt_pacientes where dni = cp.dni_contacto)::int > 0 then 1
                 when cp.flag then 2
                 else 3 end as seguimiento,

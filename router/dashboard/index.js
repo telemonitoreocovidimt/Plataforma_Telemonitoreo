@@ -299,7 +299,7 @@ router.post("/case/:case",async (req, res)=>{
             let rs = await updateRelationshipContactPatient(item.dni, dni_paciente, item.parent, true, client)
             console.log("ITEM UPDATE : ", item)
             item.factor = item.factor == "SI"
-            item.age = parseInt(item.age == "" ? null : item.age)
+            item.age = item.age.match(new RegExp('^[0-9]{1,3}$')) ?  item.age: null
             console.log(item.id, "", item.name, item.age, item.factor, item.obs)
             
             rs = await updateContact(item.id, "", item.name, item.age, item.factor, item.obs, true, client)
@@ -319,14 +319,16 @@ router.post("/case/:case",async (req, res)=>{
         await Promise.all(parse_contacts.for_add.map(async function(item){
             let rs = await getContactByid(item.dni, true, client)
             item.factor = item.factor == "SI"
-            item.age = item.age == "" ? null : item.age
+            item.age = item.age.match(new RegExp('^[0-9]{1,3}$')) ?  item.age : null
+            let status = false;
             if(rs.result.length){
                 rs = await updateContact(item.dni, "", item.name, item.age, item.factor, item.obs, true, client)
             }
             else{
+                status = true;
                 rs = await insertContact(item.dni, "", item.name, item.age, item.factor, item.obs, true, client)
             }
-            rs = await insertRelationshipContactPatient(item.dni, dni_paciente, item.parent, true, client)
+            rs = await insertRelationshipContactPatient(item.dni, dni_paciente, item.parent, status, true, client)
             
             if(item.monitor && item.monitor != ""){
                 rs = await getContactMonitorToDay(item.dni, true, client)

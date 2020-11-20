@@ -4,7 +4,7 @@ const app = express()
 const session = require('express-session')
 const pgSession = require('connect-pg-simple')(session)
 const morgan = require("morgan")
-const { PORT, PGSCHEMA } = require("./config")
+const { PORT, PGSCHEMA, KEY_SECRET } = require("./config")
 const formData = require("express-form-data")
 const exphbs = require("express-handlebars")
 const { pool } = require("./model/connection")
@@ -26,19 +26,14 @@ app.use(formData.stream());
 app.use(formData.union());
 
 app.use(session({
-    name: 'SID',
-    secret: randomString.generate({
-        length: 14,
-        charset: 'alphanumeric'
-    }),
+    secret: KEY_SECRET,
     store: new pgSession({
         pool: pool,
         tableName: 'session',
         schemaName: PGSCHEMA
     }),
-    resave: true,
-    saveUninitialized: true,
-    cookie: { secure: false }
+    resave: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 }
 }))
 
 app.use(require("./middleware_flash")())

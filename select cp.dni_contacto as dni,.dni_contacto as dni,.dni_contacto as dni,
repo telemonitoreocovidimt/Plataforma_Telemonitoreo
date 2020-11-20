@@ -1,0 +1,16 @@
+select cp.dni_contacto as dni,
+case when (select edad from development.dt_pacientes where dni = cp.dni_contacto limit 1)::int is null then c.edad
+else (select edad from development.dt_pacientes where dni = cp.dni_contacto limit 1)::int end as edad,
+c.factor_riesgo,
+case when (select count(*) from development.dt_pacientes where dni = cp.dni_contacto)::int > 0 then 1
+when cp.flag then 2
+else 3 end as seguimiento,
+c.nombre,
+c.observacion,
+cp.parentesco,
+($2::date - c.fecha_creacion::date + 1)::int as dia,
+(select id_status from development.dt_monitoreo_contactos where dni_contacto = cp.dni_contacto and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
+from development.dt_contactos_pacientes as cp
+left join development.dt_contactos as c
+on cp.dni_contacto = c.dni
+where cp.dni_paciente = $1;

@@ -8,6 +8,11 @@ const { isValidDate } = require("./../../useful")
 const { listContactByDNI, getPatientContactByDNI, getContactByDNI, getMonitoreoContactsByDNI, addPermissionContact,
   removePermissionContact } = require("./../../model/dashboard")
 
+
+//Import Validation
+const { isDNI } = require("./../../libs/validation/index");
+const CayetanoString = require("./../../res/string");
+
 async function getContact(req, res){
   
   let dni = req.query.dni
@@ -15,7 +20,7 @@ async function getContact(req, res){
     "dni": dni,
     "edad": "",
     "factor_riesgo": false,
-    "seguimiento": "NO",
+    "seguimiento": 0,
     "nombre": "",
     "observacion": "",
     "parentesco": "",
@@ -51,25 +56,31 @@ async function getContact(req, res){
 }
 
 async function takeContact(req, res){
+
+  //GET BODY
   let body = req.body
   let dni_contact = body.dni_contact
   let dni_patient = body.dni_patient
-  console.log("dni_contact", dni_contact)
-  console.log("dni_patient", dni_patient)
-  if(dni_contact && dni_patient){
-    let data = await removePermissionContact(dni_contact, true)
-    console.log("Remove : ", data.result)
-    data = await addPermissionContact(dni_contact, dni_patient, false, data.client)
-    console.log("Add : ", data.result)
-    res.json({
-      success: data.result.rowCount > 0
-    })
-  }
-  else{
-    res.json({
-      success:false
-    })
-  }
+
+  //VALIDATE BODY
+  if(!isDNI(dni_contact))
+    return res.status(400).json({"status": false, "message":CayetanoString.ERROR.ERROR_MESSAGE_NOT_VALID_DNI, "field": "dni_contact"})
+  if(!isDNI(dni_patient))
+    return res.status(400).json({"status": false, "message":CayetanoString.ERROR.ERROR_MESSAGE_NOT_VALID_DNI, "field": "dni_patient"})
+
+
+  //RUN MODEL FUNCTIONS FOR TASK
+  let data = await removePermissionContact(dni_contact, true)
+  console.log("Remove : ", data.result)
+  data = await addPermissionContact(dni_contact, dni_patient, false, data.client)
+  console.log("Add : ", data.result)
+
+  //RETURN ANSWER
+  if(data.result.rowCount)
+    return res.status(200).json({"status": true, "message":CayetanoString.SUCCESS.SUCCESS_MESSAGE_TAKE_CONTACT, "field": "dni_patient"})
+  else
+    return res.status(400).json({"status": false, "message":CayetanoString.ERROR.ERROR_MESSAGE_ERROR_TAKE_CONTACT, "field": "dni_patient"}) 
+
 }
 
 async function movePatient(req, res){

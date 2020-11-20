@@ -19,12 +19,24 @@
         transform: scale(2);
         cursor: pointer;
     }
+
+    .error_input {
+        border: solid 1px tomato;
+    }
+
+    input[type="checkbox"]{
+        height: calc(1.5em + 0rem + 2px)
+    }
+
+    .select_status{
+        width: 70%;
+    }
 </style>
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">CASO</h1>
 </div>
-<form method="POST">
+<form method="POST" id="form">
     <div class="row">
 
         <div class="col-xl-3 col-lg-3">
@@ -400,7 +412,7 @@
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
 
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <select disabled class="browser-default custom-select mb-4" >
+                                            <select disabled class="browser-default custom-select mb-4 select_status" >
                                                 {{#each ../estado_seguimiento}}
                                                     <option value="{{ this.id }}"
                                                     {{compare this.id ../estado_evo "selected"}}>
@@ -473,7 +485,7 @@
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
 
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <select name="estado_evo" class="browser-default custom-select mb-4">
+                                            <select name="estado_evo" class="browser-default custom-select mb-4 select_status">
                                                 {{#each estado_seguimiento}}
                                                     <option value="{{ this.id }}"
                                                         {{compare this.id ../estado_evo "selected"}}>
@@ -552,7 +564,7 @@
 
 
                         <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%" id="comentario"
-                            name="comentario" placeholder="Ingrese sus comentarios" maxlength="50" >{{ comentario }}</textarea>
+                            name="comentario" placeholder="Ingrese sus comentarios" >{{ comentario }}</textarea>
                     </div>
 
 
@@ -562,8 +574,8 @@
         </div>
         <div class="col-xl-11 col-lg-11">
             <div class="form-group d-flex justify-content-between" style="flex-wrap:wrap">
-                <input class="btn btn-success" type="submit" value="VOY A SEGUIRLO MÁS TARDE" onclick="document.getElementById('tipo_guardado').value=1" style="margin:3%;width: 200px; white-space: normal;">
-                <input class="btn btn-warning" type="submit" value="QUE ALGUIEN MÁS LO SIGA HOY" onclick="document.getElementById('tipo_guardado').value=3" style="margin:3%;width: 200px; white-space: normal;1">
+                <input class="btn btn-success" type="submit" value="VOY A SEGUIRLO MÁS TARDE" onclick="document.getElementById('tipo_guardado').value=1; submitFormCustom()" style="margin:3%;width: 200px; white-space: normal;">
+                <input class="btn btn-warning" type="submit" value="QUE ALGUIEN MÁS LO SIGA HOY" onclick="document.getElementById('tipo_guardado').value=3; submitFormCustom()" style="margin:3%;width: 200px; white-space: normal;1">
             </div>
         </div>
     </div>
@@ -658,7 +670,7 @@
             if(treatment.type == 7)
                 card_head = `<div class="card-header py-3 form-inline">
                                 <label for="" class="m-0 font-weight-bold text-primary mr-2">Otros : </label>
-                                <input class="form-control col-md-5" id="input_tra_${key}_name" name="input_tra_${key}_name" type="text" value="${treatment.name}"/>
+                                <input class="form-control col-md-5" id="input_tra_${key}_name" name="input_tra_${key}_name" type="text" />
                                 <i class="fas fa-times-circle top right absolute cancel" onclick="remove_treatment('${key}', ${treatment.type})"></i>
                             </div>`
 
@@ -681,7 +693,7 @@
                                 <div class="form-group col-md-12">
                                     <label for="">Observaciones :</label>
                                     <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%"
-                                        id="input_tra_${key}_obs" name="input_tra_${key}_obs" placeholder="Ingrese sus comentarios" maxlength="50" >${treatment.observation}</textarea>
+                                        id="input_tra_${key}_obs" name="input_tra_${key}_obs" placeholder="Ingrese sus comentarios" maxlength="50" >${treatment.observation == null ? "": treatment.observation }</textarea>
                                 </div>
                             </div>
                         </div>`
@@ -794,7 +806,9 @@
             
             let factor = document.getElementById(`input_cont_${key}_factor`).value
             
-            let observation = document.getElementById(`input_cont_${key}_obs`).value
+            let observation = ""
+            if(contacts[key].observacion)
+                observation = document.getElementById(`input_cont_${key}_obs`).value
             
             let parent = document.getElementById(`input_cont_${key}_parent`).value
             
@@ -810,7 +824,9 @@
             contacts[key]["monitoreo"] = monitor
             contacts[key]["factor_riesgo"] = factor
             contacts[key]["nombre"] = name
-            contacts[key]["observacion"] = observation
+            
+            if(contacts[key].observacion)
+                contacts[key]["observacion"] = observation
             //contacts[key]["seguimiento"] = follow
             contacts[key]["parentesco"] = parent
         }
@@ -847,13 +863,16 @@
             let factor = contact.factor_riesgo ? `<option value="NO">NO</option><option value="SI" selected>SI</option>` : `<option value="NO" selected>NO</option><option value="SI">SI</option>`
             
             let factor_text = contact.factor_riesgo ? 'SI': 'NO'
-
+            contact.nombre = contact.nombre ? contact.nombre : ""
+            contact.edad = contact.edad ? contact.edad : "" 
+            contact.observacion = contact.observacion ? contact.observacion : "" 
+            contact.parentesco = contact.parentesco ? contact.parentesco : "" 
             let html_name = contact.seguimiento == 0 || contact.seguimiento == 2 ? 
                         `<input  required class="form-control col-md-11" id="input_cont_${key}_name" name="input_cont_${key}_name" type="text" value="${contact.nombre}" />`:
                             `<input disabled required class="form-control col-md-11" type="text" value="${contact.nombre}" />
                             <input id="input_cont_${key}_name" name="input_cont_${key}_name" type="hidden" value="${contact.nombre}" />`
-
-            let html_age = contact.seguimiento == 0 || contact.seguimiento == 2 || contact.edad == null || contact.edad == ""? 
+            //|| contact.edad == null || contact.edad == ""
+            let html_age = contact.seguimiento == 0 || contact.seguimiento == 2 ? 
                         `<input required class="form-control col-md-11" id="input_cont_${key}_age" name="input_cont_${key}_age" type="text" value="${contact.edad}" />`:
                         `<input required disabled class="form-control col-md-11" type="text" value="${contact.edad}" />
                         <input  id="input_cont_${key}_age" name="input_cont_${key}_age" type="hidden" value="${contact.edad}" />`
@@ -1008,9 +1027,13 @@
         container_contact = document.getElementById("container_contact") // Contenedor de "Cards contactos" 
         generateCardContact(container_contact) //Convertir JSON en HTML Cards
         button_agregar_contacto.addEventListener("click", async ()=>{
+            Swal.fire({imageUrl: 'https://i.pinimg.com/originals/7e/fc/2c/7efc2cb33ee4eb9d7625ca1eca702506.gif', title: "Espere un momento."})
             button_agregar_contacto.disabled = true
             let dni = text_box_contacto.value
+            if(!Validation.isDNI(dni))
+                return Swal.fire({icon: 'error', title: "DNI invalido", text: "Ingrese un DNI valido. El formato es 88888888."}) , button_agregar_contacto.disabled = false;
             let rs = await fetch(`/api/v1/ajax/contact?dni=${dni}`)
+            Swal.close()
             let json = await rs.json()
             console.log(contacts)
             console.log("Resultado AJAX : ", json.data)
@@ -1029,10 +1052,68 @@
 </script>
 
 <script>
+
+    const Validation ={
+        isDNI: (_dni) => new RegExp("^[0-9]{8}$").test(_dni),
+    }
+
     window.onload  = ()=>{
         init_treatments()
         initContacts()
         const scroll = document.getElementById("containet_form_check")
         scroll.parentNode.scrollTo(scroll.scrollWidth, 0)
+
+
+        window.onkeypress = (event)=>{
+            //debugger
+            //console.log(event.keyCode == 13)
+            if(event.keyCode == 13)
+                event.preventDefault()
+        }
+    }
+
+
+    function submitFormCustom(){
+        
+        event.preventDefault()
+        saveStatusContacts()
+        //console.log(contacts)
+        saveState()
+        let prefix = 'input_tra'
+        let i_treatments = 0
+        
+        for(let key in treatments){
+            let treatment = treatments[key]
+            let type = treatment.type
+            let name = treatment.name
+            let init = treatment.init
+            let finish = treatment.finish
+            let observation = treatment.observation
+           
+            //i_treatments+=validateInputBlackNull(`${prefix}_${key}_obs`, observation, "Observación no definido", "Porfavor defina la observación (Rango de horas para tomar el medicamento y mas).") 
+            //i_treatments+=validateInputBlackNull(`${prefix}_${key}_to`, finish, "Fecha de fin de tratamiento no definido", "Porfavor defina una fecha para el tratamiento tratamiento a seguir.") 
+            i_treatments+=validateInputBlackNull(`${prefix}_${key}_from`, init, "Fecha inicial de tratamiento no definido", "Porfavor defina una fecha para el tratamiento tratamiento a seguir.") 
+            i_treatments+=validateInputBlackNull(`${prefix}_${key}_name`, name, "Nombre de tratamiento no definido", "Porfavor defina el nombre de tratamiento a seguir.") 
+            i_treatments+=validateInputBlackNull(`${prefix}_${key}_type`, type, "Tipo de tratamiento no definido", "Porfavor defina el tipo de tratamiento a seguir.") 
+        }
+        
+        if(i_treatments == 0)
+            document.getElementById("form").submit()
+    }
+
+
+
+    function validateInputBlackNull(id, value, title_error, message_error){
+        if(value == "" || value == null){
+            document.getElementById(id).focus()
+            document.getElementById(id).classList.add("error_input")
+            Swal.fire({
+                icon: 'error',
+                title: title_error,
+                text: message_error,
+            })
+            return 1
+        }
+        return 0
     }
 </script>
