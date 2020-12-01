@@ -3,7 +3,7 @@ const { validationResult } = require('express-validator')
 const { getRangeCase, getRangeDailySurvey, getRangeInitialSurvey } = require("./../model/report")
 const { dateToDateString, dateToTimeStampString } = require("./../useful")
 
-async function casos_dia(req, res){
+async function casosDia(req, res){
 
     let error = validationResult(req)
     if(!error.isEmpty())
@@ -28,7 +28,7 @@ async function casos_dia(req, res){
     res.end(excel, 'binary')
 }
 
-async function encuestas_iniciales(req, res){
+async function encuestasIniciales(req, res){
 
     let error = validationResult(req)
     if(!error.isEmpty())
@@ -54,7 +54,7 @@ async function encuestas_iniciales(req, res){
 }
 
 
-async function encuestas_diarias(req, res){
+async function encuestasDiarias(req, res){
 
     let error = validationResult(req)
     if(!error.isEmpty())
@@ -78,7 +78,7 @@ async function encuestas_diarias(req, res){
 }
 
 module.exports = {
-    casos_dia,
-    encuestas_iniciales,
-    encuestas_diarias
-}
+  casosDia,
+  encuestasIniciales,
+  encuestasDiarias,
+};

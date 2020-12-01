@@ -1,168 +1,44 @@
-const { Router } = require("express")
-const router = Router()
-const { getPatientsAlert, getPatients, countAllCaseToday, countAllCaseAttendedToday,
-     countAllCaseAttendedToDayForDoctor, countAllCaseAttendedToDayBetweenDoctors, takeCase, canTakeCase,
-     getStatusPatients, canTerminateCase, terminateCase, getMyPatients, getCase, updateCase, dropCase, getPatientForCase, removeScheduledCase, addScheduledCase, haveThisScheduledCaseForTomorrow,getComentarios,getNoteByPatient, updateNoteByPatient, getPreviousCases, getTreatment,
-     deleteTreatment,
-     updateTreatment,
-     insertTreatment,
-     getContactByPatient,
-     updateRelationshipContactPatient,
-     updateContact,
-     updateContactMonitor,
-     insertContact,
-     getContactByid,
-     insertRelationshipContactPatient,
-     insertContactMonitor,
-     getContactMonitorToDay,
-     getMonitoreoContactsByDNI,
-     deleteRelationshipContactPatient,
-     listContact } = require("./../../model/dashboard")
+const {Router} = require('express');
+const router = new Router();
+const {takeCase,
+  canTakeCase,
+  getStatusPatients,
+  canTerminateCase,
+  terminateCase,
+  getCase,
+  updateCase,
+  dropCase,
+  getPatientForCase,
+  removeScheduledCase,
+  addScheduledCase,
+  haveThisScheduledCaseForTomorrow,
+  getComentarios,
+  getPreviousCases,
+  getTreatment,
+  deleteTreatment,
+  updateTreatment,
+  insertTreatment,
+  updateRelationshipContactPatient,
+  updateContact,
+  updateContactMonitor,
+  insertContact,
+  getContactByid,
+  insertRelationshipContactPatient,
+  insertContactMonitor,
+  getContactMonitorToDay,
+  getMonitoreoContactsByDNI,
+  deleteRelationshipContactPatient,
+  listContact} = require('../model/dashboard');
 
-const { getGroups, getGroupsContacts } = require("./../../useful")
-const { openConnection } = require("././../../model/connection")
+const {getGroups, getGroupsContacts} = require('../useful');
+const {getInbox, getMyInbox} = require('./../controller/dashboard');
+const {isDoctor} = require('./../middleware/auth');
 
-router.get("/old",async (req, res)=>{
+router.get('/', isDoctor, getInbox);
 
-    if(req.session.user){
-        let data = await getPatientsAlert(true)
-        let cases_alert = data.result
-        data = await getPatients(true, data.client)
-        let cases = data.result
-        data = await getMyPatients(req.session.user.dni, true, data.client)
-        let my_cases = data.result
-        data = await countAllCaseToday(true, data.client)
-        let cases_for_attent = data.result
-        data = await countAllCaseAttendedToday(true, data.client)
-        let cases_attented = data.result
-        data = await countAllCaseAttendedToDayForDoctor(req.session.user.dni, true, data.client)
-        let cases_attented_for_me = data.result
-        data = await countAllCaseAttendedToDayBetweenDoctors(false, data.client)
-        
-        let count = 0
-        let sum = 0
-        data.result.forEach((json)=>{
-            count++
-            sum+=parseInt(json.count)
-        })
-        let cases_attented_promean = 0;
-        if ( count && sum ){
-            cases_attented_promean = parseInt(sum/count)
-        }
+router.get('/mibandeja', isDoctor, getMyInbox);
 
-        await req.useFlash(res)
-        res.render("dashboard", {  layout: 'main',
-            islogin:true,
-            ...req.session.user, 
-            cases_alert, 
-            cases,
-            my_cases,
-            cases_attented_for_me : cases_attented_for_me[0].count , 
-            cases_attented_promean, 
-            cases_for_attent: cases_for_attent[0].count,
-            cases_attented : cases_attented[0].count
-        })
-    }
-    else{
-        await req.flash("danger", "Usted no ha iniciado sesión.")
-        res.redirect("/")
-    }
-})
-
-router.get("/",async (req, res)=>{
-
-    if(req.session.user){
-        let data = await getPatientsAlert(req.session.user.dni, true)
-        let cases_alert = data.result
-        data = await getPatients(req.session.user.dni, true, data.client)
-        let cases = data.result
-        /*
-        data = await getMyPatients(req.session.user.dni, true, data.client)
-        let my_cases = data.result*/
-        data = await countAllCaseToday(true, data.client)
-        let cases_for_attent = data.result
-        data = await countAllCaseAttendedToday(true, data.client)
-        let cases_attented = data.result
-        data = await countAllCaseAttendedToDayForDoctor(req.session.user.dni, true, data.client)
-        let cases_attented_for_me = data.result
-        data = await countAllCaseAttendedToDayBetweenDoctors(false, data.client)
-        let count = 0
-        let sum = 0
-        data.result.forEach((json)=>{
-            count++
-            sum+=parseInt(json.count)
-        })
-        let cases_attented_promean = 0;
-        if ( count && sum ){
-            cases_attented_promean = parseInt(sum/count)
-        }
-
-        await req.useFlash(res)
-        res.render("dashboard1", {  layout: 'main1',
-            islogin:true,
-            ...req.session.user, 
-            cases_alert, 
-            cases,
-            cases_attented_for_me : cases_attented_for_me[0].count , 
-            cases_attented_promean, 
-            cases_for_attent: cases_for_attent[0].count,
-            cases_attented : cases_attented[0].count
-        })
-    }
-    else{
-        await req.flash("danger", "Usted no ha iniciado sesión.")
-        res.redirect("/")
-    }
-})
-
-router.get("/mibandeja",async (req, res)=>{
-
-    if(req.session.user){
-        
-        let data = await getPatientsAlert(true)
-        let cases_alert = data.result
-        data = await getPatients(true, data.client)
-        let cases = data.result 
-        
-         data = await getMyPatients(req.session.user.dni, true, data.client)
-        let my_cases = data.result
-        data = await countAllCaseToday(true, data.client)
-        let cases_for_attent = data.result
-        data = await countAllCaseAttendedToday(true, data.client)
-        let cases_attented = data.result
-        data = await countAllCaseAttendedToDayForDoctor(req.session.user.dni, true, data.client)
-        let cases_attented_for_me = data.result
-        data = await countAllCaseAttendedToDayBetweenDoctors(false, data.client)
-        let count = 0
-        let sum = 0
-        data.result.forEach((json)=>{
-            count++
-            sum+=parseInt(json.count)
-        })
-        let cases_attented_promean = 0;
-        if ( count && sum ){
-            cases_attented_promean = parseInt(sum/count)
-        }
-
-        await req.useFlash(res)
-        res.render("mycases", {  layout: 'main1',
-            islogin:true,
-            ...req.session.user, 
-            my_cases,
-            cases_attented_for_me : cases_attented_for_me[0].count , 
-            cases_attented_promean, 
-            cases_for_attent: cases_for_attent[0].count,
-            cases_attented : cases_attented[0].count
-        })
-    }
-    else{
-        await req.flash("danger", "Usted no ha iniciado sesión.")
-        res.redirect("/")
-    }
-})
-
-router.get("/case/:case",async (req, res)=>{
-
+router.get('/case/:case', async (req, res)=>{
     req.params.case = parseInt(req.params.case)
     if(req.session.user){
         if(req.params.case){
@@ -237,7 +113,7 @@ router.get("/case/:case",async (req, res)=>{
     }
 })
 
-router.post("/case/:case",async (req, res)=>{
+router.post('/case/:case', async (req, res)=>{
     const json = req.body
     console.log(json)
     

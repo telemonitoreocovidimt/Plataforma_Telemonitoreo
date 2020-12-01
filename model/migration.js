@@ -41,6 +41,7 @@ function makeMigrations(){
         params = [datePeru_current]
         result = await client.query(query, params)
         client.release(true)
+        console.log(result.rows)
         resolve(result.rows)
     })
 }

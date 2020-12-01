@@ -16,7 +16,7 @@
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Casos por atender hoy</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{ cases_for_attent }}</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{ numberCaseToDay }}</div>
                     </div>
                     <div class="col-auto">
                      
@@ -34,7 +34,7 @@
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Casos atendidos hoy</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{ cases_attented  }}</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{ numberCaseAttented  }}</div>
                     </div>
                     <div class="col-auto">
                      <i class="fas fa-procedures fa-2x text-gray-300"></i>
@@ -53,7 +53,7 @@
                       <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Casos por día / médico</div>
                       <div class="row no-gutters align-items-center">
                         <div class="col-auto">
-                          <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ cases_attented_promean }}</div>
+                          <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ averageCaseAttented }}</div>
                         </div>
 
                       </div>
@@ -73,7 +73,7 @@
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Casos atendidos por mí</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{ cases_attented_for_me }}</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{ numberCaseAttentedByDoctor }}</div>
                     </div>
                     <div class="col-auto">
                        <i class="fas fa-procedures fa-2x text-gray-300"></i>

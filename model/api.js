@@ -1,54 +1,79 @@
-const { openConnection } = require("./connection")
-const moment = require('moment-timezone')
-const { PGSCHEMA } = require("./../config")
+/* eslint "max-len": ["error", {"code":200}] */
+const {openConnection} = require('./connection');
+const {PGSCHEMA} = require('./../config');
+const {getTimeNow} = require('./../lib/time');
 
-function getTimeNow(restar_day=0, restar_hour=0){
-    let date = new Date()
-    date.setDate(date.getDate() - restar_day)
-    date.setHours(date.getHours() - restar_hour)
-    let datePeru = moment.tz(date, "America/Lima");
-    let day_string = `${datePeru.year().toString()}-${(datePeru.month() + 1).toString().padStart(2,"0")}-${datePeru.date().toString().padStart(2,"0")}`
-    let datePeru_init = `${day_string}T00:00:00.000Z`
-    let datePeru_finish = `${day_string}T23:59:59.0000Z`
-    let clock_string = `${datePeru.hours().toString().padStart(2,"0")}:${datePeru.minutes().toString().padStart(2,"0")}:${datePeru.seconds().toString().padStart(2,"0")}.${datePeru.milliseconds().toString().padStart(3,'0')}Z`
-    let datePeru_current = `${day_string}T${clock_string}`
-    return {datePeru_init, datePeru_finish, datePeru_current}
+/**
+ * Obtener la lista de usuarios para la encuesta inicial.
+ * @return {Promise}
+ */
+function getPatientsSurvey01() {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateCurrent} = getTimeNow();
+    const client = await openConnection();
+    // let query = `select * from ${PGSCHEMA}.sp_list_patients_survey01($1)`
+    const query = `select p.codigo, p.dni, p.nombre, p.celular, p.acepto_terminos, p.id_hospital, h.descripcion nombre_hospital from ${PGSCHEMA}.dt_pacientes as p
+                inner join dm_hospitales as h
+                on p.id_hospital = h.id
+                where p.paso_encuesta_inicial = false and p.estado = 1 and 
+                (p.fecha_creacion + concat((select param.cantidad_max from ${PGSCHEMA}.dm_parametros as param limit 1)::int, ' days')::interval) > $1 and 
+                p.fecha_creacion < $1;`;
+    const params = [peruvianDateCurrent];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
-function getPatientsSurvey01(){
-    return new Promise(async (resolve, reject)=>{
-        let { datePeru_current } = getTimeNow()
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.sp_list_patients_survey01($1)`
-        let params = [datePeru_current]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * Obtener la lista de usuarios para la encuesta diaria.
+ * @return {Promise}
+ */
+function getPatientsSurvey02() {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateCurrent} = getTimeNow();
+    const client = await openConnection();
+    // let query = `select * from ${PGSCHEMA}.sp_list_patients_survey02($1)`
+    const query = `select p.codigo, p.dni, p.nombre, p.celular, p.acepto_terminos, p.id_hospital, h.descripcion nombre_hospital from ${PGSCHEMA}.dt_pacientes as p
+            inner join dm_hospitales as h
+            on p.id_hospital = h.id
+            where p.grupo = 'C'
+            and p.is_doctor = false
+            and p.factor_riesgo = false
+            and p.estado = 1
+            and p.paso_encuesta_inicial = true
+            and (p.fecha_creacion + concat((select param.cantidad_max from ${PGSCHEMA}.dm_parametros as param limit 1)::int, ' days')::interval) >= $1 and 
+            p.fecha_creacion < $1;`;
+    const params = [peruvianDateCurrent];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
-function getPatientsSurvey02(){
-    return new Promise(async (resolve, reject)=>{
-        let { datePeru_current } = getTimeNow()
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.sp_list_patients_survey02($1)`
-        let params = [datePeru_current]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
-}
-
-function getPatientsSurvey03(){
-    return new Promise(async (resolve, reject)=>{
-        let { datePeru_current } = getTimeNow()
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.sp_list_patients_survey03($1)`
-        let params = [datePeru_current]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * Obtener la lista de usuarios para la encuesta final.
+ * @return {Promise}
+ */
+function getPatientsSurvey03() {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateCurrent} = getTimeNow();
+    const client = await openConnection();
+    // let query = `select * from ${PGSCHEMA}.sp_list_patients_survey03($1)`
+    const query = `select p.codigo, p.dni, p.nombre, p.celular, p.acepto_terminos, p.id_hospital, h.descripcion nombre_hospital from ${PGSCHEMA}.dt_pacientes as p
+        inner join dm_hospitales as h
+        on p.id_hospital = h.id
+        where p.grupo = 'C'
+        and p.is_doctor = false
+        and p.factor_riesgo = false
+        and p.estado = 1
+        and p.paso_encuesta_inicial = true
+        and (p.fecha_creacion + concat((select param.cantidad_max from ${PGSCHEMA}.dm_parametros as param limit 1)::int, ' days')::interval) = $1;`;
+    const params = [peruvianDateCurrent];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
 function existePatient(dni_paciente){
@@ -63,7 +88,7 @@ function existePatient(dni_paciente){
 }
 
 
-function save_answer(dni_paciente, variable, respuesta, asked_at, answered_at){
+function saveAnswer(dni_paciente, variable, respuesta, asked_at, answered_at){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
         let query = `select * from ${PGSCHEMA}.sp_save_answer($1, $2, $3, $4, $5)`
@@ -75,7 +100,7 @@ function save_answer(dni_paciente, variable, respuesta, asked_at, answered_at){
     })
 }
 
-function patient_change_status(dni_paciente, estado){
+function patientChangeStatus(dni_paciente, estado){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
         let query = `select * from ${PGSCHEMA}.sp_patient_change_status($1, $2)`
@@ -88,7 +113,7 @@ function patient_change_status(dni_paciente, estado){
 
 
 
-function exists_case_patient(dni_paciente){
+function existsCasePatient(dni_paciente){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_init } = getTimeNow()
         let client = await openConnection()
@@ -101,7 +126,7 @@ function exists_case_patient(dni_paciente){
     })
 }
 
-function patient_change_risk_factor(dni_paciente, factor_riesgo){
+function patientChangeRiskFactor(dni_paciente, factor_riesgo){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
         let query = `select * from ${PGSCHEMA}.sp_patient_change_risk_factor($1, $2)`
@@ -112,7 +137,7 @@ function patient_change_risk_factor(dni_paciente, factor_riesgo){
     })
 }
 
-function patient_change_age(dni_paciente, age){
+function patientChangeAge(dni_paciente, age){
     return new Promise(async (resolve, reject)=>{
         let client = await openConnection()
         let query = `select * from ${PGSCHEMA}.sp_patient_change_age($1, $2)`
@@ -123,7 +148,7 @@ function patient_change_age(dni_paciente, age){
     })
 }
 
-function validate_group_case(dni_paciente){
+function validateGroupCase(dni_paciente){
     return new Promise(async (resolve, reject)=>{
         let { datePeru_init } = getTimeNow()
         let client = await openConnection()
@@ -136,7 +161,7 @@ function validate_group_case(dni_paciente){
 }
 
 
-async function patient_is_doctor(dni_paciente){
+async function patientIsDoctor(dni_paciente){
     console.log("Patient is doctor")
     console.log(dni_paciente)
     let client = await openConnection()
@@ -147,20 +172,17 @@ async function patient_is_doctor(dni_paciente){
     return result.rows
 } 
 
-//existePatient(req.body.patient_code) sp_save_answer
-//development.sp_save_answer(patient_id, answer.variable, answer.answer, answer.asked_at, answer.answered_at) save_answer
-// development.sp_patient_change_status(patient_id, 2) patient_change_status
-// development.sp_patient_change_status(patient_id, 3)patient_change_status
+
 module.exports = {
-    getPatientsSurvey01,
-    getPatientsSurvey02,
-    getPatientsSurvey03,
-    existePatient,
-    save_answer,
-    patient_change_status,
-    patient_change_risk_factor,
-    patient_change_age,
-    validate_group_case,
-    patient_is_doctor,
-    exists_case_patient
-}
+  getPatientsSurvey01,
+  getPatientsSurvey02,
+  getPatientsSurvey03,
+  existePatient,
+  saveAnswer,
+  patientChangeStatus,
+  patientChangeRiskFactor,
+  patientChangeAge,
+  validateGroupCase,
+  patientIsDoctor,
+  existsCasePatient,
+};

@@ -1,20 +1,70 @@
-const { openConnection } = require("./connection")
-const { PGSCHEMA } = require("./../config")
+const {openConnection} = require('./connection');
+const {PGSCHEMA} = require('./../config');
 
-
-function login(email, password){
-    return new Promise(async (resolve, reject)=>{
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.dm_medicos_voluntarios as m where m.correo = $1 and m.password = $2`
-        let params = [email, password]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * Validar credenciales
+ * @function
+ * @param {String} email Correo electronico del usuario
+ * @param {String} password Contraseña del usuario
+ * @return {Promise}
+ */
+function login(email, password) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.dm_medicos_voluntarios as m 
+                    where m.correo = $1 and m.password = $2`;
+    const params = [email, password];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
+/**
+ * Validar credenciales
+ * @function
+ * @param {String} email Correo electronico del usuario
+ * @param {String} password Contraseña del usuario
+ * @return {Promise}
+ */
+function login(email, password) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select *, h.descripcion nombre_hospital
+       from ${PGSCHEMA}.dm_medicos_voluntarios as m 
+       inner join ${PGSCHEMA}.dm_hospitales as h
+        on m.id_hospital = h.id
+                    where m.correo = $1 and m.password = $2 limit 1;`;
+    const params = [email, password];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
+}
+
+/**
+ * Validar credenciales para administrador
+ * @function
+ * @param {String} email Correo electronico del administrador
+ * @param {String} password Contraseña del administrador
+ * @return {Promise}
+ */
+function loginAdmin(email, password) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select *, h.descripcion nombre_hospital
+        from ${PGSCHEMA}.dm_administradores as a
+        inner join ${PGSCHEMA}.dm_hospitales as h
+        on a.id_hospital = h.id
+        where a.email = $1 
+        and a.password = crypt($2, a.password) limit 1;`;
+    const params = [email, password];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
+}
 module.exports = {
-    login
-}
-
-
+  login,
+  loginAdmin,
+};

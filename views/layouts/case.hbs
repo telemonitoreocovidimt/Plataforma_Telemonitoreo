@@ -29,11 +29,11 @@
                 <div class="logo">
                     <p>
                         <i class="zmdi zmdi-view-dashboard"></i>
-                        Sistema de Monitoreo de Pacientes - COVID 19
+                        Sistema de Monitoreo de Pacientes - {{nombre_hospital}}
                     </p>
                 </div>
                 <ul>
-                    <li>Hola, {{ nombre }}</li>
+                    <li>Hola, {{nombre}}</li>
                     <span class="sm-hide">|</span>
                     <li>
                         <a href="/logout">
@@ -44,6 +44,9 @@
                     </li>
                 </ul>
             </div>
+            {{#each flash}}
+                <div class="alert alert-{{this.type}}">{{{this.message}}}</div>
+            {{/each}}
             <div class="container">
             <div class="row nav-side">
 

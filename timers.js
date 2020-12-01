@@ -8,7 +8,6 @@ const { TIME_OUT_ROUTINE } = require("./config")
 
 const { makeMigrations } = require("./model/migration")
 
-
 //Config Timers
 const job_01 = new CronJob(TIME_OUT_ROUTINE, function() {
     makeMigrations()
