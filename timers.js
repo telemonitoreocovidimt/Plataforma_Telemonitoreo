@@ -1,21 +1,20 @@
-//Import modules
-const CronJob = require("cron").CronJob;
+const CronJob = require('cron').CronJob;
 
-//Global variables
-const { TIME_OUT_ROUTINE } = require("./config")
+const {TIME_OUT_ROUTINE} = require('./config');
+const {makeMigrations} = require('./model/migration');
 
-//Import my modules
+const job01 = new CronJob(TIME_OUT_ROUTINE, function() {
+  makeMigrations();
+}, null, true, 'America/Lima');
 
-const { makeMigrations } = require("./model/migration")
-
-//Config Timers
-const job_01 = new CronJob(TIME_OUT_ROUTINE, function() {
-    makeMigrations()
-}, null, true, "America/Lima")
-
-
-function runJobs(){
-    job_01.start()
+/**
+ * Ejecutar los jobs
+ * @function
+ */
+function runJobs() {
+  job01.start();
 }
 
-module.exports = {runJobs}
+module.exports = {
+  runJobs,
+};

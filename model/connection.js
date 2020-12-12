@@ -1,14 +1,16 @@
-const {Pool, Client} = require("pg")
+const {Pool} = require('pg');
 
 const pool = new Pool({
-    ssl:true
-})
-
-function openConnection(){
-    return pool.connect()
+  ssl: true,
+});
+/**
+ * @return {Pool}
+ */
+function openConnection() {
+  return pool.connect();
 }
 
 module.exports = {
-    openConnection,
-    pool
-}
+  openConnection,
+  pool,
+};

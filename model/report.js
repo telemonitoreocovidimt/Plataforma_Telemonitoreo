@@ -1,11 +1,16 @@
-const { openConnection } = require("./connection")
-const { PGSCHEMA } = require("./../config")
+/* eslint "max-len" : ["error", {"code": 190}] */
+const {openConnection} = require('./connection');
+const {PGSCHEMA} = require('./../config');
 
-function getRangeCase(from , to){
-    return new Promise(async (resolve, reject)=>{
-
-        let client = await openConnection()
-        let query = `SELECT p.dni "DNI paciente",
+/**
+ * @param {*} from
+ * @param {*} to
+ * @return {Promise}
+ */
+function getRangeCase(from, to) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `SELECT p.dni "DNI paciente",
                 p.nombre "Nombre paciente",
                 p.celular "Celular paciente",
                 p.distrito "Distrito paciente",
@@ -30,18 +35,22 @@ function getRangeCase(from , to){
                 INNER JOIN ${PGSCHEMA}.dm_medicos_voluntarios mv ON cd.dni_medico = mv.dni
                 INNER JOIN ${PGSCHEMA}.dm_estados_pacientes ep ON ep.id = p.estado
                 WHERE cd.fecha_caso::date >= $1::date and cd.fecha_caso::date <= $2::date
-                ORDER BY cd.fecha_caso ASC`
-        let params = [from, to]
-        let result = await client.query(query, params)
-        resolve(result.rows)
-    })
+                ORDER BY cd.fecha_caso ASC`;
+    const params = [from, to];
+    const result = await client.query(query, params);
+    resolve(result.rows);
+  });
 }
 
-function getRangeDailySurvey(from , to){
-    return new Promise(async (resolve, reject)=>{
-
-        let client = await openConnection()
-        let query = `select dni_paciente "DNI paciente",
+/**
+ * @param {*} from
+ * @param {*} to
+ * @return {Promise}
+ */
+function getRangeDailySurvey(from, to) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select dni_paciente "DNI paciente",
                     nombre "Nombre",
                     max(fecha_respuesta) "Fin de encuesta",
                     max(dificultad_para_respirar) "Dificultad para respirar",
@@ -73,18 +82,22 @@ function getRangeDailySurvey(from , to){
                     order by p.dni asc
                     ) fex
                     group by dni_paciente,nombre
-                    order by max(fecha_respuesta) asc`
-        let params = [from, to]
-        let result = await client.query(query, params)
-        resolve(result.rows)
-    })
+                    order by max(fecha_respuesta) asc`;
+    const params = [from, to];
+    const result = await client.query(query, params);
+    resolve(result.rows);
+  });
 }
 
-function getRangeInitialSurvey(from , to){
-    return new Promise(async (resolve, reject)=>{
-
-        let client = await openConnection()
-        let query = `select dni_paciente "DNI paciente",
+/**
+ * @param {*} from
+ * @param {*} to
+ * @return {Promise}
+ */
+function getRangeInitialSurvey(from, to) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select dni_paciente "DNI paciente",
                 nombre "Nombre",
                 max(fecha_respuesta) "Fin de encuesta", 
                 max(edad_paciente) "Edad paciente",
@@ -113,16 +126,16 @@ function getRangeInitialSurvey(from , to){
                 order by p.dni asc
                 ) fex
                 group by dni_paciente,nombre
-                order by max(fecha_respuesta) asc`
-        let params = [from, to]
-        let result = await client.query(query, params)
-        resolve(result.rows)
-    })
+                order by max(fecha_respuesta) asc`;
+    const params = [from, to];
+    const result = await client.query(query, params);
+    resolve(result.rows);
+  });
 }
 
 
 module.exports = {
-    getRangeCase,
-    getRangeInitialSurvey,
-    getRangeDailySurvey
-}
+  getRangeCase,
+  getRangeInitialSurvey,
+  getRangeDailySurvey,
+};

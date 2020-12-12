@@ -94,7 +94,8 @@ router.get('/case/:case', async (req, res)=>{
                     data = await getComentarios(dni_paciente);
                     let comments = data.result
                     await req.useFlash(res)
-                    res.render("form1", {layout: 'main1', contacts_json, treatments_string, estado_seguimiento, previous_cases, have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
+                    console.log({layout: 'main1', contacts_json, treatments_string, estado_seguimiento, previous_cases, have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
+                    return res.render("form1", {layout: 'main1', contacts_json, treatments_string, estado_seguimiento, previous_cases, have_this_scheduled_case, islogin:true, ...cases[0], ...data, status_patients, groups, factors, test,condicionesEgreso,comments, condicion_egreso})
                 }
                 else{
                     await req.flash("danger", canTake[0].message)

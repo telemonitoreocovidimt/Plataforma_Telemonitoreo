@@ -29,7 +29,7 @@
     }
 
     .select_status{
-        width: 70%;
+        width: 100%;
     }
 </style>
 <!-- Page Heading -->
@@ -91,11 +91,35 @@
                                 <label for="inputEmail4">DNI:</label>
                                 <input type="text" class="form-control" name="dni" id="dni" disabled value="{{dni}}" />
                             </div>
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-4">
                                 <label for="inputEmail4">Teléfono</label>
                                 <input type="text" class="form-control" name="celular" id="celular"
                                     value="{{celular}}" />
                             </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputEmail4">Edad:</label>
+                                <input type="text" class="form-control" disabled value="{{edad}}" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="inputEmail4">Pais:</label>
+                                <input type="text" class="form-control" disabled value="{{pais}}" />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputEmail4">Provincia:</label>
+                                <input type="text" class="form-control" disabled value="{{provincia}}" />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputEmail4">Distrito:</label>
+                                <input type="text" class="form-control" disabled value="{{distrito}}" />
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label for="inputEmail4">Direccion:</label>
+                                <input type="text" class="form-control" disabled value="{{direccion}}" />
+                            </div>
+                            
                         </div>
 
                         <div class="form-row">

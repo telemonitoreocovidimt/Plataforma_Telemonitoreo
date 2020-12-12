@@ -29,96 +29,112 @@ const {listContactByDNI,
 const {isDNI} = require('../lib/validation');
 const CayetanoString = require('../res/string');
 
-async function getContact(req, res){
-  
-  let dni = req.query.dni
+/**
+ *
+ * @function
+ * @param {Request} req Solicitud HTTTP
+ * @param {Response} res Respuesta HTTP
+ */
+async function getContact(req, res) {
+  const dni = req.query.dni;
   let data = {
-    "dni": dni,
-    "edad": "",
-    "factor_riesgo": false,
-    "seguimiento": 0,
-    "nombre": "",
-    "observacion": "",
-    "parentesco": "",
-    "dia":1,
-    "monitoreo": "",
-    "monitoreos":[]
-  }
-  if(dni){
-    let rs = await getPatientContactByDNI(dni)
-    if(rs.result.length > 0){
-      data = rs.result[0]
-    }
-    else{
-      rs = await getContactByDNI(dni)
-      if(rs.result.length > 0){
-        data = rs.result[0]
+    'dni': dni,
+    'edad': '',
+    'factor_riesgo': false,
+    'seguimiento': 0,
+    'nombre': '',
+    'observacion': '',
+    'parentesco': '',
+    'dia': 1,
+    'monitoreo': '',
+    'monitoreos': [],
+  };
+  if (dni) {
+    let rs = await getPatientContactByDNI(dni);
+    if (rs.result.length > 0) {
+      data = rs.result[0];
+    } else {
+      rs = await getContactByDNI(dni);
+      if (rs.result.length > 0) {
+        data = rs.result[0];
       }
     }
 
-    rs = await getMonitoreoContactsByDNI(dni)
-    data["monitoreos"] = rs.result
+    rs = await getMonitoreoContactsByDNI(dni);
+    data['monitoreos'] = rs.result;
   }
-  
-  for(let key in data){
-    if(data[key] == null)
-      data[key] = ""
+
+  for (const key in data) {
+    if (data[key] == null) {
+      data[key] = '';
+    }
   }
 
   res.json({
-    success:true,
-    data
-  })
+    success: true,
+    data,
+  });
 }
 
-async function takeContact(req, res){
+/**
+ *
+ * @function
+ * @param {Request} req Solicitud HTTTP
+ * @param {Response} res Respuesta HTTP
+ */
+async function takeContact(req, res) {
+  // GET BODY
+  const body = req.body;
+  const dni_contact = body.dni_contact;
+  const dni_patient = body.dni_patient;
 
-  //GET BODY
-  let body = req.body
-  let dni_contact = body.dni_contact
-  let dni_patient = body.dni_patient
-
-  //VALIDATE BODY
-  if(!isDNI(dni_contact))
-    return res.status(400).json({"status": false, "message":CayetanoString.ERROR.ERROR_MESSAGE_NOT_VALID_DNI, "field": "dni_contact"})
-  if(!isDNI(dni_patient))
-    return res.status(400).json({"status": false, "message":CayetanoString.ERROR.ERROR_MESSAGE_NOT_VALID_DNI, "field": "dni_patient"})
-
-
-  //RUN MODEL FUNCTIONS FOR TASK
-  let data = await removePermissionContact(dni_contact, true)
-  console.log("Remove : ", data.result)
-  data = await addPermissionContact(dni_contact, dni_patient, false, data.client)
-  console.log("Add : ", data.result)
-
-  //RETURN ANSWER
-  if(data.result.rowCount)
-    return res.status(200).json({"status": true, "message":CayetanoString.SUCCESS.SUCCESS_MESSAGE_TAKE_CONTACT, "field": "dni_patient"})
-  else
-    return res.status(400).json({"status": false, "message":CayetanoString.ERROR.ERROR_MESSAGE_ERROR_TAKE_CONTACT, "field": "dni_patient"}) 
-
-}
-
-async function movePatient(req, res){
-  let dni_patient = req.body.dni_patient
-  if(dni_patient){
-
-    let rs = await patient_change_status(dni_patient, 2)
-    rs = await exists_case_patient(dni_patient)
-    
-
-    if(rs.length){
-      await makeMigrationsCustomer(dni_patient)
-    }
-    
-    return res.json({
-      success: rs.length > 0
-    })
+  // VALIDATE BODY
+  if (!isDNI(dni_contact)) {
+    return res.status(400).json({'status': false, 'message': CayetanoString.ERROR.ERROR_MESSAGE_NOT_VALID_DNI, 'field': 'dni_contact'});
   }
-  else{
+  if (!isDNI(dni_patient)) {
+    return res.status(400).json({'status': false, 'message': CayetanoString.ERROR.ERROR_MESSAGE_NOT_VALID_DNI, 'field': 'dni_patient'});
+  }
+
+
+  // RUN MODEL FUNCTIONS FOR TASK
+  let data = await removePermissionContact(dni_contact, true);
+  console.log('Remove : ', data.result);
+  data = await addPermissionContact(dni_contact, dni_patient, false, data.client);
+  console.log('Add : ', data.result);
+
+  // RETURN ANSWER
+  if (data.result.rowCount) {
+    return res.status(200).json({'status': true, 'message': CayetanoString.SUCCESS.SUCCESS_MESSAGE_TAKE_CONTACT, 'field': 'dni_patient'});
+  } else {
+    return res.status(400).json({'status': false, 'message': CayetanoString.ERROR.ERROR_MESSAGE_ERROR_TAKE_CONTACT, 'field': 'dni_patient'});
+  }
+}
+
+/**
+ *
+ * @function
+ * @param {Request} req Solicitud HTTTP
+ * @param {Response} res Respuesta HTTP
+ */
+async function movePatient(req, res) {
+  const dni_patient = req.body.dni_patient;
+  if (dni_patient) {
+    let rs = await patient_change_status(dni_patient, 2);
+    rs = await exists_case_patient(dni_patient);
+
+
+    if (rs.length) {
+      await makeMigrationsCustomer(dni_patient);
+    }
+
     return res.json({
-      success:false
-    })
+      success: rs.length > 0,
+    });
+  } else {
+    return res.json({
+      success: false,
+    });
   }
 }
 
@@ -156,23 +172,23 @@ function arrayJsonToPatientsList(patients) {
 
 /**
  * @function
- * @param {*} patient 
- * @param {*} answers 
- * @param {*} tray 
+ * @param {*} patient
+ * @param {*} answers
+ * @param {*} tray
  */
 async function answerDailySurvey(patient, answers, tray) {
-  let patient_id = patient.dni
+  const patient_id = patient.dni;
   // let patientToUrgency = 0;
   // let patientToNormalTray = 0;
 
   for (const i in answers) {
-    let variable = answers[i].variable
-    let answer = answers[i].answer
-    let asked_at = answers[i].asked_at
-    let answered_at = answers[i].answered_at
-    let rows = await save_answer(patient_id, variable, answer, asked_at, answered_at)
+    const variable = answers[i].variable;
+    const answer = answers[i].answer;
+    const asked_at = answers[i].asked_at;
+    const answered_at = answers[i].answered_at;
+    const rows = await save_answer(patient_id, variable, answer, asked_at, answered_at);
     // if((variable == "dificultad_para_respirar" || variable == "dolor_pecho" ||
-    //     variable == "confusion_desorientacion" || variable == "labios_azules") && 
+    //     variable == "confusion_desorientacion" || variable == "labios_azules") &&
     //     answer.toUpperCase() == "SI"){
     //     patientToUrgency++
     // }
@@ -182,59 +198,51 @@ async function answerDailySurvey(patient, answers, tray) {
   }
 
 
-  if(tray == 3){
-    //pasa a urgencia
-    let x = await patient_change_status(patient_id, 3)
-    await makeMigrationsCustomer(patient_id)
+  if (tray == 3) {
+    // pasa a urgencia
+    const x = await patient_change_status(patient_id, 3);
+    await makeMigrationsCustomer(patient_id);
   }
 
-  if(tray == 2){
-    //pasa a bandeja normal
-    let x = await patient_change_status(patient_id, 2)
-    await makeMigrationsCustomer(patient_id)
+  if (tray == 2) {
+    // pasa a bandeja normal
+    const x = await patient_change_status(patient_id, 2);
+    await makeMigrationsCustomer(patient_id);
   }
-  
 }
 
-async function answerFinalSurvey(patient, answers, tray){
-  
-  let patient_id = patient.dni
-  let need_doctor = false
+async function answerFinalSurvey(patient, answers, tray) {
+  const patient_id = patient.dni;
+  let need_doctor = false;
 
-  for(const i in answers){
-    let variable = answers[i].variable
-    let answer = answers[i].answer
-    let asked_at = answers[i].asked_at
-    let answered_at = answers[i].answered_at
-    let rows = await save_answer(patient_id, variable, answer, asked_at, answered_at)
+  for (const i in answers) {
+    const variable = answers[i].variable;
+    const answer = answers[i].answer;
+    const asked_at = answers[i].asked_at;
+    const answered_at = answers[i].answered_at;
+    const rows = await save_answer(patient_id, variable, answer, asked_at, answered_at);
     // if((variable == "dificultad_para_respirar" || variable == "dolor_pecho" ||
-    //     variable == "confusion_desorientacion" || variable == "labios_azules") && 
+    //     variable == "confusion_desorientacion" || variable == "labios_azules") &&
     //     answer.toUpperCase() == "SI"){
     //     patientToUrgency++
     // }
     // if((variable == "fiebre_hoy" || variable == "diarrea") && answer.toUpperCase() == "SI") {
     //     patientToNormalTray++;
     // }
-    if(variable === "necesita_medico" && answer.toUpperCase() === "SI"){
-      need_doctor = true
+    if (variable === 'necesita_medico' && answer.toUpperCase() === 'SI') {
+      need_doctor = true;
     }
   }
 
-  if(tray == 3){
-    //pasa a urgencia
-    let x = await patient_change_status(patient_id, 3)
-    await makeMigrationsCustomer(patient_id)
+  if (tray == 3) {
+    // pasa a urgencia
+    const x = await patient_change_status(patient_id, 3);
+    await makeMigrationsCustomer(patient_id);
+  } else if (need_doctor || tray == 2) {
+    // pasa a bandeja normal
+    const x = await patient_change_status(patient_id, 2);
+    await makeMigrationsCustomer(patient_id);
   }
-  else if(need_doctor || tray == 2){
-    //pasa a bandeja normal
-    let x = await patient_change_status(patient_id, 2)
-    await makeMigrationsCustomer(patient_id)
-  }
-
-  
-
- 
-  
 }
 
 /**

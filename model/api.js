@@ -68,7 +68,7 @@ function getPatientsSurvey03() {
         and p.factor_riesgo = false
         and p.estado = 1
         and p.paso_encuesta_inicial = true
-        and (p.fecha_creacion + concat((select param.cantidad_max from ${PGSCHEMA}.dm_parametros as param limit 1)::int, ' days')::interval) = $1;`;
+        and (p.fecha_creacion + concat((select param.cantidad_max from ${PGSCHEMA}.dm_parametros as param limit 1)::int, ' days')::interval)::date = $1::date;`;
     const params = [peruvianDateCurrent];
     const result = await client.query(query, params);
     client.release(true);
@@ -76,101 +76,136 @@ function getPatientsSurvey03() {
   });
 }
 
-function existePatient(dni_paciente){
-    return new Promise(async (resolve, reject)=>{
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.dt_pacientes as p where p.dni = $1`
-        let params = [dni_paciente]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * @param {String} dniPaciente DNI del paciente
+ * @return {Promise}
+ */
+function existePatient(dniPaciente) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.dt_pacientes as p where p.dni = $1`;
+    const params = [dniPaciente];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
-
-function saveAnswer(dni_paciente, variable, respuesta, asked_at, answered_at){
-    return new Promise(async (resolve, reject)=>{
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.sp_save_answer($1, $2, $3, $4, $5)`
-        let params = [dni_paciente, variable, respuesta, asked_at, answered_at]
-        console.log(params)
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * @param {String} dniPaciente DNI del paciente
+ * @param {String} variable Id pregunta
+ * @param {String} respuesta Respuesta
+ * @param {Date} askedAt Fecha en la que fue preguntada
+ * @param {Date} answeredAt Fecha en la que fue respondida
+ * @return {Promise}
+ */
+function saveAnswer(dniPaciente, variable, respuesta, askedAt, answeredAt) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.sp_save_answer($1, $2, $3, $4, $5)`;
+    const params = [dniPaciente, variable, respuesta, askedAt, answeredAt];
+    console.log(params);
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
-function patientChangeStatus(dni_paciente, estado){
-    return new Promise(async (resolve, reject)=>{
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.sp_patient_change_status($1, $2)`
-        let params = [dni_paciente, estado]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * @param {String} dniPaciente DNI del paciente
+ * @param {Number} estado  Id del estado nuevo
+ * @return {Promise}
+ */
+function patientChangeStatus(dniPaciente, estado) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.sp_patient_change_status($1, $2)`;
+    const params = [dniPaciente, estado];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
-
-
-function existsCasePatient(dni_paciente){
-    return new Promise(async (resolve, reject)=>{
-        let { datePeru_init } = getTimeNow()
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.dt_casos_dia
-                        where dni_paciente = $1 and fecha_caso = $2`
-        let params = [dni_paciente, datePeru_init]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * @param {String} dniPaciente DNI del paciente
+ * @return {Promise}
+ */
+function existsCasePatient(dniPaciente) {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateInit} = getTimeNow();
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.dt_casos_dia
+                        where dni_paciente = $1 and fecha_caso = $2`;
+    const params = [dniPaciente, peruvianDateInit];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
-function patientChangeRiskFactor(dni_paciente, factor_riesgo){
-    return new Promise(async (resolve, reject)=>{
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.sp_patient_change_risk_factor($1, $2)`
-        let params = [dni_paciente, factor_riesgo]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * @param {String} dniPaciente DNI del paciente
+ * @param {Boolean} factorRiesgo Es o no factor de riesgo
+ * @return {Promise}
+ */
+function patientChangeRiskFactor(dniPaciente, factorRiesgo) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.sp_patient_change_risk_factor($1, $2)`;
+    const params = [dniPaciente, factorRiesgo];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
-function patientChangeAge(dni_paciente, age){
-    return new Promise(async (resolve, reject)=>{
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.sp_patient_change_age($1, $2)`
-        let params = [dni_paciente, age]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * @param {String} dniPaciente DNI del paciente
+ * @param {Number} age Edad del paciente
+ * @return {Promise}
+ */
+function patientChangeAge(dniPaciente, age) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.sp_patient_change_age($1, $2)`;
+    const params = [dniPaciente, age];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
-function validateGroupCase(dni_paciente){
-    return new Promise(async (resolve, reject)=>{
-        let { datePeru_init } = getTimeNow()
-        let client = await openConnection()
-        let query = `select * from ${PGSCHEMA}.sp_validate_create_case($1, $2)`
-        let params = [dni_paciente, datePeru_init]
-        let result = await client.query(query, params)
-        client.release(true)
-        resolve(result.rows)
-    })
+/**
+ * @param {String} dniPaciente DNI del paciente
+ * @return {Promise}
+ */
+function validateGroupCase(dniPaciente) {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateInit} = getTimeNow();
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.sp_validate_create_case($1, $2)`;
+    const params = [dniPaciente, peruvianDateInit];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
 }
 
-
-async function patientIsDoctor(dni_paciente){
-    console.log("Patient is doctor")
-    console.log(dni_paciente)
-    let client = await openConnection()
-    let query = `select * from ${PGSCHEMA}.sp_patient_is_doctor($1)`
-    let params = [dni_paciente]
-    let result = await client.query(query, params)
-    client.release(true)
-    return result.rows
-} 
+/**
+ * @param {String} dniPaciente DNI del paciente
+ * @return {Promise}
+ */
+async function patientIsDoctor(dniPaciente) {
+  console.log('Patient is doctor');
+  console.log(dniPaciente);
+  const client = await openConnection();
+  const query = `select * from ${PGSCHEMA}.sp_patient_is_doctor($1)`;
+  const params = [dniPaciente];
+  const result = await client.query(query, params);
+  client.release(true);
+  return result.rows;
+}
 
 
 module.exports = {

@@ -5,6 +5,7 @@ const {
   addPatientTamizaje,
   addHistory,
 } = require('../../model/loadExcel');
+const {setAge} = require('./../../model/pacient');
 
 /**
  * Leer un archivo Excel y agregar a la base de datos como recien admitidos.
@@ -90,6 +91,7 @@ function validateAdmision(rows) {
     isRequired(row.apellidoMaterno, 'D', rowNumber, error);
     isRequired(row.nombre, 'E', rowNumber, error);
     isRequired(row.documento, 'F', rowNumber, error);
+    lengthRestriction(row.documento, 'F', 1, 16, rowNumber, error);
     isRequired(row.celular, 'H', rowNumber, error);
     isDate(row.fecha, 'B', rowNumber, error);
     parsePhoneNumber(row.celular, 'G', rowNumber, error);
@@ -190,6 +192,7 @@ function excelTamizaje(excelPath, idHospital) {
         error.push('No se pudo ingresar en la BD la fila ' + rowNumber);
       });
       if (resolved) {
+        await setAge(row.edad, paramsHistory[0]);
         await addHistory(paramsHistory[0],
             paramsHistory[1],
             paramsHistory[2],
@@ -221,6 +224,7 @@ function validateTamizaje(rows) {
     isRequired(row.semanaEpid, 'B', rowNumber, error);
     isRequired(row.fecha, 'C', rowNumber, error);
     isRequired(row.documento, 'D', rowNumber, error);
+    lengthRestriction(row.documento, 'D', 1, 16, rowNumber, error);
     isRequired(row.nombre, 'E', rowNumber, error);
     isRequired(row.edad, 'F', rowNumber, error);
     isRequired(row.sexo, 'G', rowNumber, error);
@@ -260,6 +264,29 @@ function validateTamizaje(rows) {
 function isRequired(data, column, row, error) {
   if (data === null || data === undefined) {
     error.push(column + row + ' es obligatorio');
+  }
+}
+
+/**
+ * Validar la longitud maxima y minima
+ * @function
+ * @param {String} data Información de una celda
+ * @param {Number} column Indice de columna
+ * @param {Number} min Longitud minima
+ * @param {Number} max Longitud maxima
+ * @param {Number} row Indice de fila
+ * @param {Array} error Array al cual se le agregaran los errores
+ */
+function lengthRestriction(data, column, min, max, row, error) {
+  if (!(data === null || data === undefined)) {
+    data = '' + data;
+    if (data.length < min) {
+      error.push(column + row +
+        ' tiene que tener un longitud mayor o igual a ' + min +',');
+    } else if (data.length > max) {
+      error.push(column + row +
+        ' tiene que tener un longitud menor o igual a ' + max +',');
+    }
   }
 }
 

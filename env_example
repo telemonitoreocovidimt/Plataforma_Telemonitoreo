@@ -1,0 +1,10 @@
+KEY_SECRET=[SECRETO DEL BACKEND]
+PGUSER=[Usuario postgresql]
+PGHOST=[Host postgresql]
+PGPASSWORD=[Password postgresql]
+PGDATABASE=[Nombre de base de datos postgresql]
+PGPORT=[Puerto postgresql]
+PGSCHEMA=[esquema de postgresql]
+NODE_TLS_REJECT_UNAUTHORIZED=0
+TIME_OUT_ROUTINE = 0 1 * * *
+PORT=3000

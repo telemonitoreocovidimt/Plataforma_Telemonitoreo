@@ -1,5 +1,0 @@
-fix:  funcionality take case enabled
-
-view and funcionality of user case take case finished.
-
-Version 0.9

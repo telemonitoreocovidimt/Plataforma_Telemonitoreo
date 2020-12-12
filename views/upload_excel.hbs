@@ -1,46 +1,123 @@
-<div class="upload-box">
-<form action="/admin/respuesta-admision" method="post" enctype="multipart/form-data">
-  <h3 class="form-title">Carga de Archivo Admisión</h3>
+<div class="col-md-6" >
+  <form action="/admin/respuesta-admision" method="post" enctype="multipart/form-data">
+    <h3 class="form-title">Carga de Archivo Admisión</h3>
+    <div class="input-group">
+      <div class="input-group-prepend">
+      <span class="input-group-text" id="inputGroupFileAddon01">Cargar</span>
+      </div>
+      <div class="custom-file">
+          <input type="hidden" value="233232" name="w34321432">
+          <input type="file" class="custom-file-input" id="inputGroupFile01"  name ="fileAdmision"
+          aria-describedby="inputGroupFileAddon01">
+          <label class="custom-file-label" for="inputGroupFile01">Seleccionar archivo</label>
+      </div>
+      
+  </div>
   <div class="input-group">
-    <div class="input-group-prepend">
-     <span class="input-group-text" id="inputGroupFileAddon01">Cargar</span>
-    </div>
-    <div class="custom-file">
-        <input type="hidden" value="233232" name="w34321432">
-        <input type="file" class="custom-file-input" id="inputGroupFile01"  name ="fileAdmision"
-        aria-describedby="inputGroupFileAddon01">
-        <label class="custom-file-label" for="inputGroupFile01">Seleccionar archivo</label>
-    </div>
-    
-</div>
-<div class="input-group">
-<input type="submit" value="Subir" class="btn btn-primary">
-</div>
+  <input type="submit" value="Subir" class="btn btn-primary">
+  </div>
 
-    
-</form>
-<br><br>
-<form action="/admin/respuesta-tamizaje" method="post" enctype="multipart/form-data">
+      
+  </form>
+  <br><br>
+  <form action="/admin/respuesta-tamizaje" method="post" enctype="multipart/form-data">
 
-<h3 class="form-title">Carga de Archivo Tamizaje</h3>
+  <h3 class="form-title">Carga de Archivo Tamizaje</h3>
+    <div class="input-group">
+      <div class="input-group-prepend">
+      <span class="input-group-text" id="inputGroupFileAddon01">Cargar</span>
+      </div>
+      <div class="custom-file">
+          <input type="file" class="custom-file-input" id="inputGroupFile01"  name ="fileTamizaje"
+          aria-describedby="inputGroupFileAddon01">
+          <label class="custom-file-label" for="inputGroupFile01">Seleccionar archivo</label>
+      </div>
+      
+  </div>
   <div class="input-group">
-    <div class="input-group-prepend">
-     <span class="input-group-text" id="inputGroupFileAddon01">Cargar</span>
+  <input type="submit" value="Subir" class="btn btn-primary">
+  </div>
+  </form>
+</div>
+
+<div class="col-md-6" >
+  <div class="col-md-12" >
+    <h2>Reportes de casos</h2>
+    <br>
+    <div class="form-row">
+        <div class="form-group col-md-6" style="flex-wrap: wrap;">
+            <label for="fecha_inicio">Fecha de inicio:</label>
+            <input id="fecha_inicio" class="form-control col-12" type="date" onchange="setUrlReportCases()" onkeypress="setUrlReportCases()"/>
+        </div>
+        <div class="form-group col-md-6" style="flex-wrap: wrap;">
+            <label for="downloadReportCases">Fecha de fin:</label>
+            <input id="fecha_fin" class="form-control col-12" type="date" onchange="setUrlReportCases()" onkeypress="setUrlReportCases()"/>
+        </div>
     </div>
-    <div class="custom-file">
-        <input type="file" class="custom-file-input" id="inputGroupFile01"  name ="fileTamizaje"
-        aria-describedby="inputGroupFileAddon01">
-        <label class="custom-file-label" for="inputGroupFile01">Seleccionar archivo</label>
+    <script>
+      function setUrlReportCases() {
+        const init = document.getElementById("fecha_inicio");
+        const finish = document.getElementById("fecha_fin");
+        const download = document.getElementById("downloadReportCases");
+        download.href = `api/v1/report/case/${init.value}/${finish.value}`
+      }
+    </script>
+    <a href="" class="btn btn-primary" id="downloadReportCases" download>Descargar</a>
+  </div>
+  <br>
+  <br>
+  <div class="col-md-12" >
+    <h2>Reportes de encuestas iniciales</h2>
+    <br>
+    <div class="form-row">
+        <div class="form-group col-md-6" style="flex-wrap: wrap;">
+            <label for="fecha_inicio2">Fecha de inicio:</label>
+            <input id="fecha_inicio2" class="form-control col-12" type="date" onchange="setUrlReportSurveyInit()" onkeypress="setUrlReportSurveyInit()"/>
+        </div>
+        <div class="form-group col-md-6" style="flex-wrap: wrap;">
+            <label for="fecha_fin2">Fecha de fin:</label>
+            <input id="fecha_fin2" class="form-control col-12" type="date" onchange="setUrlReportSurveyInit()" onkeypress="setUrlReportSurveyInit()"/>
+        </div>
     </div>
-    
+    <script>
+      function setUrlReportSurveyInit() {
+        const init = document.getElementById("fecha_inicio2");
+        const finish = document.getElementById("fecha_fin2");
+        const download = document.getElementById("downloadReportSurveyInit");
+        download.href = `api/v1/report/initial_survey/${init.value}/${finish.value}`
+      }
+    </script>
+    <a href="" class="btn btn-primary" id="downloadReportSurveyInit" download>Descargar</a>
+  </div>
+  <br>
+  <br>
+  <div class="col-md-12" >
+    <h2>Reportes de encuestas diarias</h2>
+    <br>
+    <div class="form-row">
+        <div class="form-group col-md-6" style="flex-wrap: wrap;">
+            <label for="fecha_inicio3">Fecha de inicio:</label>
+            <input id="fecha_inicio3" class="form-control col-12" type="date" onchange="setUrlReportSurveyDaily()" onkeypress="setUrlReportSurveyDaily()"/>
+        </div>
+        <div class="form-group col-md-6" style="flex-wrap: wrap;">
+            <label for="fecha_fin3">Fecha de fin:</label>
+            <input id="fecha_fin3" class="form-control col-12" type="date" onchange="setUrlReportSurveyDaily()" onkeypress="setUrlReportSurveyDaily()"/>
+        </div>
+    </div>
+    <script>
+      function setUrlReportSurveyDaily() {
+        const init = document.getElementById("fecha_inicio3");
+        const finish = document.getElementById("fecha_fin3");
+        const download = document.getElementById("downloadReportSurveyDaily");
+        download.href = `api/v1/report/daily_survey/${init.value}/${finish.value}`
+      }
+    </script>
+    <a href="" class="btn btn-primary" id="downloadReportSurveyDaily" download>Descargar</a>
+  </div>
+  <br>
+  <br>
 </div>
-<div class="input-group">
-<input type="submit" value="Subir" class="btn btn-primary">
-</div>
 
-
-
-
-
-</form>
-</div>
+{{!-- // http://localhost:3000/api/v1/report/case/2020-01-20/2020-12-20
+// http://localhost:3000/api/v1/report/initial_survey/2020-01-20/2020-12-20
+// http://localhost:3000/api/v1/report/daily_survey/2020-01-20/2020-12-20 --}}

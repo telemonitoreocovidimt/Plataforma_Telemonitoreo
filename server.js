@@ -11,8 +11,8 @@ const {pool} = require('./model/connection');
 const os = require('os');
 const {makeMigrations} = require('./model/migration');
 
-// const {runJobs} = require('./timers');
-// runJobs();
+const {runJobs} = require('./timers');
+runJobs();
 
 const options = {
   uploadDir: os.tmpdir(),
