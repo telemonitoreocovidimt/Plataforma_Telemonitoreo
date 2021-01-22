@@ -127,6 +127,10 @@ function jsonToArray(json) {
 }
 
 function getGroupsContacts(data, lastdata=[]) {
+  // console.log('--------------')
+  // console.log(data)
+  // console.log(lastdata)
+  // console.log('--------------')
   const els_drop = {
   };
 
@@ -160,8 +164,9 @@ function getGroupsContacts(data, lastdata=[]) {
     }
   }
 
-
+  console.log(els_drop)
   for (const item of lastdata) {
+    console.log(item);
     if (els_drop[item.dni]) {
       els_update[item.dni] = els_drop[item.dni];
       delete els_drop[item.dni];

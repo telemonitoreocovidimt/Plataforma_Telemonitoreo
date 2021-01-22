@@ -14,6 +14,7 @@ const {PGSCHEMA} = require('./../config');
  * @param {String} celular Número de celular del paciente.
  * @param {String} fijo Número fijo del paciente.
  * @param {String} idHospital Id de hospitalque monitorea al paciente.
+ * @param {Integer} idTipoRegistro Id del tipo de registro.
  * @return {Promise} Devolvera un Boolean que indica si se hizo o no la inserción.
  */
 function addPatientAdmission(dni,
@@ -24,13 +25,19 @@ function addPatientAdmission(dni,
     direccion,
     celular,
     fijo,
-    idHospital) {
+    idHospital, idTipoRegistro=1, jumpInitSurvey=false) {
   return new Promise(async (resolve, reject)=>{
     const client = await openConnection();
-    const query = `SELECT * FROM ${PGSCHEMA}.sp_add_patient_admission($1,$2,$3,$4,$5,$6,$7,$8,$9)`;
-    const params = [dni, codigo, fechaIngreso, fechaCreacion,
+    let query = `SELECT * FROM ${PGSCHEMA}.sp_add_patient_admission($1,$2,$3,$4,$5,$6,$7,$8,$9)`;
+    let params = [dni, codigo, fechaIngreso, fechaCreacion,
       nombre, direccion, celular, fijo, idHospital];
     const result = await client.query(query, params);
+    query = `update ${PGSCHEMA}.dt_pacientes set
+            id_tipo_registro = $1,
+            paso_encuesta_inicial = $2
+          where dni = $3;`;
+    params = [idTipoRegistro, jumpInitSurvey, dni];
+    await client.query(query, params);
     client.release(true);
     return resolve(result);
   });

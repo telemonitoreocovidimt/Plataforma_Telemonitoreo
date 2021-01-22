@@ -65,6 +65,26 @@ async function thanksTerms(req, res) {
 }
 
 /**
+ * Mostrar la vista de agradecimiento para los terminos y condiciones.
+ * @function
+ * @param {Object} req request
+ * @param {Object} res response
+ * @return {Object}
+ */
+async function rejectedThanksTerms(req, res) {
+  const userTemp = req.session.userTemp;
+  if (userTemp) {
+    return res.render('refuseTerms', {
+      'layout': 'blank',
+      'title': 'terms and conditions',
+      ...userTemp,
+    });
+  } else {
+    return res.redirect(`/landing/terms/${userTemp.dni}`);
+  }
+}
+
+/**
  * Mostrar la vista de terminos y condiciones.
  * @function
  * @param {Object} req request
@@ -77,12 +97,15 @@ async function updateTerms(req, res) {
   if (userTemp) {
     await setName(body.name, userTemp.dni);
     await setTypeDocument(body.typeDocument, userTemp.dni);
-    const acceptedTerm = body.acceptTerm ? true : false;
-    if (acceptedTerm) {
+    const acceptedTerm = body.acceptTerm ? 2 : 1;
+    if (acceptedTerm == 2) {
       await updateTermsPatient(userTemp.dni, acceptedTerm);
       return res.redirect(`/landing/terms/${userTemp.dni}/thanks`);
+    } else if (acceptedTerm == 1) {
+      return res.redirect(`/landing/terms/${userTemp.dni}/rejected/thanks`);
+    } else {
+      return res.redirect(`/landing/terms/${userTemp.dni}`);
     }
-    return res.redirect(`/landing/terms/${userTemp.dni}`);
   } else {
     return res.redirect('back');
   }
@@ -92,4 +115,5 @@ module.exports = {
   terms,
   thanksTerms,
   updateTerms,
+  rejectedThanksTerms,
 };

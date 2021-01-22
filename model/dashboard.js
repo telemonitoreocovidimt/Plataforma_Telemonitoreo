@@ -20,7 +20,7 @@ function getPatientsAlert(dniMedico, pass=false, client=null) {
     const query = `select c.id as id_case, p.dni, p.nombre, p.sexo, p.edad,p.grupo, 
           case when p.factor_riesgo then 'SI' else 'NO' end as factor_riesgo,
           concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
-          extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento,
+          extract(day from ($1::date - p.fecha_creacion)) + 1 as tiempo_seguimiento,
           case when p.fecha_prueba_1 is null then '-' else concat(extract(day from p.fecha_prueba_1), '-', extract(month from p.fecha_prueba_1), '-', extract(year from p.fecha_prueba_1)) end as fecha_prueba_1,
           case when p.resultado_prueba_1 is null then '-' when p.resultado_prueba_1 = 3 then 'Positivo' when p.resultado_prueba_1 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_1, 
           concat(extract(day from p.fecha_resultado_prueba_1), '-', extract(month from p.fecha_resultado_prueba_1), '-', extract(year from p.fecha_resultado_prueba_1)) as fecha_resultado_prueba_1, 
@@ -74,7 +74,7 @@ function getPatients(dniMedico, pass=false, client=null) {
     const query = `select c.id as id_case, p.dni, p.nombre, p.sexo, p.edad, p.grupo, 
             concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
             case when p.factor_riesgo then 'SI' else 'NO' end as factor_riesgo,
-            extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento,
+            extract(day from ($1::date - p.fecha_creacion)) + 1 as tiempo_seguimiento,
             case when p.fecha_prueba_1 is null then '-' else concat(extract(day from p.fecha_prueba_1), '-', extract(month from p.fecha_prueba_1), '-', extract(year from p.fecha_prueba_1)) end as fecha_prueba_1,
             case when p.resultado_prueba_1 is null then '-' when p.resultado_prueba_1 = 3 then 'Positivo' when p.resultado_prueba_1 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_1, 
             concat(extract(day from p.fecha_resultado_prueba_1), '-', extract(month from p.fecha_resultado_prueba_1), '-', extract(year from p.fecha_resultado_prueba_1)) as fecha_resultado_prueba_1, 
@@ -128,7 +128,7 @@ function getMyPatients(dniMedico, pass=false, client=null) {
     const query = `select c.id as id_case, p.dni, p.nombre, p.sexo, p.edad, p.grupo, 
             case when p.factor_riesgo then 'SI' else 'NO' end as factor_riesgo,
             concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
-            extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento,
+            extract(day from ($1::date - p.fecha_creacion)) + 1 as tiempo_seguimiento,
             case when p.fecha_prueba_1 is null then '-' else concat(extract(day from p.fecha_prueba_1), '-', extract(month from p.fecha_prueba_1), '-', extract(year from p.fecha_prueba_1)) end as fecha_prueba_1,
             case when p.resultado_prueba_1 is null then '-' when p.resultado_prueba_1 = 3 then 'Positivo' when p.resultado_prueba_1 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_1, 
             concat(extract(day from p.fecha_resultado_prueba_1), '-', extract(month from p.fecha_resultado_prueba_1), '-', extract(year from p.fecha_resultado_prueba_1)) as fecha_resultado_prueba_1, 
@@ -276,6 +276,26 @@ function countAllCaseAttendedToDayBetweenDoctors(idHospital, pass=false, client=
   });
 }
 
+/**
+ * Obtener todas las razones de pruebas
+ * @param {Boolean} pass Saltar cierre de conexión
+ * @param {Object} client Cliente postgresql
+ * @return {Promise}
+ */
+function getTestReasons(pass=false, client=null) {
+  return new Promise(async (resolve, reject)=>{
+    if (!client) {
+      client = await openConnection();
+    }
+    const query = `select * from ${PGSCHEMA}.dm_motivo_prueba order by id;`;
+    const params = [];
+    const result = await client.query(query, params);
+    if (!pass) {
+      client.release(true);
+    }
+    resolve({'results': result.rows, client});
+  });
+}
 
 /** --------------------------------------------------------- */
 
@@ -348,13 +368,13 @@ function canTakeCase(dni_medico, id_case, pass = false, client = null) {
     if (!client) {
       client = await openConnection();
     }
-    const query = `select * from ${PGSCHEMA}.sp_take_case($1, $2)`;
+    const query = `select pasa as success, message from ${PGSCHEMA}.sp_take_case($1, $2)`;
     const params = [dni_medico, id_case];
     const result = await client.query(query, params);
     if (!pass) {
       client.release(false);
     }
-    resolve({result: result.rows, client});
+    resolve({result: result.rows[0], client});
   });
 }
 
@@ -363,13 +383,13 @@ function canTerminateCase(dni_medico, id_case, pass = false, client = null) {
     if (!client) {
       client = await openConnection();
     }
-    const query = `select * from ${PGSCHEMA}.sp_terminate_case($1, $2)`;
+    const query = `select pasa as pass, message from ${PGSCHEMA}.sp_terminate_case($1, $2)`;
     const params = [dni_medico, id_case];
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({result: result.rows[0], client});
   });
 }
 
@@ -381,7 +401,7 @@ function getCase(id_case, pass = false, client = null) {
     }
     const query = `select TO_CHAR($1::date,'YYYY/MM/DD') as to_day , p.*, p.nombre , p.celular, p.fijo, p.grupo, p.factor_riesgo, p.estado , 
           concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
-          extract(day from ($1 - p.fecha_creacion)) as tiempo_seguimiento, 
+          (extract(day from ($1::date - p.fecha_creacion)) + 1)::int as tiempo_seguimiento, 
           (select pr.resultado from ${PGSCHEMA}.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'rapida' order by pr.fecha_resultado_prueba desc limit 1) as resultado_rapido,
           (select pr.resultado from ${PGSCHEMA}.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'molecular' order by pr.fecha_resultado_prueba desc limit 1) as resultado_molecular,
           c.*
@@ -394,7 +414,7 @@ function getCase(id_case, pass = false, client = null) {
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({result: result.rows[0], client});
   });
 }
 
@@ -409,24 +429,71 @@ function getStatusPatients(pass = false, client = null) {
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({results: result.rows, client});
   });
 }
 
+/**
+ * Actualizar los datos del caso y del paciente
+ * @param {JSON} json
+ * @param {Boolean} pass
+ * @param {Object} client
+ * @return {Promise}
+ */
 function updateCase(json, pass = false, client = null) {
   return new Promise(async (resolve, reject)=>{
-    let {id_caso, grupo, factor_riesgo, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, estado, fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios,
-      tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas, nota_grupo, condicion_egreso, temp_fv, fr_fv, disnea_sa, taqui_sa, saturacion_sa, alteracion_sa, otros_sa, otros, estado_evo} = json;
-
-    // let resultado_prueba_1 = null
-    // let resultado_prueba_2 = null
-    // let resultado_prueba_3 = null
-
-    if (id_caso) {
-      id_caso = parseInt(id_caso);
+    let {idCase,
+      grupo,
+      factor_riesgo,
+      resultado_prueba_1,
+      resultado_prueba_2,
+      resultado_prueba_3,
+      fecha_resultado_prueba_1,
+      fecha_resultado_prueba_2,
+      fecha_resultado_prueba_3,
+      estado,
+      fiebre,
+      dificultad_respitar,
+      dolor_pecho,
+      alteracion_sensorio,
+      colaboracion_azul_labios,
+      tos,
+      dolor_garganta,
+      congestion_nasal,
+      malestar_general,
+      cefalea,
+      nauseas,
+      diarrea,
+      comentario,
+      fecha_inicio_sintomas,
+      nota_grupo,
+      condicion_egreso,
+      temp_fv,
+      fr_fv,
+      fc_fv,
+      sat_fv,
+      disnea_sa,
+      taqui_sa,
+      saturacion_sa,
+      alteracion_sa,
+      otros_sa,
+      otros,
+      estado_evo,
+      celular,
+      sexo,
+      dniPaciente,
+      pais,
+      provincia,
+      distrito,
+      direccion,
+      motivo_prueba: idMotivoPrueba} = json;
+    if (idMotivoPrueba == '') {
+      idMotivoPrueba = null;
     }
     if (factor_riesgo) {
       factor_riesgo = factor_riesgo == 'true'? true : false;
+    } else {
+      factor_riesgo = null;
     }
     if (estado) {
       estado = parseInt(estado);
@@ -446,7 +513,6 @@ function updateCase(json, pass = false, client = null) {
     } else {
       resultado_prueba_3 = null;
     }
-
     /**
      * Seguimiento
      */
@@ -510,24 +576,47 @@ function updateCase(json, pass = false, client = null) {
     } else {
       diarrea = 0;
     }
-
     if (!fecha_inicio_sintomas) {
       fecha_inicio_sintomas = null;
     }
-
+    if (fecha_resultado_prueba_1 == "") {
+      fecha_resultado_prueba_1 = null;
+    }
+    if (fecha_resultado_prueba_2 == "") {
+      fecha_resultado_prueba_2 = null;
+    }
+    if (fecha_resultado_prueba_3 == "") {
+      fecha_resultado_prueba_3 = null;
+    }
+    
     /**
      * Seguimiento
     */
-    if (temp_fv) {
-      temp_fv = true;
+    if (isNaN(temp_fv)) {
+      temp_fv = null;
     } else {
-      temp_fv = false;
+      temp_fv = parseFloat(temp_fv);
     }
-    if (fr_fv) {
-      fr_fv = true;
+    
+    if (isNaN(fr_fv)) {
+      fr_fv = null;
     } else {
-      fr_fv = false;
+      fr_fv = parseFloat(fr_fv);
     }
+    
+    if (isNaN(sat_fv)) {
+      sat_fv = null;
+    } else {
+      sat_fv = parseFloat(sat_fv);
+    }
+
+    if (isNaN(fc_fv)) {
+      fc_fv = null;
+    } else {
+      fc_fv = parseFloat(fc_fv);
+    }
+
+
     if (disnea_sa) {
       disnea_sa = true;
     } else {
@@ -563,31 +652,74 @@ function updateCase(json, pass = false, client = null) {
     } else {
       estado_evo = 0;
     }
-
     if (condicion_egreso == '') {
       condicion_egreso = null;
     } else {
       condicion_egreso = parseInt(condicion_egreso);
     }
+
+    if(!sexo || sexo == "") {
+      sexo = null;
+    } else {
+      sexo = sexo.toUpperCase();
+    }
     if (!client) {
       client = await openConnection();
     }
-    let query = `select * from ${PGSCHEMA}.sp_update_case($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21,$22,$23)`;
-    let params = [id_caso, grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios, tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, fecha_inicio_sintomas, nota_grupo, condicion_egreso];
-    const result = await client.query(query, params);
+    let query = `update ${PGSCHEMA}.dt_pacientes set 
+              grupo = $1,
+              factor_riesgo = $2,
+              estado = $3,
+              resultado_prueba_1 = $4,
+              resultado_prueba_2 = $5,
+              resultado_prueba_3 = $6,
+              fecha_inicio_sintomas = $7,
+              condicion_egreso = $8,
+              nota_grupo = $9,
+              id_motivo_prueba = $10,
+              fecha_resultado_prueba_1 = $12,
+              fecha_resultado_prueba_2 = $13,
+              fecha_resultado_prueba_3 = $14,
+              celular = $15,
+              sexo = $16,
+              pais = $17,
+              provincia = $18,
+              distrito = $19,
+              direccion = $20
+              where dni = $11;`;
+    let params = [grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fecha_inicio_sintomas, condicion_egreso, nota_grupo, idMotivoPrueba, dniPaciente, fecha_resultado_prueba_1, fecha_resultado_prueba_2, fecha_resultado_prueba_3, celular, sexo,  pais, provincia, distrito, direccion];
+    let result = await client.query(query, params);
     query = `update ${PGSCHEMA}.dt_casos_dia set
-      temp_fv = $1,
-      fr_fv = $2,
-      disnea_sa = $3,
-      taqui_sa = $4,
-      saturacion_sa = $5,
-      alteracion_sa = $6,
-      otros_sa = $7,
-      otros = $8,
-      estado_evo = $9
-      where id = $10;`;
-    params = [temp_fv, fr_fv, disnea_sa, taqui_sa, saturacion_sa, alteracion_sa, otros_sa, otros, estado_evo, id_caso];
-    const result2 = await client.query(query, params);
+        temp_fv = $1,
+        fr_fv = $2,
+        disnea_sa = $3,
+        taqui_sa = $4,
+        saturacion_sa = $5,
+        alteracion_sa = $6,
+        otros_sa = $7,
+        otros = $8,
+        estado_evo = $9,
+        fiebre = $10,
+        dificultad_respitar = $11,
+        dolor_pecho = $12,
+        alteracion_sensorio = $13,
+        colaboracion_azul_labios = $14,
+        tos = $15,
+        dolor_garganta = $16,
+        congestion_nasal = $17,
+        malestar_general = $18,
+        cefalea = $19,
+        nauseas = $20,
+        diarrea = $21,
+        comentario = $22,
+        fc_fv = $24,
+        sat_fv = $25
+      where id = $23;`;
+    params = [temp_fv, fr_fv, disnea_sa, taqui_sa, saturacion_sa, alteracion_sa, otros_sa, otros, estado_evo,
+      fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios,
+      tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, idCase, fc_fv, sat_fv];
+    console.log(params)
+    result = await client.query(query, params);
     if (!pass) {
       client.release(true);
     }
@@ -624,7 +756,7 @@ function getPatientForCase(id_case, pass = false, client = null) {
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({result: result.rows[0], client});
   });
 }
 
@@ -644,7 +776,7 @@ function haveThisScheduledCaseForTomorrow(dni_doctor, dni_paciente, pass = false
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({result: result.rows.length > 0 ? true : false, client});
   });
 }
 
@@ -665,7 +797,7 @@ function getComentarios(dni, pass = false, client = null) {
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({results: result.rows, client});
   });
 }
 
@@ -706,7 +838,7 @@ function getPreviousCases(dni_patient, pass = false, client = null) {
     if (!client) {
       client = await openConnection();
     }
-    const query = `select *, TO_CHAR(c.fecha_caso,'YYYY/MM/DD') as fecha_caso_char, extract(day from (c.fecha_caso - p.fecha_creacion)) as day_index
+    const query = `select *, TO_CHAR(c.fecha_caso,'YYYY/MM/DD') as fecha_caso_char, (extract(day from (c.fecha_caso - p.fecha_creacion)) + 1)::int as day_index
     from ${PGSCHEMA}.dt_casos_dia as c
     inner join ${PGSCHEMA}.dt_pacientes as p
     on c.dni_paciente = p.dni
@@ -717,7 +849,7 @@ function getPreviousCases(dni_patient, pass = false, client = null) {
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({results: result.rows, client});
   });
 }
 
@@ -731,7 +863,10 @@ function getTreatment(id_caso_dia, pass = false, client = null) {
     if (!client) {
       client = await openConnection();
     }
-    const query = `select id, id_tratamiento as type, nombre as name, 
+    const query = `select id, id_tratamiento as type, nombre as name,
+    id_razon as reason,
+    id_detalle as detail,
+    usando as using,
           TO_CHAR(fecha_desde,'YYYY-MM-DD') as init, TO_CHAR(fecha_hasta,'YYYY-MM-DD') as finish,
           observacion as observation  
           from ${PGSCHEMA}.dt_tratamientos_caso_dia where id_caso_dia = $1`;
@@ -740,7 +875,7 @@ function getTreatment(id_caso_dia, pass = false, client = null) {
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({results: result.rows, client});
   });
 }
 
@@ -759,7 +894,7 @@ function deleteTreatment(id_caso_dia, id_tratamiento, pass = false, client = nul
   });
 }
 
-function updateTreatment(id, id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion, pass = false, client = null) {
+function updateTreatment(id, id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion, current_using, rea, det, pass = false, client = null) {
   return new Promise(async (resolve, reject)=>{
     if (!client) {
       client = await openConnection();
@@ -768,9 +903,12 @@ function updateTreatment(id, id_caso_dia, id_tratamiento, nombre, fecha_desde, f
               nombre = $4,
               fecha_desde = $5,
               fecha_hasta = $6,
-              observacion = $7
+              observacion = $7,
+              usando = $8,
+              id_razon = $9,
+              id_detalle = $10
           where id = $1 and id_tratamiento = $3 and id_caso_dia = $2`;
-    const params = [id, id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion];
+    const params = [id, id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion, current_using, rea, det];
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
@@ -779,14 +917,14 @@ function updateTreatment(id, id_caso_dia, id_tratamiento, nombre, fecha_desde, f
   });
 }
 
-function insertTreatment(id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion, pass = false, client = null) {
+function insertTreatment(id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion, current_using, rea, det,  pass = false, client = null) {
   return new Promise(async (resolve, reject)=>{
     if (!client) {
       client = await openConnection();
     }
-    const query = `insert into ${PGSCHEMA}.dt_tratamientos_caso_dia (id_tratamiento, id_caso_dia, nombre, fecha_desde, fecha_hasta, observacion)
-            values ($2, $1, $3, $4, $5, $6)`;
-    const params = [id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion];
+    const query = `insert into ${PGSCHEMA}.dt_tratamientos_caso_dia (id_tratamiento, id_caso_dia, nombre, fecha_desde, fecha_hasta, observacion, usando, id_razon, id_detalle)
+            values ($2, $1, $3, $4, $5, $6, $7, $8, $9)`;
+    const params = [id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion, current_using, rea, det];
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
@@ -846,8 +984,7 @@ function getContactByid(dni_contact, pass = false, client = null) {
   });
 }
 
-
-function insertContact(dni_contact, parentesco, name, age, factor, obs, pass = false, client = null) {
+function insertContact(dni_contact, parentesco, name, age, factor, obs, phone, pass = false, client = null) {
   return new Promise(async (resolve, reject)=>{
     if (!client) {
       client = await openConnection();
@@ -858,9 +995,10 @@ function insertContact(dni_contact, parentesco, name, age, factor, obs, pass = f
             nombre,
             edad,
             factor_riesgo,
-            observacion
-          ) values($1, $2, $3, $4, $5, $6);`;
-    const params = [dni_contact, parentesco, name, age, factor, obs];
+            observacion,
+            celular
+          ) values($1, $2, $3, $4, $5, $6, $7);`;
+    const params = [dni_contact, parentesco, name, age, factor, obs, phone];
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
@@ -940,26 +1078,95 @@ function deleteRelationshipContactPatient(dni_contact, dni_patient, pass = false
 }
 
 
-function updateContact(dni_contact, parentesco, name, age, factor, obs, pass = false, client = null) {
+function updateContact(dni_contact, parentesco, name, age, factor, obs, phone, pass = false, client = null) {
   return new Promise(async (resolve, reject)=>{
     if (!client) {
       client = await openConnection();
     }
-    const query = `update ${PGSCHEMA}.dt_contactos set
+    let query = `update ${PGSCHEMA}.dt_contactos set
             parentesco = $2,
             nombre = $3,
             edad = $4,
             factor_riesgo = $5,
-            observacion = $6
+            observacion = $6,
+            celular = $7
           where dni = $1;`;
-    const params = [dni_contact, parentesco, name, age, factor, obs];
-    console.log(query);
-    console.log(params);
+    let params = [dni_contact, parentesco, name, age, factor, obs, phone];
+    let result = await client.query(query, params);
+
+    query = `update ${PGSCHEMA}.dt_pacientes set
+            nombre = $1,
+            edad = $2,
+            factor_riesgo = $3,
+            celular = $4
+          where dni = $5;`;
+    params = [name, age, factor, phone, dni_contact];
+    result = await client.query(query, params);
+    if (!pass) {
+      client.release(true);
+    }
+    // console.log('Rows : ', result);
+    resolve({result: result.rows, client});
+  });
+}
+/**
+ * 
+ * @param {*} dniPatient
+ * @param {*} tipoPrueba1
+ * @param {*} fechaResultadoPrueba1
+ * @param {*} resultadoPrueba1
+ * @param {*} tipoPrueba2
+ * @param {*} fechaResultadoPrueba2
+ * @param {*} resultadoPrueba2
+ * @param {*} tipoPrueba3
+ * @param {*} fechaResultadoPrueba3
+ * @param {*} resultadoPrueba3
+ * @param {*} pass
+ * @param {*} client
+ * @return {Promise}
+ */
+function updatePatientTest(dniPatient,
+    tipoPrueba1,
+    fechaResultadoPrueba1,
+    resultadoPrueba1,
+    tipoPrueba2,
+    fechaResultadoPrueba2,
+    resultadoPrueba2,
+    tipoPrueba3,
+    fechaResultadoPrueba3,
+    resultadoPrueba3, pass = false, client = null) {
+  return new Promise(async (resolve, reject)=>{
+    if (!client) {
+      client = await openConnection();
+    }
+    const query = `update ${PGSCHEMA}.dt_pacientes set
+            tipo_prueba_1 = $2,
+            fecha_resultado_prueba_1 = $3,
+            resultado_prueba_1 = $4,
+            tipo_prueba_2 = $5,
+            fecha_resultado_prueba_2 = $6,
+            resultado_prueba_2 = $7,
+            tipo_prueba_3 = $8,
+            fecha_resultado_prueba_3 = $9,
+            resultado_prueba_3 = $10
+          where dni = $1;`;
+    const params = [dniPatient,
+      tipoPrueba1 == '' ? null : tipoPrueba1,
+      fechaResultadoPrueba1 == '' ? null : fechaResultadoPrueba1,
+      resultadoPrueba1,
+      tipoPrueba2 == '' ? null : tipoPrueba2,
+      fechaResultadoPrueba2 == '' ? null : fechaResultadoPrueba2,
+      resultadoPrueba2,
+      tipoPrueba3 == '' ? null : tipoPrueba3,
+      fechaResultadoPrueba3 == '' ? null : fechaResultadoPrueba3,
+      resultadoPrueba3];
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
     }
-    console.log('Rows : ', result);
+    // console.log(query);
+    // console.log(params);
+    // console.log('Rows : ', result);
     resolve({result: result.rows, client});
   });
 }
@@ -974,7 +1181,7 @@ function updateContactMonitor(dni_contact, status, pass = false, client = null) 
         id_status = $3
         where fecha_monitoreo::date = $2::date and dni_contacto = $1`;
     const params = [dni_contact, peruvianDateInit, status];
-    console.log(params);
+    // console.log(params);
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
@@ -993,7 +1200,7 @@ function insertContactMonitor(dni_contact, status, pass = false, client = null) 
     (dni_contacto, fecha_monitoreo, id_status)
     values ($1, $2, $3)`;
     const params = [dni_contact, peruvianDateInit, status];
-    console.log(params);
+    // console.log(params);
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
@@ -1021,7 +1228,7 @@ function getContactMonitorToDay(dni_contact, pass = false, client = null) {
 }
 
 
-function listContact(dni_paciente, pass = false, client = null) {
+function listContacts(dni_paciente, pass = false, client = null) {
   return new Promise(async (resolve, reject)=>{
     const {peruvianDateInit} = getTimeNow();
     if (!client) {
@@ -1039,23 +1246,38 @@ function listContact(dni_paciente, pass = false, client = null) {
         else 3 end as seguimiento,
         c.nombre,
         c.observacion,
+        c.celular,
         cp.parentesco,
+
+        p.tipo_prueba_1,
+        p.resultado_prueba_1,
+        p.fecha_resultado_prueba_1,
+        p.tipo_prueba_2,
+        p.resultado_prueba_2,
+        p.fecha_resultado_prueba_2,
+        p.tipo_prueba_3,
+        p.resultado_prueba_3,
+        p.fecha_resultado_prueba_3,
+
+
         ($2::date - c.fecha_creacion::date + 1)::int as dia,
         (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos where dni_contacto = cp.dni_contacto and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
         from ${PGSCHEMA}.dt_contactos_pacientes as cp
         left join ${PGSCHEMA}.dt_contactos as c
         on cp.dni_contacto = c.dni
+        left join ${PGSCHEMA}.dt_pacientes as p
+        on cp.dni_contacto = p.dni
         where cp.dni_paciente = $1;`;
     const params = [dni_paciente, peruvianDateInit];
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({results: result.rows, client});
   });
 }
 
-function listContactByDNI(dni_contact, pass = false, client = null) {
+function listContactsByDNI(dni_contact, pass = false, client = null) {
   return new Promise(async (resolve, reject)=>{
     const {peruvianDateInit} = getTimeNow();
     if (!client) {
@@ -1095,6 +1317,18 @@ function getPatientContactByDNI(dni_contact, pass = false, client = null) {
           1 as seguimiento,
           p.nombre,
           c.observacion,
+          p.celular,
+
+          p.tipo_prueba_1,
+          p.resultado_prueba_1,
+          p.fecha_resultado_prueba_1,
+          p.tipo_prueba_2,
+          p.resultado_prueba_2,
+          p.fecha_resultado_prueba_2,
+          p.tipo_prueba_3,
+          p.resultado_prueba_3,
+          p.fecha_resultado_prueba_3,
+
           '' as parentesco,
           ($2::date - c.fecha_creacion::date + 1)::int as dia,
           (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos 
@@ -1125,6 +1359,7 @@ function getContactByDNI(dni_contact, pass = false, client = null) {
         3 as seguimiento,
         c.nombre,
         c.observacion,
+        c.celular,
         '' as parentesco,
         ($2::date - fecha_creacion::date + 1) as dia,
         (select id_status from ${PGSCHEMA}.dt_monitoreo_contactos where dni_contacto = c.dni and fecha_monitoreo = $2::date limit 1)::char(1) as monitoreo
@@ -1155,7 +1390,7 @@ function getMonitoreoContactsByDNI(dni_contact, pass = false, client = null) {
     if (!pass) {
       client.release(true);
     }
-    resolve({result: result.rows, client});
+    resolve({results: result.rows, client});
   });
 }
 
@@ -1220,7 +1455,7 @@ module.exports = {
   deleteTreatment,
   updateTreatment,
   insertTreatment,
-  listContactByDNI,
+  listContactsByDNI,
   getPatientContactByDNI,
   getContactByDNI,
   getMonitoreoContactsByDNI,
@@ -1234,7 +1469,9 @@ module.exports = {
   insertRelationshipContactPatient,
   insertContactMonitor,
   getContactMonitorToDay,
-  listContact,
+  listContacts,
   addPermissionContact,
   removePermissionContact,
+  getTestReasons,
+  updatePatientTest,
 };

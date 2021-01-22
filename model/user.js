@@ -76,8 +76,43 @@ function updateTermsPatient(dni, acceptedTemrs, pass=false, client=null) {
 }
 
 
+/**
+ * Actualizar datos de un paciente
+ * @function
+ * @param {Number} dni Número de documento del paciente
+ * @param {Object} body Body de parametros
+ * @return {Promise}
+ */
+function updatePatient(dni, body) {
+  const {
+    direccion,
+    pais,
+    provincia,
+    distrito,
+    edad,
+    factor,
+  } = body;
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `update ${PGSCHEMA}.dt_pacientes set
+            direccion = $2,
+            pais = $3,
+            provincia = $4,
+            distrito = $5,
+            edad = $6,
+            factor_riesgo = $7
+            where dni = $1;`;
+    const params = [dni, direccion, pais, provincia, distrito, edad, factor];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve({'updated': result.rowCount? true : false, client});
+  });
+}
+
+
 module.exports = {
   validateTerm,
   getInfoPatient,
   updateTermsPatient,
+  updatePatient,
 };

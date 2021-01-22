@@ -32,13 +32,51 @@
         width: 100%;
     }
 </style>
-<!-- Page Heading -->
+<!-- Button trigger modal -->
+{{!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalCreatePatient">
+  Agregar como paciente
+</button> --}}
+
+<!-- Modal -->
+<div class="modal fade" id="modalCreatePatient" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Agregar paciente</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <label for="dniCreatePatient">DNI: </label>
+                <input type="text" class="form-control" id="dniCreatePatient" placeholder="Número de DNI" value="">
+            </div>
+            <div class="form-group col-md-12">
+                <label for="nameCreatePatient">Nombre: </label>
+                <input type="text" class="form-control" id="nameCreatePatient" placeholder="Nombre y apellidos" value="">
+            </div>
+            <div class="form-group col-md-12">
+                <label for="phoneCreatePatient">Celular: </label>
+                <input type="text" class="form-control" id="phoneCreatePatient" placeholder="Número de celular" value="">
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">CASO</h1>
 </div>
 <form method="POST" id="form">
     <div class="row">
-
         <div class="col-xl-3 col-lg-3">
             <div class="card card-comments shadow mb-4 border-left-warning">
                 <div class="card-header py-3">
@@ -97,27 +135,27 @@
                                     value="{{celular}}" />
                             </div>
                             <div class="form-group col-md-4">
-                                <label for="inputEmail4">Edad:</label>
-                                <input type="text" class="form-control" disabled value="{{edad}}" />
+                                <label for="edad">Edad:</label>
+                                <input type="text" class="form-control" name="edad" id="edad" value="{{edad}}" />
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group col-md-4">
-                                <label for="inputEmail4">Pais:</label>
-                                <input type="text" class="form-control" disabled value="{{pais}}" />
+                                <label for="pais">Pais:</label>
+                                <input type="text" class="form-control" id="pais" name="pais" value="{{pais}}" />
                             </div>
                             <div class="form-group col-md-4">
-                                <label for="inputEmail4">Provincia:</label>
-                                <input type="text" class="form-control" disabled value="{{provincia}}" />
+                                <label for="provincia">Provincia:</label>
+                                <input type="text" class="form-control" id="provincia" name="provincia" value="{{provincia}}" />
                             </div>
                             <div class="form-group col-md-4">
-                                <label for="inputEmail4">Distrito:</label>
-                                <input type="text" class="form-control" disabled value="{{distrito}}" />
+                                <label for="distrito">Distrito:</label>
+                                <input type="text" class="form-control" id="distrito" name="distrito" value="{{distrito}}" />
                             </div>
                             <div class="form-group col-md-12">
-                                <label for="inputEmail4">Direccion:</label>
-                                <input type="text" class="form-control" disabled value="{{direccion}}" />
+                                <label for="direccion">Direccion:</label>
+                                <input type="text" class="form-control" id="direccion" name="direccion" value="{{direccion}}" />
                             </div>
                             
                         </div>
@@ -148,7 +186,7 @@
                                 <label for="inputEmail4">Tipo Bandeja:</label>
                                 <select class="form-control" id="estado" name="estado">
                                     <option value="">Seleccionar</option>
-                                    {{#each status_patients}}
+                                    {{#each statementsPatients}}
                                     <option value="{{ this.id }}" {{compare this.id ../estado "selected"}}>
                                         {{ this.descripcion }}</option>
                                     {{/each}}
@@ -157,20 +195,43 @@
                         </div>
 
                         <div class="form-row">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
                                 <label for="fecha_inicio_sintomas">Fecha de inicio de sintómas:</label>
                                 <input class="form-control" type="date" id="fecha_inicio_sintomas"
                                     name="fecha_inicio_sintomas" value="{{ fecha_inicio_sintomas }}" />
 
                             </div>
-                            <div class="form-group col-md-5">
-
+                            <div class="form-group col-md-4">
+                                <label for="sexo">Sexo</label>
+                                <select class="form-control" id="sexo" name="sexo">
+                                    <option value="">Seleccionar</option>
+                                    <option value="M" {{compare sexo "M" "selected"}}>
+                                        M</option>
+                                    <option value="F" {{compare sexo "F" "selected"}}>
+                                        F</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4">
                                 <label for="tiempo_seguimiento">Día de seguimiento</label>
                                 <input class="form-control" type="text" id="tiempo_seguimiento"
                                     name="tiempo_seguimiento" placeholder="5" value="{{ tiempo_seguimiento }}"
                                     disabled />
                             </div>
                         </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="motivo_prueba">Motivo de prueba:</label>
+                                <select class="form-control" id="motivo_prueba" name="motivo_prueba">
+                                    <option value="">Seleccionar</option>
+                                    {{#each testReasons}}
+                                        <option value="{{ this.id }}" {{compare this.id ../id_motivo_prueba "selected"}}>
+                                        {{ this.descripcion }}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        </div>
+
 
                         <div class="form-row">
                             <div class="form-group col-md-12">
@@ -182,12 +243,17 @@
                                         <select name="resultado_prueba_1" class="browser-default custom-select mb-4"
                                             id="resultado_prueba_1">
                                             <option value="">Seleccionar</option>
-                                            {{#each test}}
+                                            {{#each testResults}}
                                             <option value="{{ this.id }}"
                                                 {{compare this.id ../resultado_prueba_1 "selected"}}>
                                                 {{ this.descripcion }}</option>
                                             {{/each}}
                                         </select>
+                                    </td>
+                                    <td class="td_select">
+                                        <label for="fecha_resultado_prueba_1">Fecha de resultado de prueba 1 - {{tipo_prueba_1}}:</label>
+                                        <input class="form-control" type="date" id="fecha_resultado_prueba_1"
+                                            name="fecha_resultado_prueba_1" value="{{dateToString fecha_resultado_prueba_1}}"/>
                                     </td>
                                 </tr>
                                 {{/if}}
@@ -199,29 +265,40 @@
                                         <select name="resultado_prueba_2" class="browser-default custom-select mb-4"
                                             id="resultado_prueba_2">
                                             <option value="">Seleccionar</option>
-                                            {{#each test}}
+                                            {{#each testResults}}
                                             <option value="{{ this.id }}"
                                                 {{compare this.id ../resultado_prueba_2 "selected"}}>
                                                 {{ this.descripcion }}</option>
                                             {{/each}}
                                         </select>
                                     </td>
+                                    <td class="td_select">
+                                        <label for="fecha_resultado_prueba_2">Fecha de resultado de prueba 2 -
+                                            {{tipo_prueba_2}}:</label>
+                                        <input class="form-control" type="date" id="fecha_resultado_prueba_2"
+                                            name="fecha_resultado_prueba_2" value="{{dateToString fecha_resultado_prueba_2}}"/>
+                                    </td>
                                 </tr>
                                 {{/if}}
                                 {{#if tipo_prueba_3}}
                                 <tr class="tr_general">
-                                    <td><label for="textInput">Resultado de prueba 3 - {{tipo_prueba_2}}:</label></td>
+                                    <td><label for="textInput">Resultado de prueba 3 - {{tipo_prueba_3}}:</label></td>
                                     <td class="td_select">
-                                        {{ resultado_prueba_2 }}
+                                        {{ resultado_prueba_3 }}
                                         <select name="resultado_prueba_3" class="browser-default custom-select mb-4"
                                             id="select">
                                             <option value="">Seleccionar</option>
-                                            {{#each test}}
+                                            {{#each testResults}}
                                             <option value="{{ this.id }}"
-                                                {{compare this.id ../resultado_prueba_2 "selected"}}>
+                                                {{compare this.id ../resultado_prueba_3 "selected"}}>
                                                 {{ this.descripcion }}</option>
                                             {{/each}}
                                         </select>
+                                    </td>
+                                    <td class="td_select">
+                                        <label for="fecha_resultado_prueba_3">Fecha de resultado de prueba 3 - {{tipo_prueba_3}}:</label>
+                                        <input class="form-control" type="date" id="fecha_resultado_prueba_3"
+                                            name="fecha_resultado_prueba_3" value="{{dateToString fecha_resultado_prueba_3}}"/>
                                     </td>
                                 </tr>
                                 {{/if}}
@@ -233,9 +310,9 @@
                                 <label for="inputEmail4">Condición de egreso:</label>
                                 <select class="form-control" id="egreso" name="condicion_egreso">
                                     <option value="">Seleccionar</option>
-                                            {{#each condicionesEgreso}}
+                                            {{#each exitConditions}}
                                             <option value="{{ this.id }}"
-                                                {{compare this.id ../condicion_egreso "selected"}}>
+                                                {{compare this.id ../condicionEgreso "selected"}}>
                                                 {{ this.descripcion }}</option>
                                             {{/each}}
                                 </select>
@@ -263,7 +340,7 @@
 
                     <div class="form-group custom-switch">
                         <input type="checkbox" class="custom-control-input" name="continue_tracking" id="customSwitch1"
-                            {{#if have_this_scheduled_case }} checked {{/if}} data-toggle="toggle" data-on="Si"
+                            {{#if haveThisScheduledCase }} checked {{/if}} data-toggle="toggle" data-on="Si"
                             data-off="No" data-onstyle="success" data-offstyle="danger" />
                         <label class="custom-control-label" for="customSwitch1">Continuar el seguimiento</label>
                     </div>
@@ -303,6 +380,10 @@
                                 <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
                                     Día
                                 </li>
+
+
+
+
                                 <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
                                     <strong>Funciones Vitales</strong>
                                 </li>
@@ -311,6 +392,27 @@
                                 </li>
                                 <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
                                     Temperatura
+                                </li>
+                                <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                    FC:
+                                </li>
+                                <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                  
+                                    <div class="form-group custom-switch">
+                                        <input type="checkbox" class="custom-control-input" {{#if can_plus_fv }}checked{{/if}} 
+                                            data-toggle="toggle" data-on="Si" name="enabled_"
+                                            data-off="No" data-onstyle="success" data-offstyle="danger" id="customSwitch02" onchange="checkboxOxi(this)" />
+                                        <label class="custom-control-label" for="customSwitch02">¿Cuenta con oximetro?</label>
+                                        <script>
+                                            function checkboxOxi(el) {
+                                                //document.getElementById("fc_fv").disabled = !el.checked;
+                                                document.getElementById("sat_fv").disabled = !el.checked;
+                                            }
+                                        </script>
+                                    </div>
+                                </li>
+                                <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
+                                    SatO2:
                                 </li>
                                 <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
                                     <strong>Signos de Alarma</strong>
@@ -322,7 +424,12 @@
                                     Taquipnea (>= 22 pm)
                                 </li>
                                 <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
-                                    Saturación de oxígeno < 92%
+                                    {{#if (equal id_hospital 2)}}
+                                        Saturación de oxígeno < 88%
+                                    {{/if}}
+                                    {{#if (equal id_hospital 1)}}
+                                        Saturación de oxígeno < 95%
+                                    {{/if}}
                                 </li>
                                 <li style="min-width: 50px; height: 50px; display:flex; justify-content: flex-start; align-items: center;">
                                     Alteración de la conciencia
@@ -373,18 +480,27 @@
                         </div>
                         <div style="width:calc(100% - 120px);overflow: auto;">
                             <div id="containet_form_check" style="display: flex;">
-                                {{#each previous_cases}}
+                                {{#each previousCases}}
                                 <div style="margin: 0px 20px;">
                                     <ul style="padding: 0px; list-style: none;">
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>{{ this.fecha_caso_char }}</strong></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>{{ this.day_index }}</strong> </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.fr_fv }}checked{{/if}}  />
+                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" value="{{ this.fr_fv }}"  />
                                         </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.temp_fv }}checked{{/if}}  />
+                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" value="{{ this.temp_fv }}"  />
                                         </li>
+      
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" value="{{ this.fc_fv }}"  />
+                                        </li>
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" value="{{ this.sat_fv }}"  />
+                                        </li>
+
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
                                             <input disabled style="cursor: no-drop;" class="form-control" type="checkbox" {{#if this.disnea_sa }}checked{{/if}}  />
@@ -453,10 +569,18 @@
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>{{ tiempo_seguimiento }}</strong> </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input  class="form-control" type="checkbox" {{#if fr_fv }} checked {{/if}}  name="fr_fv"  />
+                                            <input  class="form-control" type="number"  value="{{ fr_fv }}"  name="fr_fv"  />
                                         </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input  class="form-control" type="checkbox" {{#if temp_fv }} checked {{/if}}  name="temp_fv"  />
+                                            <input  class="form-control" type="number"  value="{{ temp_fv }}"  name="temp_fv"  />
+                                        </li>
+                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                            <input class="form-control" type="number"  name="fc_fv" id="fc_fv" value="{{ fc_fv }}"  />
+                                        </li>
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
+                                       
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
+                                            <input {{#if can_plus_fv }} {{else}} disabled{{/if}}  class="form-control" type="number"  name="sat_fv" id="sat_fv" value="{{ sat_fv }}"  />
                                         </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
@@ -510,7 +634,7 @@
 
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
                                             <select name="estado_evo" class="browser-default custom-select mb-4 select_status">
-                                                {{#each estado_seguimiento}}
+                                                {{#each monitoringStatus}}
                                                     <option value="{{ this.id }}"
                                                         {{compare this.id ../estado_evo "selected"}}>
                                                         {{ this.descripcion }}</option>
@@ -529,7 +653,9 @@
         <div class="col-xl-11 col-lg-11">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Tratamiento</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Medicación  reportada por paciente</h6>
+                    <p class="h6 m-3 text-danger">IMPORTANTE: Al momento no existe un tratamiento que tenga beneficio probado en el manejo ambulatorio de COVID-19. 
+Se aconseja desalentar la automedicación y monitorear eventos adversos si es que alguna de estas medicinas han sido prescritas por un médico.</p>
                 </div>
                 <div class="card-body">
 
@@ -538,7 +664,7 @@
                             <div class="form-group col-md-12">
                                 <select id="combo_box_tratamiento" class="browser-default custom-select mb-2" >
                                 </select>
-                                <input id="button_agregar_tratamiento" type="button" class="btn btn-primary bg-primary" value="Agregar tratamiento">
+                                <input id="button_agregar_tratamiento" type="button" class="btn btn-primary bg-primary" value="Registrar  medicamento">
                             </div>
 
                             <div class="form-group col-md-12" id="container_treatments">
@@ -555,7 +681,7 @@
         <div class="col-xl-11 col-lg-11">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Contactos</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Contactos Intradomiciliarios</h6>
                 </div>
                 <div class="card-body">
 
@@ -563,10 +689,11 @@
                         <div class="form-row">
                             <div class="form-group col-md-12">
                                 <input id="text_box_contacto" class="browser-default mb-2 form-control" type="text" placeholder="Ingrese DNI"/>
-                                <input id="button_agregar_contacto" type="button" class="btn btn-primary bg-primary" value="Agregar Contacto">
+                                <input id="button_agregar_contacto" type="button" class="btn btn-primary bg-primary" value="Agregar Contactos Intradomiciliarios">
                             </div>
 
                             <div class="form-group col-md-12" id="container_contact">
+
                                 
                             </div>
 
@@ -605,8 +732,6 @@
     </div>
 
 </form>
-
-
 <script>
 
     const options = {
@@ -635,6 +760,14 @@
             "life": 1
         },
         "7": {
+            "name": "Ivermectina",
+            "life": 1
+        },
+        "8": {
+            "name": "Dióxido de cloro",
+            "life": 1
+        },
+        "100": {
             "name": "Otros",
             "life": 1000
         }
@@ -650,7 +783,7 @@
         return json
     }
 
-    const treatments = arrayJsonToTreatmentsStruct(JSON.parse(`{{{ treatments_string }}}`))
+    const treatments = arrayJsonToTreatmentsStruct(JSON.parse(`{{{ treatmentsString }}}`))
 
     function printOptions(el, options){
         let html = ''
@@ -679,6 +812,10 @@
         }
     }
 
+    function checkboxCurrentTreatment(el, idElementTarget) {
+        document.getElementById(idElementTarget).disabled = el.checked;
+    }
+
     function printTreatments(el){
         
         let html = ''
@@ -689,12 +826,11 @@
                                 <input type="hidden" id="input_tra_${key}_name" name="input_tra_${key}_name" value="${treatment.name}"/>
                                 <p class="m-0 font-weight-bold text-primary">${treatment.name}</p>
                                 <i class="fas fa-times-circle top right absolute cancel" onclick="remove_treatment('${key}', ${treatment.type})"></i>
-                            </div>`
-
-            if(treatment.type == 7)
+                            </div>`;
+            if(treatment.type == 100)
                 card_head = `<div class="card-header py-3 form-inline">
                                 <label for="" class="m-0 font-weight-bold text-primary mr-2">Otros : </label>
-                                <input class="form-control col-md-5" id="input_tra_${key}_name" name="input_tra_${key}_name" type="text" />
+                                <input class="form-control col-md-5" id="input_tra_${key}_name" name="input_tra_${key}_name" type="text" value="${treatment.name}" />
                                 <i class="fas fa-times-circle top right absolute cancel" onclick="remove_treatment('${key}', ${treatment.type})"></i>
                             </div>`
 
@@ -704,14 +840,18 @@
                             ${card_head}
                             <div class="card-body">
                                 <div class="form-inline mb-2">
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-5">
                                         <label for="">Fecha de inicio :</label>
-                                        <input class="form-control" id="input_tra_${key}_from" name="input_tra_${key}_from" type="date" value="${treatment.init}" />
+                                        <input class="form-control col-11" id="input_tra_${key}_from" name="input_tra_${key}_from" type="date" value="${treatment.init}" />
                                     </div>
-
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-5">
                                         <label for="">Fecha de fin :</label>
-                                        <input class="form-control" type="date" id="input_tra_${key}_to" name="input_tra_${key}_to" value="${treatment.finish}" />
+                                        <input class="form-control col-11" ${treatment.using? "disabled" : ""} type="date" id="input_tra_${key}_to" name="input_tra_${key}_to" value="${treatment.finish}" />
+                                    </div>
+                                    <div class="form-group custom-switch col-md-2">
+                                        <input type="checkbox" class="custom-control-input" onchange="checkboxCurrentTreatment(this, 'input_tra_${key}_to')" name="input_tra_${key}_currentusing" id="input_tra_${key}_currentusing"
+                                            data-toggle="toggle" ${treatment.using? "checked" : ""} data-on="Si" data-off="No" data-onstyle="success" data-offstyle="danger"/>
+                                        <label class="custom-control-label" for="input_tra_${key}_currentusing">Actualmente en uso</label>
                                     </div>
                                 </div>
                                 <div class="form-group col-md-12">
@@ -719,12 +859,49 @@
                                     <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%"
                                         id="input_tra_${key}_obs" name="input_tra_${key}_obs" placeholder="Ingrese sus comentarios" maxlength="50" >${treatment.observation == null ? "": treatment.observation }</textarea>
                                 </div>
+
+
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="input_tra_${key}_rea">Motivo uso:</label>
+                                        <select class="form-control col-11" id="input_tra_${key}_rea" name="input_tra_${key}_rea" onchange="enabledByOption('input_tra_${key}_rea', 'input_tra_${key}_det_container', 2)">
+                                            <option value="">Seleccionar</option>
+                                            <option value="1" ${treatment.reason == 1 ? "selected": "" }>Uso por indicación médica (receta médica)</option>
+                                            <option value="2" ${treatment.reason == 2 ? "selected": "" }>Automedicación</option>
+                                        </select>
+                                    </div>
+                                     <div class="form-group col-md-6" style="${treatment.reason != 2 ? "display:none": "" }" id="input_tra_${key}_det_container">
+                                        <label for="input_tra_${key}_det">Detalle del uso:</label>
+                                        <select ${treatment.reason != 2 ? "disabled": "" } class="form-control col-11" id="input_tra_${key}_det" name="input_tra_${key}_det">
+                                            <option value="">Seleccionar</option>
+                                            <option value="1" ${treatment.detail == 1 ? "selected": "" }>Consultó con un farmacéutico</option>
+                                            <option value="2" ${treatment.detail == 2 ? "selected": "" }>Consultó con familiares/amigos</option>
+                                            <option value="3" ${treatment.detail == 3 ? "selected": "" }>Lo tomó a criterio personal</option>
+                                            <option value="4" ${treatment.detail == 4 ? "selected": "" }>Otro</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                    
                             </div>
                         </div>`
             html+=card
         }
 
         el.innerHTML = html
+    }
+
+    function enabledByOption(idElement, toIdElement, value) {
+        element = document.getElementById(idElement);
+        toElement = document.getElementById(toIdElement);
+        toElementSelect = toElement.querySelector("select");
+        if (element.value == value) {
+            toElement.style.display = "block";
+            toElementSelect.disabled = false;
+        } else {
+            toElement.style.display = "none";
+            toElementSelect.disabled = true;
+        }
     }
 
     function saveState(){
@@ -754,7 +931,10 @@
             name: name,
             init: "",
             finish: "",
-            observation: ""
+            observation: "",
+            reason: null,
+            detail: null,
+            using: false
         }
     }
     
@@ -772,6 +952,7 @@
             substractLife(id)
             let key = "none" + countInputsNone
             countInputsNone++
+            debugger
             add_treatment(key, id, name)
             printOptions(combo_box_tratamiento, options)
             printTreatments(container_treatments)
@@ -779,13 +960,14 @@
     }
 
 </script>
-
-
 <script>
+
+    
+
     var countInputsNoneContact = 0
     var container_contact
-    const contacts = JSON.parse(`{{{ contacts_json }}}`)
-    const monitor_options = ["", "A", "S","H", "F"]
+    const contacts = JSON.parse(`{{{ contactsString }}}`)
+    const monitor_options = ["", "A", "S","H", "F", "L"]
     const seguimiento_options = {
         "0":"NO", 
         "1":"PACIENTE", 
@@ -800,6 +982,7 @@
     }
 
     function add_contact(key, data=null){
+        debugger;
         saveStatusContacts() //Guardar el estado de los inputs para volver a generar HTML
         if(data)
             contacts[key] = data
@@ -812,42 +995,56 @@
                 "nombre": "",
                 "observacion": "",
                 "parentesco": "",
-                "dia":2,
+                "dia": 2,
+                "celular": "",
                 "monitoreo": "",
-                "monitoreos":[]
+                "monitoreos": [],
+                "tipo_prueba_1": "",
+                "resultado_prueba_1": "",
+                "fecha_resultado_prueba_1": "",
+                "tipo_prueba_2": "",
+                "resultado_prueba_2": "",
+                "fecha_resultado_prueba_2": "",
+                "tipo_prueba_3": "",
+                "resultado_prueba_3": "",
+                "fecha_resultado_prueba_3": ""
             }
         generateCardContact(container_contact)
     }
     
-    function saveStatusContacts(){
-        for(let key in contacts){
+    function saveStatusContacts() {
+        
+        for (let key in contacts) {
             
-            let name = document.getElementById(`input_cont_${key}_name`).value
+            let name = document.getElementById(`input_cont_${key}_name`).value;
             
             //let dni = document.getElementById(`input_cont_${key}_dni`).value
             
-            let age = document.getElementById(`input_cont_${key}_age`).value
+            let age = document.getElementById(`input_cont_${key}_age`).value;
             
-            let factor = document.getElementById(`input_cont_${key}_factor`).value
+            let factor = document.getElementById(`input_cont_${key}_factor`).value;
             
-            let observation = ""
-            if(contacts[key].observacion)
-                observation = document.getElementById(`input_cont_${key}_obs`).value
+            let observation = "";
             
-            let parent = document.getElementById(`input_cont_${key}_parent`).value
+            if(contacts[key].observacion && document.getElementById(`input_cont_${key}_obs`))
+                observation = document.getElementById(`input_cont_${key}_obs`).value;
+            
+            let parent = document.getElementById(`input_cont_${key}_parent`).value;
             
             //let follow = document.getElementById(`input_cont_${key}_follow`).value
+
+            let phone = document.getElementById(`input_cont_${key}_phone`).value;
             
 
-            let monitor = document.getElementById(`input_cont_${key}_monitor`) ? document.getElementById(`input_cont_${key}_monitor`).value : ""
+            let monitor = document.getElementById(`input_cont_${key}_monitor`) ? document.getElementById(`input_cont_${key}_monitor`).value : "";
 
             
             
-            //contacts[key]["dni"] = dni
             contacts[key]["edad"] = age
             contacts[key]["monitoreo"] = monitor
             contacts[key]["factor_riesgo"] = factor
             contacts[key]["nombre"] = name
+            contacts[key]["celular"] = phone
             
             if(contacts[key].observacion)
                 contacts[key]["observacion"] = observation
@@ -868,8 +1065,6 @@
         let html = ''
         for(let _key in seguimiento_options){
             let item = seguimiento_options[_key]
-            console.log(item)
-            console.log(_key)
             html+= key != null && _key == key? `<option value="${_key}" selected>${item}</option>` : `<option value="${_key}">${item}</option>`
         }
         return html
@@ -881,8 +1076,8 @@
         //Iterar JSON por KEY
         for(let key in contacts){
             let contact = contacts[key] //Obtener Elemento "Contact" desde JSON
-
-            let follow = validateOptionSeguimiento(contact.seguimiento)
+            console.log(contact)
+            //let follow = validateOptionSeguimiento(contact.seguimiento)
             //let follow = contact.seguimiento ? `<option value="NO">NO</option><option value="SI" selected>SI</option>` : `<option value="NO" selected>NO</option><option value="SI">SI</option>`
             let factor = contact.factor_riesgo ? `<option value="NO">NO</option><option value="SI" selected>SI</option>` : `<option value="NO" selected>NO</option><option value="SI">SI</option>`
             
@@ -928,7 +1123,7 @@
                 let _html = validateOptionMonitoreo(monitor.monitoreo) //Validar Options de monitoreo segun KEY [  | A | S | H | F]
                 last_monitors += `<div style="margin: 0px 20px;">
                                     <ul style="padding: 0px; list-style: none;">
-                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>${monitor.dia}</strong></li>
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>Condición - día ${monitor.dia}</strong></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
                                             <select disabled class="browser-default custom-select mb-4">
                                                 ${_html}
@@ -938,12 +1133,12 @@
                                 </div>`
             }
 
-            let monitor = validateOptionMonitoreo(contact.monitoreo) //Options validados segun KEY [  | A | S | H | F]
+            let monitor = validateOptionMonitoreo(contact.monitoreo) //Options validados segun KEY [  | A | S | H | F | L]
 
             let _html_monitor_input =  contact.seguimiento == 0 || contact.seguimiento == 2 ? 
                                 `<div style="margin: 0px 20px;">
                                     <ul style="padding: 0px; list-style: none;">
-                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>${contact.dia}</strong></li>
+                                        <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>Condición - día ${contact.dia}</strong></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
                                             <select id="input_cont_${key}_monitor" name="input_cont_${key}_monitor" class="browser-default custom-select mb-4">
                                                 ${monitor}
@@ -956,24 +1151,103 @@
                                 ${last_monitors}
                                 ${_html_monitor_input}
                             </div>
-                            <label for="" class="m-0 font-weight-bold text-primary">(Vacío=Pendiente; A=Asintomático; S=Sintomático; H=Hospitalizado; F=Fallecido)</label>`
-            _html_monitor = contact.seguimiento == 1 && contact.monitoreos.lenght == 0 ? "" : _html_monitor
-
-            
-            let html_follow = contact.seguimiento == 3 && key.indexOf("none") == -1?
+                            <label for="" class="m-0 font-weight-bold text-primary">(Vacío=Pendiente; A=Asintomático; S=Sintomático; H=Hospitalizado; F=Fallecido; L=Alta)</label>`
+            _html_monitor = contact.seguimiento == 1 && contact.monitoreos.lenght == 0 ? "" : _html_monitor;
+            const htmlFollowAddPatient = contact.seguimiento != 1 ? `<br/><br/>
+                            <button type="button" class="btn btn-primary" onclick="addPatient('${key}')">
+                                Agregar como paciente
+                            </button>
+                            <div class="col-md-1"></div>` : ``;
+            let html_follow = contact.seguimiento == 3 && key.indexOf("none") == -1 ?
                             `<div class="col-md-12" style="padding: 0px;">
-                                <label for="" style="text-align: start;display: block;">En seguimiento ?</label>
+                                <label for="" style="text-align: start;display: block;">¿Seguimiento por plataforma?</label>
                             </div>
-                            <input disabled id="input_cont_${key}_follow" name="input_cont_${key}_follow" class="form-control col-md-6" type="text" value="${seguimiento_options[contact.seguimiento]}" />
-                            <div class="col-md-1"></div>
+                            <input disabled id="input_cont_${key}_follow" name="input_cont_${key}_follow" class="form-control col-md-12" type="text" value="${seguimiento_options[contact.seguimiento]}" />
+                            ${htmlFollowAddPatient}
                             <div class="form-group custom-switch col-md-5">
                                 <input type="checkbox" class="custom-control-input" name="input_cont_${key}_have_control" id="input_cont_${key}_have_control"
                                     data-toggle="toggle" data-on="Si" data-off="No" data-onstyle="success" data-offstyle="danger" onclick="takeContact(this, '${contact.dni}', '{{dni}}')"/>
                                 <label class="custom-control-label" for="input_cont_${key}_have_control">¿Tomar contacto?</label>
                             </div>`:
-                            `<label for="">En seguimiento ?</label>
-                            <input disabled id="input_cont_${key}_follow" name="input_cont_${key}_follow" class="form-control col-md-11" type="text" value="${seguimiento_options[contact.seguimiento]}" />`
-
+                            `<label for="">¿Seguimiento por plataforma?</label>
+                            <input disabled id="input_cont_${key}_follow" name="input_cont_${key}_follow" class="form-control col-md-11" type="text" value="${seguimiento_options[contact.seguimiento]}" />
+                            ${htmlFollowAddPatient}`;
+            const html_test = contact.seguimiento != 1 ? '' :`
+            <div class="form-inline mb-2">
+                <div class="form-group col-md-4">
+                    <label  for="input_cont_${key}_tipoprueba1&${contact.dni}">Tipo de muestra 1:</label>
+                    <select id="input_cont_${key}_tipoprueba1&${contact.dni}" name="input_cont_${key}_tipoprueba1&${contact.dni}" class="browser-default custom-select col-md-11 form-control">
+                            <option value="">-</option>
+                            <option ${contact.tipo_prueba_1 == "ANTIGENO" ? "selected" : ""} value="ANTIGENO">ANTIGENO</option>
+                            <option ${contact.tipo_prueba_1 == "MOLECULAR" ? "selected" : ""} value="MOLECULAR">MOLECULAR</option>
+                            <option ${contact.tipo_prueba_1 == "RAPIDA" ? "selected" : ""} value="RAPIDA">RAPIDA</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label  for="input_cont_${key}_fecharesultadoprueba1&${contact.dni}">Fecha de resultado de prueba 1:</label>
+                    <input class="col-md-11 form-control" type="date" id="input_cont_${key}_fecharesultadoprueba1&${contact.dni}"
+                                            name="input_cont_${key}_fecharesultadoprueba1&${contact.dni}" value="${contact.fecha_resultado_prueba_1 == null? "": contact.fecha_resultado_prueba_1.substring(0, 10)}"/>
+                </div>
+                <div class="form-group col-md-4">
+                    <label  for="input_cont_${key}_resultadoprueba1&${contact.dni}">Resultado de muestra 1:</label>
+                    <select id="input_cont_${key}_resultadoprueba1&${contact.dni}" name="input_cont_${key}_resultadoprueba1&${contact.dni}" class="browser-default custom-select col-md-11 form-control">
+                            <option ${contact.resultado_prueba_1 == 3 ? "selected" : ""} value="3">PENDIENTE</option>
+                            <option ${contact.resultado_prueba_1 == 2 ? "selected" : ""} value="2">POSITIVO</option>
+                            <option ${contact.resultado_prueba_1 == 1 ? "selected" : ""} value="1">NEGATIVO</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-inline mb-2">
+                <div class="form-group col-md-4">
+                    <label  for="input_cont_${key}_tipoprueba2&${contact.dni}">Tipo de muestra 2:</label>
+                    <select id="input_cont_${key}_tipoprueba2&${contact.dni}" name="input_cont_${key}_tipoprueba2&${contact.dni}" class="browser-default custom-select col-md-11 form-control">
+                            <option value="">-</option>
+                            <option ${contact.tipo_prueba_2 == "ANTIGENO" ? "selected" : ""} value="ANTIGENO">ANTIGENO</option>
+                            <option ${contact.tipo_prueba_2 == "MOLECULAR" ? "selected" : ""} value="MOLECULAR">MOLECULAR</option>
+                            <option ${contact.tipo_prueba_2 == "RAPIDA" ? "selected" : ""} value="RAPIDA">RAPIDA</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label  for="input_cont_${key}_fecharesultadoprueba2&${contact.dni}">Fecha de resultado de prueba 2:</label>
+                    <input class="col-md-11 form-control" type="date" id="input_cont_${key}_fecharesultadoprueba2&${contact.dni}"
+                                            name="input_cont_${key}_fecharesultadoprueba2&${contact.dni}" value="${contact.fecha_resultado_prueba_2 == null? "": contact.fecha_resultado_prueba_2.substring(0, 10)}"/>
+                </div>
+                <div class="form-group col-md-4">
+                    <label  for="input_cont_${key}_resultadoprueba2&${contact.dni}">Resultado de muestra 2:</label>
+                    <select id="input_cont_${key}_resultadoprueba2&${contact.dni}" name="input_cont_${key}_resultadoprueba2&${contact.dni}" class="browser-default custom-select col-md-11 form-control">
+                            <option ${contact.resultado_prueba_2 == 3 ? "selected" : ""} value="3">PENDIENTE</option>
+                            <option ${contact.resultado_prueba_2 == 2 ? "selected" : ""} value="2">POSITIVO</option>
+                            <option ${contact.resultado_prueba_2 == 1 ? "selected" : ""} value="1">NEGATIVO</option>
+                    </select>
+                </div>
+            </div>
+            
+            
+            <div class="form-inline mb-2">
+                <div class="form-group col-md-4">
+                    <label  for="input_cont_${key}_tipoprueba3&${contact.dni}">Tipo de muestra 3:</label>
+                    <select id="input_cont_${key}_tipoprueba3&${contact.dni}" name="input_cont_${key}_tipoprueba3&${contact.dni}" class="browser-default custom-select col-md-11 form-control">
+                            <option value="">-</option>
+                            <option ${contact.tipo_prueba_3 == "ANTIGENO" ? "selected" : ""} value="ANTIGENO">ANTIGENO</option>
+                            <option ${contact.tipo_prueba_3 == "MOLECULAR" ? "selected" : ""} value="MOLECULAR">MOLECULAR</option>
+                            <option ${contact.tipo_prueba_3 == "RAPIDA" ? "selected" : ""} value="RAPIDA">RAPIDA</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label  for="input_cont_${key}_fecharesultadoprueba3&${contact.dni}">Fecha de resultado de prueba 3:</label>
+                    <input class="col-md-11 form-control" type="date" id="input_cont_${key}_fecharesultadoprueba3&${contact.dni}"
+                                            name="input_cont_${key}_fecharesultadoprueba3&${contact.dni}" value="${contact.fecha_resultado_prueba_3 == null? "": contact.fecha_resultado_prueba_3.substring(0, 10)}"/>
+                </div>
+                <div class="form-group col-md-4">
+                    <label  for="input_cont_${key}_resultadoprueba3&${contact.dni}">Resultado de muestra 3:</label>
+                    <select id="input_cont_${key}_resultadoprueba3&${contact.dni}" name="input_cont_${key}_resultadoprueba3&${contact.dni}" class="browser-default custom-select col-md-11 form-control">
+                            <option ${contact.resultado_prueba_3 == 3 ? "selected" : ""} value="3">PENDIENTE</option>
+                            <option ${contact.resultado_prueba_3 == 2 ? "selected" : ""} value="2">POSITIVO</option>
+                            <option ${contact.resultado_prueba_3 == 1 ? "selected" : ""} value="1">NEGATIVO</option>
+                    </select>
+                </div>
+            </div>`
             html+=`<div class="card shadow mb-4 relative">
                         <input type="hidden" id="input_cont_${key}_id" name="input_cont_${key}_id" value="${key}"/>
                         <div class="card-header py-3 form-inline">
@@ -1010,12 +1284,92 @@
                                     ${html_factor}
                                 </div>
                             </div>
+                            <div class="form-inline mb-2">
+                                <div class="form-group col-md-6">
+                                    <label for="input_cont_${key}_phone">Celular :</label><div class="col-md-1"></div>
+                                    <input required class="form-control col-md-11" id="input_cont_${key}_phone" name="input_cont_${key}_phone" type="text" value="${contact.celular}" />
+                                </div>
+
+                                
+                            </div>
+                            ${html_test}
                             ${html_observacion}
                             ${_html_monitor}
                         </div>
                     </div>`
         }
         el.innerHTML = html
+    }
+
+    async function addPatient(dniContact){
+        const inputDni = document.getElementById(`input_cont_${dniContact}_dni`);
+        const inputName = document.getElementById(`input_cont_${dniContact}_name`);
+        const inputPhone = document.getElementById(`input_cont_${dniContact}_phone`);
+        const inputAge = document.getElementById(`input_cont_${dniContact}_age`);
+        const inputFactor = document.getElementById(`input_cont_${dniContact}_factor`);
+        if (!(inputDni && inputDni.value != null && inputDni.value != '')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'DNI necesario',
+                text: 'Es necesario el DNI para crear al paciente.',
+            });
+            return;
+        }
+        if (!(inputName && inputName.value != null && inputName.value != '')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Nombre necesario',
+                text: 'Es necesario el NOMBRE para crear al paciente.',
+            });
+            return;
+        }
+        if (!(inputPhone && inputPhone.value != null && inputPhone.value != '')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'CELULAR necesario',
+                text: 'Es necesario el número de CELULAR para crear al paciente.',
+            });
+            return;
+        }
+        if (!(inputAge && inputAge.value != null && inputAge.value != '')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Nombre necesario',
+                text: 'Es necesario la Edad para crear al paciente.',
+            });
+            return;
+        }
+        const body = {
+            "dni": inputDni.value,
+            "nombre": inputName.value,
+            "celular": inputPhone.value,
+            "edad": inputAge.value,
+            "factor": inputFactor.value.toUpperCase() == 'SI'? true : false,
+            "dniPaciente": "{{dni}}"
+        }
+        Swal.fire({
+            'imageUrl': 'https://i.pinimg.com/originals/7e/fc/2c/7efc2cb33ee4eb9d7625ca1eca702506.gif',
+            'title': 'Espere un momento.'
+            })
+        fetch(`/api/v1/ajax/patient/add`,{
+            method:"POST",
+            headers:{"content-type": "application/json"},
+            body:JSON.stringify(body),
+        }).then(async (data)=>{
+            Swal.close();
+            const json = await data.json();
+            if (json.success) {
+                remove_contact(dniContact)
+                const text_box_contacto = document.getElementById("text_box_contacto");
+                const button_agregar_contacto = document.getElementById("button_agregar_contacto");
+                const tempValue = text_box_contacto.value;
+                text_box_contacto.value = inputDni.value;
+                button_agregar_contacto.click();
+                text_box_contacto.value = tempValue;
+            }
+        }).catch((err)=>{
+            Swal.close();
+        })
     }
 
     async function takeContact(el, dni_contact, dni_patient){
@@ -1074,9 +1428,7 @@
     }
     
 </script>
-
 <script>
-
     const Validation ={
         isDNI: (_dni) => new RegExp("^[0-9]{8}$").test(_dni),
     }

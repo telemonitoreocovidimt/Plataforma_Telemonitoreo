@@ -41,7 +41,7 @@ function makeMigrations() {
                 and estado = 1 limit 1) is null then 1 else 2 end,
                 $1
         FROM ${PGSCHEMA}.dt_pacientes p
-        where p.estado in (2, 3) and p.paso_encuesta_inicial = true and p.is_doctor = false`;// and not p.grupo = 'A';`
+        where p.estado in (2, 3) and p.paso_encuesta_inicial = true`;//and p.is_doctor = false and not p.grupo = 'A';`
     params = [datePeru_current];
     result = await client.query(query, params);
     client.release(true);

@@ -64,7 +64,27 @@ function loginAdmin(email, password) {
     resolve(result.rows);
   });
 }
+
+/**
+ * Obtener paciente
+ * @function
+ * @param {String} dniPatient Dni de paciente
+ * @return {Promise}
+ */
+function getPatient(dniPatient) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.dt_pacientes
+                    where dni = $1`;
+    const params = [dniPatient];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows.length == 0? null : result.rows[0]);
+  });
+}
+
 module.exports = {
   login,
   loginAdmin,
+  getPatient,
 };

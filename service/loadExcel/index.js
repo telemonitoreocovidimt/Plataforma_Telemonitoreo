@@ -166,7 +166,7 @@ function excelTamizaje(excelPath, idHospital) {
       paramsPatient.push(row.fechaMuestra);
       paramsPatient.push(resultadoMuestra(row.resultadoMuestra1));
       paramsPatient.push(
-        row.fechaResultado1 == undefined ? null : row.fechaResultado1);
+        row.fechaResultado1 == undefined ? row.fechaMuestra : row.fechaResultado1);
       paramsPatient.push(tipoPrueba(row.tipoMuestra1));
       paramsPatient.push(resultadoMuestra(row.resultadoMuestra2));
       paramsPatient.push(
@@ -369,6 +369,7 @@ function parseTipoMuestra(data, column, row, error) {
   if (
     data !== null &&
     data !== undefined &&
+    data.toUpperCase() !== 'ANTIGENO' &&
     data.toUpperCase() !== 'RAPIDA' &&
     data.toUpperCase() !== 'P RAPIDA' &&
     data.toUpperCase() !== 'P. RAPIDA' &&
@@ -380,7 +381,7 @@ function parseTipoMuestra(data, column, row, error) {
         column +
         row +
         ' solo puede tener los siguientes valores P RAPIDA,' +
-        ' HISOPADO NASOFARINGEO Y OROFARINGEO, MOLECULAR, NO TIENE');
+        ' HISOPADO NASOFARINGEO Y OROFARINGEO, MOLECULAR, NO TIENE Y ANTIGENO');
   }
 }
 
@@ -505,6 +506,7 @@ function resultadoMuestra(resultado) {
  * - P. RAPIDA
  * - HISOPADO NASOFARINGEO Y OROFARINGEO
  * - MOLECULAR
+ * - ANTIGENO
  * - NO TIENE
  * @function
  * @param {String} tipo valor de celda de tipo "Tipo de prueba"
@@ -527,6 +529,9 @@ function tipoPrueba(tipo) {
     }
     if (tipo.toUpperCase() === 'MOLECULAR') {
       result = 'MOLECULAR';
+    }
+    if (tipo.toUpperCase() === 'ANTIGENO') {
+      result = 'ANTIGENO';
     }
   }
   return result;

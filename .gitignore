@@ -5,3 +5,5 @@ script.sql
 test.sql
 package-lock.json
 nodemon.json
+.env
+.*

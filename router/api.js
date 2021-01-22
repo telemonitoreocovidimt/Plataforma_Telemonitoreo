@@ -1,7 +1,7 @@
-/* eslint "max-len": ["error", {"code":100}] */
+/* eslint 'max-len': ['error', {'code':100}] */
 const {Router} = require('express');
 const router = new Router();
-const {apiAcceptedTermsByUser} = require('./../controller/api');
+const {apiAcceptedTermsByUser, savePatient} = require('./../controller/api');
 const {getPatientsSurvey01,
   existsCasePatient,
   getPatientsSurvey02,
@@ -12,6 +12,7 @@ const {getPatientsSurvey01,
   patientChangeRiskFactor,
   patientChangeAge,
   validateGroupCase,
+  updateReasonTestPatient,
   patientIsDoctor} = require('../model/api');
 const {makeMigrationsCustomer} = require('../model/migration');
 const {casosDia,
@@ -19,7 +20,7 @@ const {casosDia,
   encuestasDiarias} = require('../controller/report');
 const {check} = require('express-validator');
 const {isValidDate} = require('../useful');
-const {listContactByDNI,
+const {listContactsByDNI,
   getPatientContactByDNI,
   getContactByDNI,
   getMonitoreoContactsByDNI,
@@ -43,20 +44,36 @@ async function getContact(req, res) {
     'factor_riesgo': false,
     'seguimiento': 0,
     'nombre': '',
+    'celular': '',
     'observacion': '',
     'parentesco': '',
     'dia': 1,
     'monitoreo': '',
     'monitoreos': [],
+    'tipo_prueba_1': '',
+    'resultado_prueba_1': '',
+    'fecha_resultado_prueba_1': '',
+    'tipo_prueba_2': '',
+    'resultado_prueba_2': '',
+    'fecha_resultado_prueba_2': '',
+    'tipo_prueba_3': '',
+    'resultado_prueba_3': '',
+    'fecha_resultado_prueba_3': '',
   };
   if (dni) {
     let rs = await getPatientContactByDNI(dni);
     if (rs.result.length > 0) {
-      data = rs.result[0];
+      data = {
+        ...data,
+        ...rs.result[0],
+      };
     } else {
       rs = await getContactByDNI(dni);
       if (rs.result.length > 0) {
-        data = rs.result[0];
+        data = {
+          ...data,
+          ...rs.result[0],
+        };
       }
     }
 
@@ -120,7 +137,7 @@ async function takeContact(req, res) {
 async function movePatient(req, res) {
   const dni_patient = req.body.dni_patient;
   if (dni_patient) {
-    let rs = await patient_change_status(dni_patient, 2);
+    let rs = await patientChangeStatus(dni_patient, 2);
     rs = await exists_case_patient(dni_patient);
 
 
@@ -146,21 +163,26 @@ async function movePatient(req, res) {
 function arrayJsonToPatientsList(patients) {
   const listPatients = [];
   patients.forEach((patient) => {
-    listPatients.push({
-      'code': patient.codigo,
-      'identity_document': {
-        'number': patient.dni,
-      },
-      'name': {
-        'name': patient.nombre,
-        'family_name_1': '',
-        'family_name_2': '',
-      },
-      'mobile_phone': patient.celular,
-      'id_hospital': patient.id_hospital,
-      'name_hospital': patient.nombre_hospital,
-      'acepted_terms': patient.acepto_terminos,
-    });
+    patient.quiere_seguimiento = patient.quiere_seguimiento == null ? true : patient.quiere_seguimiento;
+    if (patient.quiere_seguimiento || patient.quiere_seguimiento.toUpperCase() == 'SI') {
+      listPatients.push({
+        'code': patient.codigo,
+        'identity_document': {
+          'number': patient.dni,
+        },
+        'name': {
+          'name': patient.nombre,
+          'family_name_1': '',
+          'family_name_2': '',
+        },
+        'mobile_phone': patient.celular,
+        'id_hospital': patient.id_hospital,
+        'name_hospital': patient.nombre_hospital,
+        'accepted_terms': patient.acepto_terminos,
+        'historical_pulse': patient.max,
+        'monitoring_days': patient.dias_monitoriados,
+      });
+    }
   });
   return {
     'status': 'ok',
@@ -177,72 +199,69 @@ function arrayJsonToPatientsList(patients) {
  * @param {*} tray
  */
 async function answerDailySurvey(patient, answers, tray) {
-  const patient_id = patient.dni;
-  // let patientToUrgency = 0;
-  // let patientToNormalTray = 0;
+  const patientId = patient.dni;
 
-  for (const i in answers) {
-    const variable = answers[i].variable;
-    const answer = answers[i].answer;
-    const asked_at = answers[i].asked_at;
-    const answered_at = answers[i].answered_at;
-    const rows = await save_answer(patient_id, variable, answer, asked_at, answered_at);
-    // if((variable == "dificultad_para_respirar" || variable == "dolor_pecho" ||
-    //     variable == "confusion_desorientacion" || variable == "labios_azules") &&
-    //     answer.toUpperCase() == "SI"){
-    //     patientToUrgency++
-    // }
-    // if((variable == "fiebre_hoy" || variable == "diarrea") && answer.toUpperCase() == "SI") {
-    //     patientToNormalTray++;
-    // }
-  }
+  await Promise.all(answers.map(async (answersElement)=>{
+    const variable = answersElement.variable;
+    const answer = answersElement.answer;
+    const askedAt = answersElement.asked_at;
+    const answeredAt = answersElement.answered_at;
+    await saveAnswer(patientId, variable, answer, askedAt, answeredAt);
+  }));
 
-
-  if (tray == 3) {
-    // pasa a urgencia
-    const x = await patient_change_status(patient_id, 3);
-    await makeMigrationsCustomer(patient_id);
-  }
-
-  if (tray == 2) {
-    // pasa a bandeja normal
-    const x = await patient_change_status(patient_id, 2);
-    await makeMigrationsCustomer(patient_id);
+  if (tray == 3 || tray == 2) {
+    // tray => 3  pasa a urgencia
+    // tray => 2  pasa a bandeja normal
+    await patientChangeStatus(patientId, tray);
+    await makeMigrationsCustomer(patientId);
   }
 }
 
+/**
+ * @param {*} patient
+ * @param {*} answers
+ * @param {*} tray
+ */
 async function answerFinalSurvey(patient, answers, tray) {
-  const patient_id = patient.dni;
-  let need_doctor = false;
+  const patientId = patient.dni;
+  // let need_doctor = false;
 
-  for (const i in answers) {
-    const variable = answers[i].variable;
-    const answer = answers[i].answer;
-    const asked_at = answers[i].asked_at;
-    const answered_at = answers[i].answered_at;
-    const rows = await save_answer(patient_id, variable, answer, asked_at, answered_at);
-    // if((variable == "dificultad_para_respirar" || variable == "dolor_pecho" ||
-    //     variable == "confusion_desorientacion" || variable == "labios_azules") &&
-    //     answer.toUpperCase() == "SI"){
-    //     patientToUrgency++
-    // }
-    // if((variable == "fiebre_hoy" || variable == "diarrea") && answer.toUpperCase() == "SI") {
-    //     patientToNormalTray++;
-    // }
-    if (variable === 'necesita_medico' && answer.toUpperCase() === 'SI') {
-      need_doctor = true;
-    }
-  }
+  await Promise.all(answers.map(async (answersElement)=>{
+    const variable = answersElement.variable;
+    const answer = answersElement.answer;
+    const askedAt = answersElement.asked_at;
+    const answeredAt = answersElement.answered_at;
+    await saveAnswer(patientId, variable, answer, askedAt, answeredAt);
+  }));
 
   if (tray == 3) {
     // pasa a urgencia
-    const x = await patient_change_status(patient_id, 3);
-    await makeMigrationsCustomer(patient_id);
-  } else if (need_doctor || tray == 2) {
+    await patientChangeStatus(patientId, 3);
+    await makeMigrationsCustomer(patientId);
+  // } else if (need_doctor || tray == 2) {
+  } else if (tray == 2) {
     // pasa a bandeja normal
-    const x = await patient_change_status(patient_id, 2);
-    await makeMigrationsCustomer(patient_id);
+    await patientChangeStatus(patientId, 2);
+    await makeMigrationsCustomer(patientId);
   }
+  // for (const i in answers) {
+  // const variable = answers[i].variable;
+  // const answer = answers[i].answer;
+  // const asked_at = answers[i].asked_at;
+  // const answered_at = answers[i].answered_at;
+  // const rows = await save_answer(patient_id, variable, answer, asked_at, answered_at);
+  // if((variable == 'dificultad_para_respirar' || variable == 'dolor_pecho' ||
+  //     variable == 'confusion_desorientacion' || variable == 'labios_azules') &&
+  //     answer.toUpperCase() == 'SI'){
+  //     patientToUrgency++
+  // }
+  // if((variable == 'fiebre_hoy' || variable == 'diarrea') && answer.toUpperCase() == 'SI') {
+  //     patientToNormalTray++;
+  // }
+  // if (variable === 'necesita_medico' && answer.toUpperCase() === 'SI') {
+  //   need_doctor = true;
+  // }
+  // }
 }
 
 /**
@@ -256,9 +275,10 @@ async function answerFinalSurvey(patient, answers, tray) {
  * @function
  * @param {Object} patient Objeto paciente.
  * @param {JSONArray} answers Lista de respuestas.
+ * @param {*} tray
  * @return {Void}
  */
-async function answerInitialSurvey(patient, answers) {
+async function answerInitialSurvey(patient, answers, tray) {
   const patientId = patient.dni;
   if (answers.length == 0) {
     return;
@@ -281,22 +301,36 @@ async function answerInitialSurvey(patient, answers) {
     if (variable == 'comorbilidades' && answer.toUpperCase() == 'NO') {
       isRiskFactor = false;
     }
+    if (variable == 'comorbilidades_familiares' && answer.toUpperCase() == 'SI') {
+      isRiskFactor = true;
+    }
     if (variable === 'es_profesional_salud' && answer.toUpperCase() === 'SI') {
       isDoctor = true;
+      isRiskFactor = true;
+    }
+    if (variable === 'motivo_test_covid' &&
+      (answer.toUpperCase() == 'A' || answer.toUpperCase() == 'B' || answer.toUpperCase() == 'C')) {
+      isRiskFactor = true;
+    }
+    if (variable === 'motivo_test_covid') {
+      updateReasonTestPatient(answer.toUpperCase(), patientId);
     }
   }));
   if (patientAge != 0) {
+    // Update age and flag 'paso_encuesta_inicial'
+    await patientChangeAge(patientId, patientAge);
+    // Change risk factor and change group
     if (isRiskFactor != null) {
-      // Update age and flag "paso_encuesta_inicial"
-      await patientChangeAge(patientId, patientAge);
-      // Change risk factor and change group
+      // Cambia a estado 2 (bandeja normal) y son factor de riesgo
       await patientChangeRiskFactor(patientId, isRiskFactor);
-      if (isDoctor) {
-        await patientIsDoctor(patientId);
-      } else {
-        // Create case if group C with risk factor or if is group A or B
-        await validateGroupCase(patientId);
-      }
+    }
+    if (isDoctor) {
+      await patientIsDoctor(patientId);
+      await patientChangeStatus(patientId, 2);
+      await makeMigrationsCustomer(patientId);
+    } else {
+      // Si es A O B pasan a bandeja o si es C y factor de riesgo
+      await validateGroupCase(patientId);
     }
   }
 }
@@ -369,6 +403,8 @@ router.put('/ajax/contact', takeContact);
 router.get('/ajax/:dni/acceptedTerms', apiAcceptedTermsByUser);
 
 router.post('/tray/move/normal', movePatient);
+
+router.post('/ajax/patient/add', savePatient);
 
 module.exports = router;
 

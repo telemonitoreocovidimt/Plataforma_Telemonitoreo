@@ -48,6 +48,9 @@ app.engine('.hbs', exphbs.create({
   layoutsDir: path.join(app.get('views'), 'layouts'),
   extname: '.hbs',
   helpers: {
+    'equal': (v1, v2, v)=>{
+      return v1 == v2;
+    },
     'compare': (v1, v2, v)=>{
       return v1 == v2 ? v : '';
     },
@@ -58,8 +61,23 @@ app.engine('.hbs', exphbs.create({
       }
       return text;
     },
-  },
-}).engine);
+    'dateToString': (d)=>{
+      if (d != null) {
+        var month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear();
+
+          if (month.length < 2) 
+              month = '0' + month;
+          if (day.length < 2) 
+              day = '0' + day;
+
+          return [year, month, day].join('-');
+      }
+      return ""
+      
+  }
+}}).engine);
 app.set('view engine', '.hbs');
 
 
@@ -74,6 +92,6 @@ app.use('/dashboard', require('./router/dashboard'));
 app.use('/admin', require('./router/admin'));
 app.use('/api/v1/', require('./router/api'));
 
-app.listen( PORT, ()=>{
+app.listen(PORT, ()=>{
   console.log(`Server on port ${PORT}`);
 });
