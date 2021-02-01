@@ -1,6 +1,7 @@
 /* eslint max-len: ["error", { "code": 100 }] */
 const {openConnection} = require('./connection');
 const {PGSCHEMA} = require('./../config');
+const {addPatient, updatePatient, getPatientContactByDNI} = require('./patient');
 
 /**
  * Agregar un nuevo paciente
@@ -49,14 +50,60 @@ function addPatientAdmission(dni,
  * @param {Array} params Parametros necesarios para el procedimiento de tamizaje.
  * @return {Promise} Devolvera un Boolean que indica si se hizo o no la inserción.
  */
-function addPatientTamizaje(params) {
+function addPatientTamizajeOld(params) {
   return new Promise(async (resolve, reject)=>{
     const client = await openConnection();
     const query = `SELECT * FROM ${PGSCHEMA}.sp_add_patient_tamizaje($1,$2,$3,$4,$5,$6,$7,
         $8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)`;
     const result = await client.query(query, params);
+    console.log(params);
     client.release(true);
     return resolve(result);
+  });
+}
+
+/**
+ * Agregar o actualizar un paciente por tamizaje
+ * @function
+ * @param {Array} params Parametros necesarios para el procedimiento de tamizaje.
+ * @return {Promise} Devolvera un Boolean que indica si se hizo correctamente el proceso.
+ */
+function addPatientTamizaje(params) {
+  return new Promise(async (resolve, reject)=>{
+    const {documento} = params;
+    const patient = await getPatientContactByDNI(documento);
+
+    params.estado = 1;
+    if (params.resultadoMuestra1 == null &&
+      params.resultadoMuestra2 == null &&
+      params.resultadoMuestra3 == null) {
+      params.grupo = 'C';
+    } else if (params.resultadoMuestra1 == 2 ||
+      params.resultadoMuestra2 == 2||
+      params.resultadoMuestra3 == 2) {
+      params.grupo = 'A';
+    } else {
+      params.grupo = 'B';
+    }
+    if (patient != null) {
+      // console.log('Resultado prueba 1 : ', resultadoMuestra(row.resultadoMuestra1));
+      // console.log('Resultado prueba 2 : ', resultadoMuestra(row.resultadoMuestra2));
+      // console.log('Resultado prueba 3 : ', resultadoMuestra(row.resultadoMuestra3));
+      if (patient.estado == 4) {
+        params.estado = 2;
+      } else {
+        params.estado = patient.estado;
+      }
+      console.log(params);
+      await updatePatient(params);
+    } else {
+      params.factorRiesgo = null;
+      params.pasoEncuestaInicial = false;
+      params.flagActivo = true;
+      console.log(params);
+      await addPatient(params);
+    }
+    resolve();
   });
 }
 

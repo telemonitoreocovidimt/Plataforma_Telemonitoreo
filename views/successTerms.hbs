@@ -1,6 +1,18 @@
 <br>
 <br>
 <center>
-  <h1>Gracias {{ nombre }}, ya puedes regresar al Whatsapp para tu monitoreo.</h1>
+  <h1>Gracias {{ nombre }}, 
+    {{#if accetedTerms}}
+      Se confirmo correctamente su seguimeinto en la plataforma
+    {{else}}
+      No se realizara el seguimiento en la plataforma 
+    {{/if}}
+    y
+    {{#if accetedTermsData}}
+      se confirmo correctamente el uso de sus datos.
+    {{else}}
+      no se realizara el uso de sus datos.
+    {{/if}}
+  </h1>
   <a class="btn btn-primary" href="https://wa.me/917834811114?text=Iniciar%20encuesta%20inicial"> Ir a Whatsapp</a>
 </center>

@@ -116,9 +116,7 @@ async function takeContact(req, res) {
 
   // RUN MODEL FUNCTIONS FOR TASK
   let data = await removePermissionContact(dni_contact, true);
-  console.log('Remove : ', data.result);
   data = await addPermissionContact(dni_contact, dni_patient, false, data.client);
-  console.log('Add : ', data.result);
 
   // RETURN ANSWER
   if (data.result.rowCount) {
@@ -313,7 +311,7 @@ async function answerInitialSurvey(patient, answers, tray) {
       isRiskFactor = true;
     }
     if (variable === 'motivo_test_covid') {
-      updateReasonTestPatient(answer.toUpperCase(), patientId);
+      await updateReasonTestPatient(answer.toUpperCase(), patientId);
     }
   }));
   if (patientAge != 0) {
@@ -329,7 +327,7 @@ async function answerInitialSurvey(patient, answers, tray) {
       await patientChangeStatus(patientId, 2);
       await makeMigrationsCustomer(patientId);
     } else {
-      // Si es A O B pasan a bandeja o si es C y factor de riesgo
+      // Si es A  pasan a bandeja o si es C o B y factor de riesgo
       await validateGroupCase(patientId);
     }
   }

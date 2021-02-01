@@ -15,25 +15,27 @@ const {runJobs} = require('./timers');
 runJobs();
 
 const options = {
-  uploadDir: os.tmpdir(),
-  autoClean: true,
+  'uploadDir': os.tmpdir(),
+  'autoClean': true,
 };
 
 app.use(formData.parse(options));
 app.use(formData.format());
 app.use(formData.stream());
 app.use(formData.union());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({'extended': false}));
 app.use(express.json());
 app.use(session({
-  secret: KEY_SECRET,
-  store: new PGSession({
-    pool: pool,
-    tableName: 'session',
-    schemaName: PGSCHEMA,
+  'secret': KEY_SECRET,
+  'store': new PGSession({
+    'pool': pool,
+    'tableName': 'session',
+    'schemaName': PGSCHEMA,
   }),
-  resave: false,
-  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},
+  'resave': false,
+  'cookie': {
+    'maxAge': 1000 * 60 * 60 * 24 * 30,
+  },
 }));
 
 app.use(require('./middleware/flash')());
@@ -43,11 +45,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 
 app.engine('.hbs', exphbs.create({
-  defaultLayout: 'main',
-  partialsDir: path.join(app.get('views'), 'partials'),
-  layoutsDir: path.join(app.get('views'), 'layouts'),
-  extname: '.hbs',
-  helpers: {
+  'defaultLayout': 'main',
+  'partialsDir': path.join(app.get('views'), 'partials'),
+  'layoutsDir': path.join(app.get('views'), 'layouts'),
+  'extname': '.hbs',
+  'helpers': {
     'equal': (v1, v2, v)=>{
       return v1 == v2;
     },
@@ -78,8 +80,8 @@ app.engine('.hbs', exphbs.create({
       
   }
 }}).engine);
-app.set('view engine', '.hbs');
 
+app.set('view engine', '.hbs');
 
 app.get('/routine', (req, res)=>{
   makeMigrations();

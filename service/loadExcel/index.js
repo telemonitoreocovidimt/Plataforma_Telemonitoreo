@@ -1,3 +1,4 @@
+/* eslint max-len: ["error", { "code": 150 }] */
 const excelToJson = require('convert-excel-to-json');
 const {getTimeNow} = require('../../lib/time');
 const {
@@ -16,32 +17,33 @@ const {setAge} = require('./../../model/pacient');
  */
 function excelAdmision(excelPath, idHospital) {
   return new Promise(async (resolve, reject) => {
-    const result = excelToJson({
-      sourceFile: excelPath,
-      header: {
-        rows: 1,
+    const sheets = excelToJson({
+      'sourceFile': excelPath,
+      'header': {
+        'rows': 1,
       },
-      columnToKey: {
-        A: 'numero',
-        B: 'fecha',
-        C: 'apellidoPaterno',
-        D: 'apellidoMaterno',
-        E: 'nombre',
-        F: 'documento',
-        G: 'direccion',
-        H: 'celular',
-        I: 'fijo',
+      'columnToKey': {
+        'A': 'numero',
+        'B': 'fecha',
+        'C': 'apellidoPaterno',
+        'D': 'apellidoMaterno',
+        'E': 'nombre',
+        'F': 'documento',
+        'G': 'direccion',
+        'H': 'celular',
+        'I': 'fijo',
       },
     });
-    const rows = result[Object.keys(result)[0]];
+    const namesSheets = Object.keys(sheets);
+    const nameFirstSheet = namesSheets[0];
+    const rows = sheets[nameFirstSheet];
+    // Validar si todos los campos son correctos y tienen valores,
     const error = validateAdmision(rows);
-    console.log(error);
     if (error.length !== 0) {
       return reject(error);
     }
     const {peruvianDateCurrent} = getTimeNow();
     await Promise.all(rows.map(async (row, i)=>{
-      console.log(row);
       const rowNumber = i + 2;
       const params = [];
       params.push(numeroDocumento(row.documento));
@@ -153,36 +155,33 @@ function excelTamizaje(excelPath, idHospital) {
     const {peruvianDateCurrent} = getTimeNow();
     await Promise.all(rows.map(async (row, i)=>{
       const rowNumber = i + 2;
-      const paramsPatient = [];
+      const paramsPatient = {};
       const paramsHistory = [];
-      paramsPatient.push(numeroDocumento(row.documento));
-      paramsPatient.push(row.numero);
-      paramsPatient.push(row.nombre);
-      paramsPatient.push(row.fecha);
-      paramsPatient.push(peruvianDateCurrent);
-      paramsPatient.push(row.direccion);
-      paramsPatient.push(row.celular);
-      paramsPatient.push(null);
-      paramsPatient.push(row.fechaMuestra);
-      paramsPatient.push(resultadoMuestra(row.resultadoMuestra1));
-      paramsPatient.push(
-        row.fechaResultado1 == undefined ? row.fechaMuestra : row.fechaResultado1);
-      paramsPatient.push(tipoPrueba(row.tipoMuestra1));
-      paramsPatient.push(resultadoMuestra(row.resultadoMuestra2));
-      paramsPatient.push(
-        row.fechaResultado2 == undefined ? null : row.fechaResultado2);
-      paramsPatient.push(tipoPrueba(row.tipoMuestra2));
-      paramsPatient.push(resultadoMuestra(row.resultadoMuestra3));
-      paramsPatient.push(
-        row.fechaResultado3 == undefined ? null : row.fechaResultado3);
-      paramsPatient.push(tipoPrueba(row.tipoMuestra3));
-      paramsPatient.push(row.sexo);
-      paramsPatient.push(row.pais);
-      paramsPatient.push(row.provincia);
-      paramsPatient.push(row.distrito);
-      paramsPatient.push(row.fechaSintomas);
-      paramsPatient.push(confirmacionCovid19(row.clasificacion));
-      paramsPatient.push(idHospital);
+      paramsPatient.documento = numeroDocumento(row.documento);
+      paramsPatient.numero = row.numero;
+      paramsPatient.nombre = row.nombre;
+      paramsPatient.fecha = row.fecha;
+      paramsPatient.fechaCreacion = peruvianDateCurrent;
+      paramsPatient.direccion = row.direccion;
+      paramsPatient.celular = row.celular;
+      paramsPatient.fijo = null;
+      paramsPatient.fechaMuestra = row.fechaMuestra;
+      paramsPatient.resultadoMuestra1 = resultadoMuestra(row.resultadoMuestra1);
+      paramsPatient.fechaResultado1 = row.fechaResultado1 == undefined ? row.fechaMuestra : row.fechaResultado1;
+      paramsPatient.tipoMuestra1 = tipoPrueba(row.tipoMuestra1);
+      paramsPatient.resultadoMuestra2 = resultadoMuestra(row.resultadoMuestra2);
+      paramsPatient.fechaResultado2 = row.fechaResultado2 == undefined ? null : row.fechaResultado2;
+      paramsPatient.tipoMuestra2 = tipoPrueba(row.tipoMuestra2);
+      paramsPatient.resultadoMuestra3 = resultadoMuestra(row.resultadoMuestra3);
+      paramsPatient.fechaResultado3 = row.fechaResultado3 == undefined ? null : row.fechaResultado3;
+      paramsPatient.tipoMuestra3 = tipoPrueba(row.tipoMuestra3);
+      paramsPatient.sexo = row.sexo;
+      paramsPatient.pais = row.pais;
+      paramsPatient.provincia = row.provincia;
+      paramsPatient.distrito = row.distrito;
+      paramsPatient.fechaSintomas = row.fechaSintomas;
+      // paramsPatient.clasificacion = confirmacionCovid19(row.clasificacion);
+      paramsPatient.idHospital = idHospital;
       paramsHistory.push(numeroDocumento(row.documento));
       paramsHistory.push(row.destino);
       paramsHistory.push(row.lugar);
@@ -491,9 +490,10 @@ function resultadoMuestra(resultado) {
     } else if (resultado.toUpperCase() === 'PENDIENTE') {
       result = 3;
     }
-  } else {
-    result = 3;
   }
+  // else {
+  //   result = 3;
+  // }
   return result;
 }
 

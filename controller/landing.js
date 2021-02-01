@@ -22,7 +22,9 @@ async function terms(req, res) {
   const userExists = result.length == 0? false: true;
   let acceptedTerms = false;
   if (userExists) {
-    acceptedTerms = result[0].acepto_terminos;
+    // console.log(data);
+    // console.log(result);
+    acceptedTerms = result[0].acepto_terminos > 0;
   }
   let contactDescription = await getMasterParameterHospital(1, userTemp.id_hospital);
   if (contactDescription.result.length == 0) {
@@ -54,10 +56,16 @@ async function terms(req, res) {
 async function thanksTerms(req, res) {
   const userTemp = req.session.userTemp;
   if (userTemp) {
+    const accetedTerms = userTemp.acepto_terminos == 2;
+    const accetedTermsData = userTemp.acepto_terminos_datos == 2;
+    const accetedTermsDate = userTemp.fecha_respuesta_terminos;
     return res.render('successTerms', {
       'layout': 'blank',
       'title': 'terms and conditions',
       ...userTemp,
+      accetedTerms,
+      accetedTermsData,
+      accetedTermsDate,
     });
   } else {
     return res.redirect(`/landing/terms/${userTemp.dni}`);
@@ -94,15 +102,18 @@ async function rejectedThanksTerms(req, res) {
 async function updateTerms(req, res) {
   const userTemp = req.session.userTemp;
   const body = req.body;
+  console.log('Datos del POST : ', body);
   if (userTemp) {
     await setName(body.name, userTemp.dni);
     await setTypeDocument(body.typeDocument, userTemp.dni);
-    const acceptedTerm = body.acceptTerm ? 2 : 1;
-    if (acceptedTerm == 2) {
-      await updateTermsPatient(userTemp.dni, acceptedTerm);
-      return res.redirect(`/landing/terms/${userTemp.dni}/thanks`);
-    } else if (acceptedTerm == 1) {
+    const acceptedTerm = body.acceptTerm == 'on'? 2 : 1;
+    const acceptedTermData = body.acceptTermsData == 'on' ? 2 : 1;
+    await updateTermsPatient(userTemp.dni, acceptedTerm, acceptedTermData);
+    console.log(acceptedTerm + ' ---------- ' +acceptedTermData);
+    if (acceptedTerm == 1 && acceptedTermData == 1) {
       return res.redirect(`/landing/terms/${userTemp.dni}/rejected/thanks`);
+    } else if (acceptedTerm > 0 && acceptedTermData > 0) {
+      return res.redirect(`/landing/terms/${userTemp.dni}/thanks`);
     } else {
       return res.redirect(`/landing/terms/${userTemp.dni}`);
     }

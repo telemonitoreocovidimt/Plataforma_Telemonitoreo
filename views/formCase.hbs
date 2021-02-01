@@ -487,18 +487,18 @@
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>{{ this.day_index }}</strong> </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" value="{{ this.fr_fv }}"  />
+                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" step="any" value="{{ this.fr_fv }}"  />
                                         </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" value="{{ this.temp_fv }}"  />
+                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" step="any" value="{{ this.temp_fv }}"  />
                                         </li>
       
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" value="{{ this.fc_fv }}"  />
+                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" step="any" value="{{ this.fc_fv }}"  />
                                         </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" value="{{ this.sat_fv }}"  />
+                                            <input disabled style="cursor: no-drop;" class="form-control" type="number" step="any" value="{{ this.sat_fv }}"  />
                                         </li>
 
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
@@ -569,18 +569,18 @@
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"> <strong>{{ tiempo_seguimiento }}</strong> </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input  class="form-control" type="number"  value="{{ fr_fv }}"  name="fr_fv"  />
+                                            <input  class="form-control" type="number"  value="{{ fr_fv }}" step="any" name="fr_fv"  />
                                         </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input  class="form-control" type="number"  value="{{ temp_fv }}"  name="temp_fv"  />
+                                            <input  class="form-control" type="number"  value="{{ temp_fv }}" step="any" name="temp_fv"  />
                                         </li>
                                          <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input class="form-control" type="number"  name="fc_fv" id="fc_fv" value="{{ fc_fv }}"  />
+                                            <input class="form-control" type="number"  name="fc_fv" id="fc_fv" step="any" value="{{ fc_fv }}"  />
                                         </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
                                        
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
-                                            <input {{#if can_plus_fv }} {{else}} disabled{{/if}}  class="form-control" type="number"  name="sat_fv" id="sat_fv" value="{{ sat_fv }}"  />
+                                            <input {{#if can_plus_fv }} {{else}} disabled{{/if}}  class="form-control" type="number"  step="any" name="sat_fv" id="sat_fv" value="{{ sat_fv }}"  />
                                         </li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;"></li>
                                         <li style="min-width: 50px; height: 50px; display:flex; justify-content: center; align-items: center;">
@@ -765,6 +765,10 @@ Se aconseja desalentar la automedicación y monitorear eventos adversos si es qu
         },
         "8": {
             "name": "Dióxido de cloro",
+            "life": 1
+        },
+        "9": {
+            "name": "Paracetamol",
             "life": 1
         },
         "100": {
@@ -1076,7 +1080,6 @@ Se aconseja desalentar la automedicación y monitorear eventos adversos si es qu
         //Iterar JSON por KEY
         for(let key in contacts){
             let contact = contacts[key] //Obtener Elemento "Contact" desde JSON
-            console.log(contact)
             //let follow = validateOptionSeguimiento(contact.seguimiento)
             //let follow = contact.seguimiento ? `<option value="NO">NO</option><option value="SI" selected>SI</option>` : `<option value="NO" selected>NO</option><option value="SI">SI</option>`
             let factor = contact.factor_riesgo ? `<option value="NO">NO</option><option value="SI" selected>SI</option>` : `<option value="NO" selected>NO</option><option value="SI">SI</option>`
@@ -1373,20 +1376,15 @@ Se aconseja desalentar la automedicación y monitorear eventos adversos si es qu
     }
 
     async function takeContact(el, dni_contact, dni_patient){
-        console.log(el, dni_contact, dni_patient)
         debugger
         if(el.checked){
             let body = { dni_contact, dni_patient }
-            console.log("Body : ")
-            console.log(body)
             let rs = await fetch(`/api/v1/ajax/contact`,{
                 method:"PUT",
                 headers:{"content-type": "application/json"},
                 body:JSON.stringify(body)
             })
             let json = await rs.json()
-            console.log("Response : ")
-            console.log(json)
             if(json.success){
                 for(let key in contacts){
                     let c = contacts[key]
@@ -1413,14 +1411,11 @@ Se aconseja desalentar la automedicación y monitorear eventos adversos si es qu
             let rs = await fetch(`/api/v1/ajax/contact?dni=${dni}`)
             Swal.close()
             let json = await rs.json()
-            console.log(contacts)
-            console.log("Resultado AJAX : ", json.data)
             if(json.success){
                 //contacts[json.data.dni] = json.data
                 countInputsNoneContact++
                 let key = "none"+countInputsNoneContact
                 add_contact(key, json.data)
-                console.log("Despues de agregar", contacts)
                 //generateCardContact(container_contact)
             }
             button_agregar_contacto.disabled = false
@@ -1442,10 +1437,27 @@ Se aconseja desalentar la automedicación y monitorear eventos adversos si es qu
 
         window.onkeypress = (event)=>{
             //debugger
-            //console.log(event.keyCode == 13)
             if(event.keyCode == 13)
                 event.preventDefault()
         }
+    }
+
+    
+    function typeTrayOnChange() {
+        debugger;
+        const comboBoxOut= document.getElementById('egreso');
+        const typeTray= document.getElementById('estado');
+        if(parseInt(typeTray.value) == 4 && (comboBoxOut.value == '' || comboBoxOut.value == null)) {
+            comboBoxOut.focus()
+            comboBoxOut.classList.add('error_input')
+            Swal.fire({
+                'icon': 'error',
+                'title': 'Motivo de egreso requerido',
+                'text': 'Si un pacicente es dado de alto por favor ingrese el motivo.',
+            })
+            return false;
+        }
+        return true;
     }
 
 
@@ -1453,7 +1465,6 @@ Se aconseja desalentar la automedicación y monitorear eventos adversos si es qu
         
         event.preventDefault()
         saveStatusContacts()
-        //console.log(contacts)
         saveState()
         let prefix = 'input_tra'
         let i_treatments = 0
@@ -1474,7 +1485,8 @@ Se aconseja desalentar la automedicación y monitorear eventos adversos si es qu
         }
         
         if(i_treatments == 0)
-            document.getElementById("form").submit()
+            if (typeTrayOnChange())
+                document.getElementById("form").submit()
     }
 
 

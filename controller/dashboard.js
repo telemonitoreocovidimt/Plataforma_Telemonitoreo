@@ -248,6 +248,9 @@ async function getPatientCase(req, res) {
       {'id': '4', 'descripcion': 'Fallecido'},
       {'id': '3', 'descripcion': 'No desea seguimiento'},
       {'id': '5', 'descripcion': 'Va a ser seguido por otro grupo'},
+      {'id': '6', 'descripcion': 'Número no pertenece al paciente'},
+      {'id': '7', 'descripcion': 'Paciente no contestó llamadas'},
+      {'id': '8', 'descripcion': 'Enfermedad descartada'},
     ];
     // Mensaje 14 dias de seguimiento
     if (myCase.tiempo_seguimiento > 14) {
@@ -344,8 +347,6 @@ async function savePatientCase(req, res) {
     item.current_using = item.currentusing? true : false;
     item.rea = isNaN(item.rea) ? null : parseInt(item.rea);
     item.det = isNaN(item.det) ? null : parseInt(item.det);
-    // console.log("*******************");
-    // console.log(item);
     await updateTreatment(item.id, idCase, item.type, item.name, item.from, item.to, item.obs, item.current_using, item.rea, item.det, true, client);
     return item;
   }));
@@ -354,8 +355,6 @@ async function savePatientCase(req, res) {
     item.current_using = item.currentusing? true : false;
     item.rea = isNaN(item.rea) ? null : parseInt(item.rea);
     item.det = isNaN(item.det) ? null : parseInt(item.det);
-    // console.log("*******************");
-    // console.log(item);
     await insertTreatment(idCase, item.type, item.name, item.from, item.to, item.obs, item.current_using, item.rea, item.det, true, client);
     return item;
   }));
@@ -395,8 +394,6 @@ async function savePatientCase(req, res) {
         patientsTest[testPatient[1]][testPatient[0]] = item[key];
       }
     }));
-    // console.log('Paciente contacto : ', patientsTest);
-    // console.log(Object.keys(patientsTest));
     await Promise.all(Object.keys(patientsTest).map(async function(key) {
       const patientTest = patientsTest[key];
       await updatePatientTest(key,
@@ -495,7 +492,7 @@ async function savePatientCase(req, res) {
     if (body.tipo_guardado == '2') {
       await terminateCase(idCase, dniMedico);
       await req.flash('success', 'Caso grabado y cerrado exitosamente.');
-      res.redirect('/dashboard');
+      return res.redirect('/dashboard');
     }
     await req.flash('success', 'Caso grabado exitosamente.');
     return res.redirect('/dashboard');

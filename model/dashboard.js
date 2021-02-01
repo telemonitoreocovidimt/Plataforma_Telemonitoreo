@@ -718,7 +718,6 @@ function updateCase(json, pass = false, client = null) {
     params = [temp_fv, fr_fv, disnea_sa, taqui_sa, saturacion_sa, alteracion_sa, otros_sa, otros, estado_evo,
       fiebre, dificultad_respitar, dolor_pecho, alteracion_sensorio, colaboracion_azul_labios,
       tos, dolor_garganta, congestion_nasal, malestar_general, cefalea, nauseas, diarrea, comentario, idCase, fc_fv, sat_fv];
-    console.log(params)
     result = await client.query(query, params);
     if (!pass) {
       client.release(true);
@@ -1105,7 +1104,6 @@ function updateContact(dni_contact, parentesco, name, age, factor, obs, phone, p
     if (!pass) {
       client.release(true);
     }
-    // console.log('Rows : ', result);
     resolve({result: result.rows, client});
   });
 }
@@ -1164,9 +1162,6 @@ function updatePatientTest(dniPatient,
     if (!pass) {
       client.release(true);
     }
-    // console.log(query);
-    // console.log(params);
-    // console.log('Rows : ', result);
     resolve({result: result.rows, client});
   });
 }
@@ -1181,7 +1176,6 @@ function updateContactMonitor(dni_contact, status, pass = false, client = null) 
         id_status = $3
         where fecha_monitoreo::date = $2::date and dni_contacto = $1`;
     const params = [dni_contact, peruvianDateInit, status];
-    // console.log(params);
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
@@ -1200,7 +1194,6 @@ function insertContactMonitor(dni_contact, status, pass = false, client = null) 
     (dni_contacto, fecha_monitoreo, id_status)
     values ($1, $2, $3)`;
     const params = [dni_contact, peruvianDateInit, status];
-    // console.log(params);
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);

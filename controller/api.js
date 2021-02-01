@@ -45,7 +45,6 @@ async function savePatient(req, res) {
     celular,
     edad,
     fijo} = req.body;
-  console.log(req.body);
   const user = req.session.user;
   if (!dni || !nombre || !celular || !user) {
     return res.status(400).json({

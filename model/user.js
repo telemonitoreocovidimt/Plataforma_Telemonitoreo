@@ -1,5 +1,6 @@
 const {openConnection} = require('./connection');
 const {PGSCHEMA} = require('./../config');
+const {getTimeNow} = require('./../lib/time');
 
 /**
  * Validar si un paciente acepto los terminos y condiciones
@@ -54,19 +55,23 @@ function getInfoPatient(dni, pass=false, client=null) {
  * @function
  * @param {Number} dni Número de documento
  * @param {Boolean} acceptedTemrs Acepto o no los terminos
+ * @param {Boolean} acceptedTermData Acepto o no los terminos para uso de datos.
  * @param {Boolean} pass Saltar cierre de conexión
  * @param {Object} client Cliente postgresql
  * @return {Promise}
  */
-function updateTermsPatient(dni, acceptedTemrs, pass=false, client=null) {
+function updateTermsPatient(dni, acceptedTemrs, acceptedTermData, pass=false, client=null) {
   return new Promise(async (resolve, reject)=>{
+    const {peruvianDateCurrent} = getTimeNow();
     if (!client) {
       client = await openConnection();
     }
     const query = `update ${PGSCHEMA}.dt_pacientes set
-            acepto_terminos = $2
+            acepto_terminos = $2,
+            acepto_terminos_datos = $3,
+            fecha_respuesta_terminos = $4
             where dni = $1;`;
-    const params = [dni, acceptedTemrs];
+    const params = [dni, acceptedTemrs, acceptedTermData, peruvianDateCurrent];
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);

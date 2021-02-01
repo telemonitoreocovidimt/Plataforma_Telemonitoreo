@@ -21,11 +21,10 @@ function getPatientsSurvey01() {
                 inner join  ${PGSCHEMA}.dm_hospitales as h
                 on p.id_hospital = h.id
                 where p.paso_encuesta_inicial = false and p.estado = 1 and 
-                ($1::date - p.fecha_creacion::date)::int + 1 <= (select param.cantidad_max_dias_bot from ${PGSCHEMA}.dm_parametros as param limit 1)::int and
+                ($1::date - p.fecha_creacion::date)::int + 1 <= (select param.cantidad_max_dias_bot_init from ${PGSCHEMA}.dm_parametros as param limit 1)::int and
                 ($1::date - p.fecha_creacion::date)::int + 1 >= 0;`;
     const params = [peruvianDateCurrent];
     const result = await client.query(query, params);
-    console.log(result.rows);
     client.release(true);
     resolve(result.rows);
   });
@@ -48,9 +47,7 @@ function getPatientsSurvey02() {
             from ${PGSCHEMA}.dt_pacientes as p
             inner join ${PGSCHEMA}.dm_hospitales as h
             on p.id_hospital = h.id
-            where p.grupo = 'C'
-            and p.is_doctor = false
-            and p.factor_riesgo = false
+            where p.grupo in ('C', 'B', 'A')
             and p.estado = 1
             and p.paso_encuesta_inicial = true and
             ($1::date - p.fecha_creacion::date)::int + 1 <= (select param.cantidad_max_dias_bot from ${PGSCHEMA}.dm_parametros as param limit 1)::int and
@@ -115,7 +112,6 @@ function saveAnswer(dniPaciente, variable, respuesta, askedAt, answeredAt) {
     const client = await openConnection();
     const query = `select * from ${PGSCHEMA}.sp_save_answer($1, $2, $3, $4, $5)`;
     const params = [dniPaciente, variable, respuesta, askedAt, answeredAt];
-    console.log(params);
     const result = await client.query(query, params);
     client.release(true);
     resolve(result.rows);

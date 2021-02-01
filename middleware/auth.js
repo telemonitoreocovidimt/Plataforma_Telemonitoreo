@@ -40,12 +40,15 @@ function isDoctor(req, res, next) {
 async function isUserParam(req, res, next) {
   const dni = req.params.dni;
   const result = await getInfoPatient(dni);
+  console.log(result);
   if (result.result.length) {
     req.session.userTemp = result.result[0];
+    return req.session.save(()=>{
+      next();
+    });
+  } else {
+    return res.redirect('/');
   }
-  return req.session.save(()=>{
-    next();
-  });
 }
 
 module.exports = {
