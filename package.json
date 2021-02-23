@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "nodemon server.js",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -28,11 +29,14 @@
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "pg": "^8.0.2",
+    "phantom-html-to-pdf": "^0.6.1",
     "randomstring": "^1.1.5",
-    "read-excel-file": "^4.0.6"
+    "read-excel-file": "^4.0.6",
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "eslint": "^7.11.0",
-    "eslint-config-google": "^0.14.0"
+    "eslint-config-google": "^0.14.0",
+    "jest": "^26.6.3"
   }
 }

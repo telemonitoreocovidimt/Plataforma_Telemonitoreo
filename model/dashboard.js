@@ -46,7 +46,7 @@ function getPatientsAlert(dniMedico, pass=false, client=null) {
           p.nota_grupo as nota_grupo
         from ${PGSCHEMA}.dt_casos_dia as c
         inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
-        where  p.id_hospital in (select mv.id_hospital from development.dm_medicos_voluntarios as mv where mv.dni = $3) and
+        where  p.id_hospital in (select mv.id_hospital from ${PGSCHEMA}.dm_medicos_voluntarios as mv where mv.dni = $3) and
         c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 3 and p.grupo in ('C', 'B', 'A') order by p.edad desc;`;
     const params = [peruvianDateCurrent, peruvianDateInit, dniMedico];
     const result = await client.query(query, params);
@@ -100,7 +100,7 @@ function getPatients(dniMedico, pass=false, client=null) {
             p.nota_grupo as nota_grupo
           from ${PGSCHEMA}.dt_casos_dia as c
           inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
-          where p.id_hospital in (select mv.id_hospital from development.dm_medicos_voluntarios as mv where mv.dni = $3) and
+          where p.id_hospital in (select mv.id_hospital from ${PGSCHEMA}.dm_medicos_voluntarios as mv where mv.dni = $3) and
           c.fecha_caso = $2 and c.estado_caso = 1 and p.estado = 2 and p.grupo in ('C', 'B', 'A') order by p.edad desc;`;
     const params = [peruvianDateCurrent, peruvianDateInit, dniMedico];
     const result = await client.query(query, params);
@@ -154,7 +154,7 @@ function getMyPatients(dniMedico, pass=false, client=null) {
             p.nota_grupo as nota_grupo
           from ${PGSCHEMA}.dt_casos_dia as c
           inner join ${PGSCHEMA}.dt_pacientes as p on c.dni_paciente = p.dni
-          where p.id_hospital in (select mv.id_hospital from development.dm_medicos_voluntarios as mv where mv.dni = $3) and
+          where p.id_hospital in (select mv.id_hospital from ${PGSCHEMA}.dm_medicos_voluntarios as mv where mv.dni = $3) and
           c.fecha_caso = $2 and c.estado_caso = 2 and c.dni_medico = $3 and p.grupo in ('C', 'B', 'A') order by p.edad desc;`;
     const params = [peruvianDateCurrent, peruvianDateInit, dniMedico];
     const result = await client.query(query, params);
@@ -486,6 +486,7 @@ function updateCase(json, pass = false, client = null) {
       provincia,
       distrito,
       direccion,
+      isDoctor,
       motivo_prueba: idMotivoPrueba} = json;
     if (idMotivoPrueba == '') {
       idMotivoPrueba = null;
@@ -513,6 +514,8 @@ function updateCase(json, pass = false, client = null) {
     } else {
       resultado_prueba_3 = null;
     }
+
+    isDoctor = isDoctor == null? false : true;
     /**
      * Seguimiento
      */
@@ -685,9 +688,10 @@ function updateCase(json, pass = false, client = null) {
               pais = $17,
               provincia = $18,
               distrito = $19,
-              direccion = $20
+              direccion = $20,
+              is_doctor = $21
               where dni = $11;`;
-    let params = [grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fecha_inicio_sintomas, condicion_egreso, nota_grupo, idMotivoPrueba, dniPaciente, fecha_resultado_prueba_1, fecha_resultado_prueba_2, fecha_resultado_prueba_3, celular, sexo,  pais, provincia, distrito, direccion];
+    let params = [grupo, factor_riesgo, estado, resultado_prueba_1, resultado_prueba_2, resultado_prueba_3, fecha_inicio_sintomas, condicion_egreso, nota_grupo, idMotivoPrueba, dniPaciente, fecha_resultado_prueba_1, fecha_resultado_prueba_2, fecha_resultado_prueba_3, celular, sexo,  pais, provincia, distrito, direccion, isDoctor];
     let result = await client.query(query, params);
     query = `update ${PGSCHEMA}.dt_casos_dia set
         temp_fv = $1,
@@ -924,6 +928,7 @@ function insertTreatment(id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha
     const query = `insert into ${PGSCHEMA}.dt_tratamientos_caso_dia (id_tratamiento, id_caso_dia, nombre, fecha_desde, fecha_hasta, observacion, usando, id_razon, id_detalle)
             values ($2, $1, $3, $4, $5, $6, $7, $8, $9)`;
     const params = [id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion, current_using, rea, det];
+    console.log([id_caso_dia, id_tratamiento, nombre, fecha_desde, fecha_hasta, observacion, current_using, rea, det]);
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
@@ -1420,6 +1425,221 @@ function addPermissionContact(dni_contact, dni_patient, pass = false, client = n
   });
 }
 
+
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+/**
+ * Obtener bandeja de pacientes con vacuna.
+ * @function
+ * @param {String} dniMedico Dni del medico
+ * @param {Boolean} pass Saltar cierre de conexión
+ * @param {Object} client Cliente postgresql
+ * @return {Promise}
+ */
+function getPatientsVaccine(dniMedico, pass=false, client=null) {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateInit} = getTimeNow();
+    if (!client) {
+      client = await openConnection();
+    }
+    const query = `select
+    cv.id,
+    pv.nombre,
+    ($1::date - pv.fecha_validacion::date)::int + 1 as dias,
+    case when (select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cvt
+                  where cvt.documento_identidad_paciente_vacuna = cvt.documento_identidad_paciente_vacuna
+                  and cvt.fecha_creacion = ($1::date - '1 day'::interval)
+                  and cvt.dni_medico = $2)::int > 0 then 'SI'
+                  else 'NO' end as had_patient_yesterday,
+    pv.nota_grupo,
+    pv.puntuacion,
+    cv.tipo_caso
+    from ${PGSCHEMA}.dt_casos_vacuna as cv
+    inner join ${PGSCHEMA}.dt_pacientes_vacuna as pv
+    on cv.documento_identidad_paciente_vacuna = pv.documento_identidad
+    where cv.fecha_creacion = $1 and cv.estado = 1
+    order by pv.puntuacion desc, cv.id asc;`;
+    const params = [peruvianDateInit, dniMedico];
+    const result = await client.query(query, params);
+    if (!pass) {
+      client.release(true);
+    }
+    resolve({'result': result.rows, client});
+  });
+}
+
+/**
+ * Obtener bandeja de pacientes con vacuna que yo atiendo.
+ * @function
+ * @param {String} dniMedico Dni del medico
+ * @param {Boolean} pass Saltar cierre de conexión
+ * @param {Object} client Cliente postgresql
+ * @return {Promise}
+ */
+function getMyPatientsVaccine(dniMedico, pass=false, client=null) {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateInit} = getTimeNow();
+    if (!client) {
+      client = await openConnection();
+    }
+    const query = `select
+    cv.id,
+    pv.nombre,
+    ($1::date - pv.fecha_validacion::date)::int + 1 as dias,
+    case when (select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cvt
+                  where cvt.documento_identidad_paciente_vacuna = cvt.documento_identidad_paciente_vacuna
+                  and cvt.fecha_creacion = ($1::date - '1 day'::interval)
+                  and cvt.dni_medico = $2)::int > 0 then 'SI'
+                  else 'NO' end as had_patient_yesterday,
+    pv.nota_grupo,
+    pv.puntuacion,
+    cv.tipo_caso
+    from ${PGSCHEMA}.dt_casos_vacuna as cv
+    inner join ${PGSCHEMA}.dt_pacientes_vacuna as pv
+    on cv.documento_identidad_paciente_vacuna = pv.documento_identidad
+    where cv.fecha_creacion = $1 and cv.estado = 2
+    and cv.dni_medico = $2
+    order by pv.puntuacion desc, cv.id asc;`;
+    const params = [peruvianDateInit, dniMedico];
+    const result = await client.query(query, params);
+    if (!pass) {
+      client.release(true);
+    }
+    resolve({'result': result.rows, client});
+  });
+}
+
+/**
+ * Obtener el total de casos del dia por hospital
+ * @function
+ * @param {Number} idHospital ID de hospital
+ * @param {Boolean} pass Saltar cierre de conexión
+ * @param {Object} client Cliente postgresql
+ * @return {Promise}
+ */
+function countAllCaseVaccineToday(idHospital, pass=false, client=null) {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateInit} = getTimeNow();
+    if (!client) {
+      client = await openConnection();
+    }
+    const query = `select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cv
+                      inner join ${PGSCHEMA}.dt_pacientes_vacuna as pv
+                      on cv.documento_identidad_paciente_vacuna = pv.documento_identidad
+                      where pv.id_hospital = $2
+                      and cv.estado in (1,2)
+                      and cv.fecha_creacion = $1;`;
+    const params = [peruvianDateInit, idHospital];
+    const result = await client.query(query, params);
+    if (!pass) {
+      client.release(true);
+    }
+    resolve({'result': result.rows, client});
+  });
+}
+
+/**
+ * Obtener el total de casos atendidos del dia por hospital
+ * @function
+ * @param {Number} idHospital ID de hospital
+ * @param {Boolean} pass Saltar cierre de conexión
+ * @param {Object} client Cliente postgresql
+ * @return {Promise}
+ */
+function countAllCaseVaccineAttendedToday(idHospital, pass=false, client=null) {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateInit} = getTimeNow();
+    if (!client) {
+      client = await openConnection();
+    }
+    const query = `select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cv
+                      inner join ${PGSCHEMA}.dt_pacientes_vacuna as pv
+                      on cv.documento_identidad_paciente_vacuna = pv.documento_identidad
+                      where pv.id_hospital = $2
+                      and cv.estado = 3
+                      and cv.fecha_creacion = $1;`;
+    const params = [peruvianDateInit, idHospital];
+    const result = await client.query(query, params);
+    if (!pass) {
+      client.release(true);
+    }
+    resolve({'result': result.rows, client});
+  });
+}
+
+/**
+ * Obtener el total de casos atendidos del dia por hospital y pordoctor
+ * @function
+ * @param {String} dniMedico Dni del medico
+ * @param {Boolean} pass Saltar cierre de conexión
+ * @param {Object} client Cliente postgresql
+ * @return {Promise}
+ */
+function countAllCaseVaccineAttendedToDayForDoctor(dniMedico, pass=false, client=null) {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateInit} = getTimeNow();
+    if (!client) {
+      client = await openConnection();
+    }
+    const query = `select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cv
+                      inner join ${PGSCHEMA}.dt_pacientes_vacuna as pv
+                      on cv.documento_identidad_paciente_vacuna = pv.documento_identidad
+                      where cv.estado = 3
+                      and cv.dni_medico = $2
+                      and cv.fecha_creacion = $1;`;
+    const params = [peruvianDateInit, dniMedico];
+    const result = await client.query(query, params);
+    if (!pass) {
+      client.release(true);
+    }
+    resolve({'result': result.rows, client});
+  });
+}
+
+/**
+ * Obtener el promedio de casos atendidos por hospital
+ * @function
+ * @param {Number} idHospital ID de hospital
+ * @param {Boolean} pass Saltar cierre de conexión
+ * @param {Object} client Cliente postgresql
+ * @return {Promise}
+ */
+function countAllCaseVaccineAttendedToDayBetweenDoctors(idHospital, pass=false, client=null) {
+  return new Promise(async (resolve, reject)=>{
+    const {peruvianDateInit} = getTimeNow();
+    if (!client) {
+      client = await openConnection();
+    }
+    const query = `select cv.dni_medico, count(*) from ${PGSCHEMA}.dt_casos_vacuna as cv
+                    inner join ${PGSCHEMA}.dt_pacientes_vacuna as pv
+                    on cv.documento_identidad_paciente_vacuna = pv.documento_identidad
+                    where cv.estado = 3
+                    and pv.id_hospital = $2
+                    and cv.fecha_creacion = $1
+                    group by cv.dni_medico;`;
+    const params = [peruvianDateInit, idHospital];
+    const result = await client.query(query, params);
+    if (!pass) {
+      client.release(true);
+    }
+    resolve({'result': result.rows, client});
+  });
+}
+
 module.exports = {
   getPatientsAlert,
   getPatients,
@@ -1467,4 +1687,10 @@ module.exports = {
   removePermissionContact,
   getTestReasons,
   updatePatientTest,
+  getPatientsVaccine,
+  countAllCaseVaccineToday,
+  countAllCaseVaccineAttendedToday,
+  countAllCaseVaccineAttendedToDayForDoctor,
+  countAllCaseVaccineAttendedToDayBetweenDoctors,
+  getMyPatientsVaccine,
 };

@@ -40,7 +40,7 @@
   </form>
 </div>
 
-<div class="col-md-6" >
+<div class="col-md-6">
   <div class="col-md-12" >
     <h2>Reportes de casos</h2>
     <br>
@@ -59,10 +59,16 @@
         const init = document.getElementById("fecha_inicio");
         const finish = document.getElementById("fecha_fin");
         const download = document.getElementById("downloadReportCases");
-        download.href = `api/v1/report/case/${init.value}/${finish.value}`
+        if (init.value != '' && finish.value != '') {
+          download.href = `api/v1/report/case/${init.value}/${finish.value}`;
+          download.download = true;
+        } else {
+          download.href = '#';
+          download.removeAttribute('download');
+        }
       }
     </script>
-    <a href="" class="btn btn-primary" id="downloadReportCases" download>Descargar</a>
+    <a href="#" class="btn btn-primary" id="downloadReportCases" >Descargar</a>
   </div>
   <br>
   <br>
@@ -84,10 +90,17 @@
         const init = document.getElementById("fecha_inicio2");
         const finish = document.getElementById("fecha_fin2");
         const download = document.getElementById("downloadReportSurveyInit");
-        download.href = `api/v1/report/initial_survey/${init.value}/${finish.value}`
+        
+        if (init.value != '' && finish.value != '') {
+          download.href = `api/v1/report/initial_survey/${init.value}/${finish.value}`;
+          download.download = true;
+        } else {
+          download.removeAttribute('download');
+          download.href = '#';
+        }
       }
     </script>
-    <a href="" class="btn btn-primary" id="downloadReportSurveyInit" download>Descargar</a>
+    <a href="#" class="btn btn-primary" id="downloadReportSurveyInit">Descargar</a>
   </div>
   <br>
   <br>
@@ -109,13 +122,20 @@
         const init = document.getElementById("fecha_inicio3");
         const finish = document.getElementById("fecha_fin3");
         const download = document.getElementById("downloadReportSurveyDaily");
-        download.href = `api/v1/report/daily_survey/${init.value}/${finish.value}`
+        
+        if (init.value != '' && finish.value != '') {
+          download.href = `api/v1/report/daily_survey/${init.value}/${finish.value}`
+          download.download = true;
+        } else {
+          download.removeAttribute('download');
+          download.href = '#';
+        }
       }
     </script>
-    <a href="" class="btn btn-primary" id="downloadReportSurveyDaily" download>Descargar</a>
+    <a href="#" class="btn btn-primary" id="downloadReportSurveyDaily">Descargar</a>
   </div>
   <br>
-  <br>
+  <br> 
 </div>
 
 {{!-- // http://localhost:3000/api/v1/report/case/2020-01-20/2020-12-20

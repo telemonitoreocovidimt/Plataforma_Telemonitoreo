@@ -190,6 +190,7 @@ function excelTamizaje(excelPath, idHospital) {
       const resolved = await addPatientTamizaje(paramsPatient).catch((error)=>{
         error.push('No se pudo ingresar en la BD la fila ' + rowNumber);
       });
+      // console.log('Resolved.... :  ', resolved);
       if (resolved) {
         await setAge(row.edad, paramsHistory[0]);
         await addHistory(paramsHistory[0],

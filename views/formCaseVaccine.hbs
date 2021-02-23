@@ -1,0 +1,238 @@
+{{#each flash}}
+<div class="alert alert-{{this.type}}">{{this.message}}</div>
+{{/each}}
+<style>
+    .relative {
+        position: relative;
+    }
+    .right {
+        right: 0;
+    }
+    .top {
+        top: 0;
+    }
+    .absolute {
+        position: absolute;
+    }
+    .cancel {
+        color: tomato;
+        transform: scale(2);
+        cursor: pointer;
+    }
+
+    .error_input {
+        border: solid 1px tomato;
+    }
+
+    input[type="checkbox"]{
+        height: calc(1.5em + 0rem + 2px)
+    }
+
+    .select_status{
+        width: 100%;
+    }
+</style>
+<!-- Button trigger modal -->
+{{!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalCreatePatient">
+  Agregar como paciente
+</button> --}}
+
+<!-- Modal -->
+<div class="modal fade" id="modalCreatePatient" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Agregar paciente</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <label for="dniCreatePatient">DNI: </label>
+                <input type="text" class="form-control" id="dniCreatePatient" placeholder="Número de DNI" value="">
+            </div>
+            <div class="form-group col-md-12">
+                <label for="nameCreatePatient">Nombre: </label>
+                <input type="text" class="form-control" id="nameCreatePatient" placeholder="Nombre y apellidos" value="">
+            </div>
+            <div class="form-group col-md-12">
+                <label for="phoneCreatePatient">Celular: </label>
+                <input type="text" class="form-control" id="phoneCreatePatient" placeholder="Número de celular" value="">
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">CASO</h1>
+</div>
+<form method="POST" id="form">
+    <div class="row">
+        <div class="col-xl-3 col-lg-3">
+            <div class="card card-comments shadow mb-4 border-left-warning">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Comentarios</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="case-comments ml-auto">
+                        {{#each comments}}
+                        <li class=" d-flex align-items-center">
+                            <div>
+                                <div class="small text-gray-500">{{ this.fecha_creacion }}</div>
+                                <span>{{ this.comentario }}</span>
+                            </div>
+                        </li>
+                        {{/each}}
+                        
+                    </ul>
+
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-xl-6 col-lg-6">
+            <div class="form-inputs-list">
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">DATOS PACIENTE</h6>
+                        <div class="call-action">
+                            <a href="tel://{{celular}}" class="btn btn-success btn-circle btn-sm">
+                                <i class="fas fa-phone-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="inputEmail4">Paciente:</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre"
+                                    disabled value="{{nombre}}">
+                            </div>
+                        </div>
+
+                        
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="tipo_documento">Trabajo presencial:</label>
+                                <select class="form-control" id="tipo_documento" name="tipo_documento" disabled>
+                                    {{#each typeDocumentOptions}}
+                                    <option value="{{ this.id }}" {{compare this.id ../tipo_documento "selected"}}>
+                                        {{ this.descripcion }}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-8">
+                                <label for="inputEmail4">Documento:</label>
+                                <input type="text" class="form-control" name="documento_identidad" id="documento_identidad" disabled value="{{documento_identidad}}" />
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputEmail4">Teléfono</label>
+                                <input type="text" class="form-control" name="celular" id="celular"
+                                    value="{{celular}}" />
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="cargo">Cargo:</label>
+                                <input type="text" class="form-control" name="cargo" id="cargo" value="{{cargo}}" />
+                            </div>
+                            <div class="form-group col-md-8">
+                                <label for="email">Correo:</label>
+                                <input type="text" class="form-control" name="email" id="email" value="{{email}}" />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="fill_document_esavi">¿Se llenó ficha ESAVI?</label>
+                                <select class="form-control" id="fill_document_esavi" name="fill_document_esavi">
+                                    {{#each fillESAVIOptions}}
+                                    <option value="{{ this.id }}" {{compare this.id ../fill_document_esavi "selected"}}>
+                                        {{ this.descripcion }}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        </div>
+
+    
+
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="estado_paciente">Tipo de bandeja:</label>
+                                <select class="form-control" id="estado_paciente" name="estado_paciente">
+                                    {{#each traysOptions}}
+                                        <option value="{{ this.id }}" {{compare this.id ../estado_paciente "selected"}}>
+                                        {{ this.descripcion }}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        </div>
+                        <input type="hidden" name="tipo_guardado" id="tipo_guardado">
+                    </div>
+                </div>
+
+            </div>
+           
+        </div>
+
+        <div class="col-xl-3 col-lg-3">
+
+            <div class="card  mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Guardar</h6>
+                </div>
+                <div class="card-body">
+                        <div class="form-group">
+                            <label for="inputPassword">Nota de grupo:</label>
+                            <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%" id="comentario"
+                                name="nota_grupo" maxlength="50" placeholder="Ingrese la nota de grupo">{{ nota_grupo }}</textarea>
+                        </div>
+                        <div class="custom-control d-flex justify-content-end">
+                        <input class="btn btn-primary" type="submit" value="TERMINAR SEGUIMIENTO POR HOY"
+                            onclick="document.getElementById('tipo_guardado').value=2" style="width: 200px; white-space: normal;1">
+                       </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-11 col-lg-11">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Comentario</h6>
+                </div>
+                <div class="card-body">
+
+                    <div class="form-group">
+
+
+                        <textarea class="form-control" style="width: 100%;margin: 0px;padding:1%" id="comentario"
+                            name="comentario" placeholder="Ingrese sus comentarios" >{{ comentario }}</textarea>
+                    </div>
+
+
+                </div>
+            </div>
+            
+        </div>
+        <div class="col-xl-11 col-lg-11">
+            <div class="form-group d-flex justify-content-between" style="flex-wrap:wrap">
+                <input class="btn btn-success" type="submit" value="VOY A SEGUIRLO MÁS TARDE" onclick="document.getElementById('tipo_guardado').value=1; submitFormCustom()" style="margin:3%;width: 200px; white-space: normal;">
+                <input class="btn btn-warning" type="submit" value="QUE ALGUIEN MÁS LO SIGA HOY" onclick="document.getElementById('tipo_guardado').value=3; submitFormCustom()" style="margin:3%;width: 200px; white-space: normal;1">
+            </div>
+        </div>
+    </div>
+
+</form>

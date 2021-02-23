@@ -58,13 +58,14 @@ async function updatePatient(params) {
     const query = `update ${PGSCHEMA}.dt_pacientes set 
                       codigo = $2,
                       fecha_ingreso = $3,
-                      fecha_creacion = $4,
+                      fecha_ultima_actualizacion = $4,
+                      cantidad_subidas = cantidad_subidas + 1,
                       nombre = $5,
                       direccion = $6,
                       celular = $7,
                       fijo = $8,
                       estado = $9,
-                      grupo = $10',
+                      grupo = $10,
                       sexo = $11,
                       pais = $12,
                       provincia = $13,
@@ -108,6 +109,9 @@ async function updatePatient(params) {
       tipoMuestra3,
       fechaMuestra,
       idHospital];
+    // console.log('______******______');
+    // console.log(query);
+    // console.log(params);
     await client.query(query, params);
     client.release(true);
     resolve(true);
@@ -155,12 +159,12 @@ async function addPatient(params) {
   return new Promise(async (resolve, reject)=>{
     const client = await openConnection();
     const query = `insert into ${PGSCHEMA}.dt_pacientes (
-        dni, codigo, fecha_ingreso, fecha_creacion, nombre, direccion, celular, fijo, estado, grupo, 
+        dni, codigo, fecha_ingreso, fecha_ultima_actualizacion, fecha_creacion, nombre, direccion, celular, fijo, estado, grupo, 
         factor_riesgo, paso_encuesta_inicial, flag_activo, sexo, pais, provincia, distrito, fecha_inicio_sintomas,
         resultado_prueba_1, fecha_resultado_prueba_1, tipo_prueba_1, resultado_prueba_2, 
         fecha_resultado_prueba_2, tipo_prueba_2, resultado_prueba_3, fecha_resultado_prueba_3, tipo_prueba_3, fecha_prueba, id_hospital) 
     values(
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 
+        $1, $2, $3, $4, $4, $5, $6, $7, $8, $9, $10, 
         $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, 
         $23, $24, $25, $26, $27, $28, $29);`;
     const params = [documento,

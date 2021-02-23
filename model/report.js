@@ -11,33 +11,34 @@ function getRangeCase(from, to) {
   return new Promise(async (resolve, reject)=>{
     const client = await openConnection();
     const query = `SELECT p.dni "DNI paciente",
-                p.nombre "Nombre paciente",
-                p.celular "Celular paciente",
-                p.distrito "Distrito paciente",
-                CONCAT(mv.apellido,' ',mv.nombre) "Nombre medico",
-                cd.fecha_caso "Fecha del caso",
-                ep.descripcion "Bandeja",
-                cd.comentario "Comentarios",
-                case when cd.fiebre = 1 then 'SI' else 'NO' end "Fiebre",
-                case when cd.dificultad_respitar = 1 then 'SI' else 'NO' end "Dificultad para respirar",
-                case when cd.dolor_pecho = 1 then 'SI' else 'NO' end "Dolor de pecho",
-                case when cd.alteracion_sensorio = 1 then 'SI' else 'NO' end "Alteración del sensorio",
-                case when cd.colaboracion_azul_labios = 1 then 'SI' else 'NO' end "Colorazión azul en los labios",
-                case when cd.tos = 1 then 'SI' else 'NO' end "Tos",
-                case when cd.dolor_garganta = 1 then 'SI' else 'NO' end "Dolor de garganta",
-                case when cd.congestion_nasal = 1 then 'SI' else 'NO' end "Congestion nasal",
-                case when cd.malestar_general = 1 then 'SI' else 'NO' end "Malestar general",
-                case when cd.cefalea = 1 then 'SI' else 'NO' end "Cefalea",
-                case when cd.nauseas = 1 then 'SI' else 'NO' end "Nauseas",
-                case when cd.diarrea = 1 then 'SI' else 'NO' end "Diarre"
-                FROM ${PGSCHEMA}.dt_casos_dia cd
-                INNER JOIN ${PGSCHEMA}.dt_pacientes p ON cd.dni_paciente = p.dni
-                INNER JOIN ${PGSCHEMA}.dm_medicos_voluntarios mv ON cd.dni_medico = mv.dni
-                INNER JOIN ${PGSCHEMA}.dm_estados_pacientes ep ON ep.id = p.estado
-                WHERE cd.fecha_caso::date >= $1::date and cd.fecha_caso::date <= $2::date
-                ORDER BY cd.fecha_caso ASC`;
+                  p.nombre "Nombre paciente",
+                  p.celular "Celular paciente",
+                  p.distrito "Distrito paciente",
+                  CONCAT(mv.apellido,' ',mv.nombre) "Nombre medico",
+                  cd.fecha_caso "Fecha del caso",
+                  ep.descripcion "Bandeja",
+                  cd.comentario "Comentarios",
+                  case when cd.fiebre = 1 then 'SI' else 'NO' end "Fiebre",
+                  case when cd.dificultad_respitar = 1 then 'SI' else 'NO' end "Dificultad para respirar",
+                  case when cd.dolor_pecho = 1 then 'SI' else 'NO' end "Dolor de pecho",
+                  case when cd.alteracion_sensorio = 1 then 'SI' else 'NO' end "Alteración del sensorio",
+                  case when cd.colaboracion_azul_labios = 1 then 'SI' else 'NO' end "Colorazión azul en los labios",
+                  case when cd.tos = 1 then 'SI' else 'NO' end "Tos",
+                  case when cd.dolor_garganta = 1 then 'SI' else 'NO' end "Dolor de garganta",
+                  case when cd.congestion_nasal = 1 then 'SI' else 'NO' end "Congestion nasal",
+                  case when cd.malestar_general = 1 then 'SI' else 'NO' end "Malestar general",
+                  case when cd.cefalea = 1 then 'SI' else 'NO' end "Cefalea",
+                  case when cd.nauseas = 1 then 'SI' else 'NO' end "Nauseas",
+                  case when cd.diarrea = 1 then 'SI' else 'NO' end "Diarre"
+                  FROM ${PGSCHEMA}.dt_casos_dia cd
+                  INNER JOIN ${PGSCHEMA}.dt_pacientes p ON cd.dni_paciente = p.dni
+                  INNER JOIN ${PGSCHEMA}.dm_medicos_voluntarios mv ON cd.dni_medico = mv.dni
+                  INNER JOIN ${PGSCHEMA}.dm_estados_pacientes ep ON ep.id = p.estado
+                  WHERE cd.fecha_caso::date >= $1::date and cd.fecha_caso::date <= $2::date
+                  ORDER BY cd.fecha_caso ASC`;
     const params = [from, to];
     const result = await client.query(query, params);
+    client.release(true);
     resolve(result.rows);
   });
 }
@@ -81,10 +82,11 @@ function getRangeDailySurvey(from, to) {
                     'dolor_garganta','tos','desaparicion_olfato','fiebre_ayer','fiebre_hoy','diarrea')
                     order by p.dni asc
                     ) fex
-                    group by dni_paciente,nombre
+                    group by dni_paciente, nombre
                     order by max(fecha_respuesta) asc`;
     const params = [from, to];
     const result = await client.query(query, params);
+    client.release(true);
     resolve(result.rows);
   });
 }
@@ -129,13 +131,82 @@ function getRangeInitialSurvey(from, to) {
                 order by max(fecha_respuesta) asc`;
     const params = [from, to];
     const result = await client.query(query, params);
+    client.release(true);
     resolve(result.rows);
   });
 }
 
+/**
+ * @param {*} from
+ * @param {*} to
+ * @return {Promise}
+ */
+function getPatientsVaccine() {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select documento_identidad,
+              tipo_documento,
+              nombre,
+              cargo,
+              condicion,
+              hospital,
+              nota_grupo,
+              estado,
+              email,
+              celular,
+              fecha_creacion::text fecha_creacion,
+              trabajo_presencial,
+              celular_validado,
+              fecha_validacion::text fecha_validacion,
+              fecha_ultima_modificacion::text fecha_ultima_modificacion,
+              puntuacion,
+              id_hospital,
+              fecha_respuesta_registro::text fecha_respuesta_registro
+    from ${PGSCHEMA}.dt_pacientes_vacuna
+    where celular_validado > 0;`;
+    const params = [];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
+}
+
+/**
+ * @param {*} from
+ * @param {*} to
+ * @return {Promise}
+ */
+function getPatientsTrayVaccine() {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select  cvf.id, pv.nombre, cvf.documento_identidad_paciente_vacuna as documento_identidad,
+    pv.celular,
+    cvf.fecha_creacion::text as fecha_creacion,
+    cvf.piel,
+    cvf.dolor,
+    cvf.fiebre,
+    cvf.cabeza,
+    cvf.confusion,
+    cvf.adormecimiento,
+    cvf.diarrea,
+    cvf.otros,
+    cvf.fecha_respondido::text as fecha_respondido,
+    cvf.estado,
+    cvf.puntuacion
+    from ${PGSCHEMA}.dt_casos_vacuna_form as cvf
+inner join ${PGSCHEMA}.dt_pacientes_vacuna as pv
+on cvf.documento_identidad_paciente_vacuna = pv.documento_identidad;`;
+    const params = [];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows);
+  });
+}
 
 module.exports = {
   getRangeCase,
   getRangeInitialSurvey,
   getRangeDailySurvey,
+  getPatientsTrayVaccine,
+  getPatientsVaccine,
 };

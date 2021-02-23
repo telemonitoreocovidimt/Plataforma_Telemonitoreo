@@ -3,6 +3,10 @@ const {validateTerm, updateTermsPatient} = require('./../model/user');
 const {getMasterParameterHospital} = require('./../model/masterParameters');
 const {setName, setTypeDocument} = require('./../model/pacient');
 const {getTimeNow} = require('./../lib/time');
+
+const patientWithVaccineModel = require('../model/patientWithVaccine');
+
+
 /**
  * Mostrar la vista de terminos y condiciones.
  * @function
@@ -55,6 +59,7 @@ async function terms(req, res) {
  */
 async function thanksTerms(req, res) {
   const userTemp = req.session.userTemp;
+  const numberDocument = userTemp.dni;
   if (userTemp) {
     const accetedTerms = userTemp.acepto_terminos == 2;
     const accetedTermsData = userTemp.acepto_terminos_datos == 2;
@@ -66,6 +71,7 @@ async function thanksTerms(req, res) {
       accetedTerms,
       accetedTermsData,
       accetedTermsDate,
+      numberDocument,
     });
   } else {
     return res.redirect(`/landing/terms/${userTemp.dni}`);
@@ -122,9 +128,34 @@ async function updateTerms(req, res) {
   }
 };
 
+
+// Formularios para las vacunas.
+
+
+
+
+// app.post("/api/formulario", (req, res, next) => {
+//   console.log(req.body);
+//   res.json({status : true})
+// });
+
+// app.post("/api/Verificacion", (req, res, next) => {
+//   console.log(req.body);
+//   res.json({status : true})
+// });
+
+// app.post("/api/Seguimiento", (req, res, next) => {
+//   console.log(req.body);
+//   res.json({status : req.body})
+// });
+
 module.exports = {
   terms,
   thanksTerms,
   updateTerms,
   rejectedThanksTerms,
+  // vaccinePatientRegistry,
+  // validationVaccinePatients,
+  // vaccinePatientSurvey,
+  // ThanksVaccinePatients,
 };

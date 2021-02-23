@@ -1,59 +1,44 @@
 const {Router} = require('express');
-
 const router = new Router();
+const dashboardController = require('./../controller/dashboard');
+const middleware = require('./../middleware/auth');
 
-const {
-  takeCase,
-  canTakeCase,
-  getStatusPatients,
-  canTerminateCase,
-  terminateCase,
-  getCase,
-  updateCase,
-  dropCase,
-  getPatientForCase,
-  removeScheduledCase,
-  addScheduledCase,
-  haveThisScheduledCaseForTomorrow,
-  getComentarios,
-  getPreviousCases,
-  getTreatment,
-  deleteTreatment,
-  updateTreatment,
-  insertTreatment,
-  updateRelationshipContactPatient,
-  updateContact,
-  updateContactMonitor,
-  insertContact,
-  getContactByid,
-  insertRelationshipContactPatient,
-  insertContactMonitor,
-  getContactMonitorToDay,
-  getMonitoreoContactsByDNI,
-  deleteRelationshipContactPatient,
-  listContacts,
-} = require('../model/dashboard');
+router.get('/', middleware.isDoctor, (req, res)=>{
+  const {
+    id_hospital: idHospital,
+  } = req.session.user;
+  if (idHospital == 3) {
+    return res.redirect('/dashboard/bandejas/vacuna');
+  }
+  return res.redirect('/dashboard/bandejas/covid');
+});
 
-const {
-  getGroups,
-  getGroupsContacts
-} = require('../useful');
+/* Covid */
 
-const {
-  getInbox,
-  getMyInbox,
-  getPatientCase,
-  savePatientCase,
-} = require('./../controller/dashboard');
+router.get('/bandejas/covid',
+    middleware.isDoctorCOVID, dashboardController.getInbox);
 
-const {isDoctor} = require('./../middleware/auth');
+router.get('/mibandeja/covid',
+    middleware.isDoctorCOVID, dashboardController.getMyInbox);
 
-router.get('/', isDoctor, getInbox);
+router.get('/caso/covid/:case',
+    middleware.isDoctorCOVID, dashboardController.getPatientCase);
 
-router.get('/mibandeja', isDoctor, getMyInbox);
+router.post('/caso/covid/:case',
+    middleware.isDoctorCOVID, dashboardController.savePatientCase);
 
-router.get('/case/:case', isDoctor, getPatientCase);
+/* Vacunas */
 
-router.post('/case/:case', isDoctor, savePatientCase);
+router.get('/bandejas/vacuna',
+    middleware.isDoctorVaccine, dashboardController.getInboxVaccine);
+
+router.get('/mibandeja/vacuna',
+    middleware.isDoctorVaccine, dashboardController.getMyInboxVaccine);
+
+router.get('/caso/vacuna/:case',
+    middleware.isDoctorVaccine, dashboardController.getPatientCaseVaccine);
+
+router.post('/caso/vacuna/:case',
+    middleware.isDoctorVaccine, dashboardController.savePatientCaseVaccine);
 
 module.exports = router;

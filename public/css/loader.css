@@ -1,0 +1,88 @@
+:root{
+    --color-loader: white;
+    /*-#f7a941 */
+}
+
+/*CSS para el load*/
+.loaderWeb{
+    display: none;
+    width: 100%;height: 100%;position: fixed;top: 0;left: 0;z-index: 100;background: rgba(0, 0, 0, 0.7);
+}
+
+.loaderWeb #contenedor{
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    left: 50%;
+    bottom: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.loader {
+  font-size: 20px;
+  margin: 45% auto;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  position: relative;
+  text-indent: -9999em;
+  -webkit-animation: load4 1.3s infinite linear;
+  animation: load4 1.3s infinite linear;
+}
+@-webkit-keyframes load4 {
+  0%,
+  100% {
+    box-shadow: 0em -3em 0em 0.2em var(--color-loader), 2em -2em 0 0em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 -0.5em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 0em var(--color-loader);
+  }
+  12.5% {
+    box-shadow: 0em -3em 0em 0em var(--color-loader), 2em -2em 0 0.2em var(--color-loader), 3em 0em 0 0em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 -0.5em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  25% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 0em var(--color-loader), 3em 0em 0 0.2em var(--color-loader), 2em 2em 0 0em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 -0.5em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  37.5% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 0em var(--color-loader), 2em 2em 0 0.2em var(--color-loader), 0em 3em 0 0em var(--color-loader), -2em 2em 0 -0.5em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  50% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 0em var(--color-loader), 0em 3em 0 0.2em var(--color-loader), -2em 2em 0 0em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  62.5% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 0em var(--color-loader), -2em 2em 0 0.2em var(--color-loader), -3em 0em 0 0em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  75% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 0em var(--color-loader), -3em 0em 0 0.2em var(--color-loader), -2em -2em 0 0em var(--color-loader);
+  }
+  87.5% {
+    box-shadow: 0em -3em 0em 0em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 0em var(--color-loader), -3em 0em 0 0em var(--color-loader), -2em -2em 0 0.2em var(--color-loader);
+  }
+}
+@keyframes load4 {
+  0%,
+  100% {
+    box-shadow: 0em -3em 0em 0.2em var(--color-loader), 2em -2em 0 0em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 -0.5em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 0em var(--color-loader);
+  }
+  12.5% {
+    box-shadow: 0em -3em 0em 0em var(--color-loader), 2em -2em 0 0.2em var(--color-loader), 3em 0em 0 0em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 -0.5em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  25% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 0em var(--color-loader), 3em 0em 0 0.2em var(--color-loader), 2em 2em 0 0em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 -0.5em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  37.5% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 0em var(--color-loader), 2em 2em 0 0.2em var(--color-loader), 0em 3em 0 0em var(--color-loader), -2em 2em 0 -0.5em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  50% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 0em var(--color-loader), 0em 3em 0 0.2em var(--color-loader), -2em 2em 0 0em var(--color-loader), -3em 0em 0 -0.5em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  62.5% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 0em var(--color-loader), -2em 2em 0 0.2em var(--color-loader), -3em 0em 0 0em var(--color-loader), -2em -2em 0 -0.5em var(--color-loader);
+  }
+  75% {
+    box-shadow: 0em -3em 0em -0.5em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 0em var(--color-loader), -3em 0em 0 0.2em var(--color-loader), -2em -2em 0 0em var(--color-loader);
+  }
+  87.5% {
+    box-shadow: 0em -3em 0em 0em var(--color-loader), 2em -2em 0 -0.5em var(--color-loader), 3em 0em 0 -0.5em var(--color-loader), 2em 2em 0 -0.5em var(--color-loader), 0em 3em 0 -0.5em var(--color-loader), -2em 2em 0 0em var(--color-loader), -3em 0em 0 0em var(--color-loader), -2em -2em 0 0.2em var(--color-loader);
+  }
+}
+    

@@ -2,11 +2,17 @@
 const {
   getPatientsAlert,
   getPatients,
+  getPatientsVaccine,
+  countAllCaseVaccineToday,
+  countAllCaseVaccineAttendedToday,
+  countAllCaseVaccineAttendedToDayForDoctor,
+  countAllCaseVaccineAttendedToDayBetweenDoctors,
   countAllCaseToday,
   countAllCaseAttendedToday,
   countAllCaseAttendedToDayForDoctor,
   countAllCaseAttendedToDayBetweenDoctors,
   getMyPatients,
+  getMyPatientsVaccine,
 } = require('./../model/dashboard');
 const {
   takeCase,
@@ -46,6 +52,10 @@ const {
   getGroups,
   getGroupsContacts,
 } = require('./../useful');
+
+const time = require('./../lib/time');
+const casePatientWithVaccine = require('./../model/casePatientWithVaccine');
+const patientWithVaccine = require('./../model/patientWithVaccine');
 
 /**
  * Mostrar la vista de bandejas
@@ -90,8 +100,8 @@ async function getInbox(req, res) {
     averageCaseAttented = parseInt(sum / count);
   }
   await req.useFlash(res);
-  res.render('dashboard1', {
-    'layout': 'main1',
+  res.render('dashboardCovid', {
+    'layout': 'dashboardCovidLayout',
     'islogin': true,
     ...req.session.user,
     inboxAlert,
@@ -142,8 +152,8 @@ async function getMyInbox(req, res) {
     averageCaseAttented = parseInt(sum / count);
   }
   await req.useFlash(res);
-  return res.render('mycases', {
-    'layout': 'main1',
+  return res.render('myCasesCovid', {
+    'layout': 'dashboardCovidLayout',
     'islogin': true,
     ...req.session.user,
     myCases,
@@ -166,7 +176,7 @@ async function getPatientCase(req, res) {
   const idCase = parseInt(req.params.case);
   if (isNaN(idCase)) {
     await req.flash('danger', `Codigo ${idCase}, no es valido.`);
-    return res.redirect('/dashboard');
+    return res.redirect('/dashboard/bandejas/covid');
   }
   const dniMedico = req.session.user.dni;
   // Validar si se puede tomar el caso
@@ -287,15 +297,14 @@ async function getPatientCase(req, res) {
     if (myCase.sat_fv) {
       myCase.can_plus_fv = true;
     }
-    return res.render('formCase', {
-      layout: 'main1',
+    return res.render('formCaseCovid', {
+      layout: 'dashboardCovidLayout',
       contactsString,
       treatmentsString,
       monitoringStatus,
       previousCases,
       haveThisScheduledCase,
       ...myCase,
-      // ...data,
       statementsPatients,
       groups,
       factors,
@@ -307,7 +316,7 @@ async function getPatientCase(req, res) {
     });
   }
   await req.flash('danger', result.message);
-  return res.redirect('/dashboard');
+  return res.redirect('/dashboard/bandejas/covid');
 };
 
 /**
@@ -321,10 +330,10 @@ async function savePatientCase(req, res) {
   const idCase = parseInt(req.params.case);
   if (isNaN(idCase)) {
     await req.flash('danger', `Codigo ${idCase}, no es valido.`);
-    return res.redirect('/dashboard');
+    return res.redirect('/dashboard/bandejas/covid');
   }
   const body = req.body;
-  console.log('Contexto BODY POST CASE: ', body);
+  // console.log('Contexto BODY POST CASE: ', body);
   // Parseo de input checkbox para continuar el tracking para el dia siguiente
   body.continue_tracking = body.continue_tracking === 'on' ? true : false;
   let data = await getPatientForCase(idCase, true);
@@ -337,28 +346,38 @@ async function savePatientCase(req, res) {
   client = data.client;
   const treatments = data.results;
   const parseTreatment = getGroups(body, treatments);
+  console.log('Drop tratament');
   // Eliminar tratamientos
   await Promise.all(parseTreatment.for_drop.map(async function(item) {
     await deleteTreatment(idCase, item.type, true, client);
     return item;
   }));
+  console.log('Update tratament');
   // Actualizar tratamientos
   await Promise.all(parseTreatment.for_update.map(async function(item) {
     item.current_using = item.currentusing? true : false;
-    item.rea = isNaN(item.rea) ? null : parseInt(item.rea);
-    item.det = isNaN(item.det) ? null : parseInt(item.det);
+    item.rea = isNaN(item.rea) ? null : isNaN(parseInt(item.rea)) ? null: parseInt(item.rea);
+    item.det = isNaN(item.det) ? null : isNaN(parseInt(item.det)) ? null: parseInt(item.det);
     await updateTreatment(item.id, idCase, item.type, item.name, item.from, item.to, item.obs, item.current_using, item.rea, item.det, true, client);
     return item;
   }));
+  console.log('Add tratament');
   // Agregar tratamientos
   await Promise.all(parseTreatment.for_add.map(async function(item) {
     item.current_using = item.currentusing? true : false;
-    item.rea = isNaN(item.rea) ? null : parseInt(item.rea);
-    item.det = isNaN(item.det) ? null : parseInt(item.det);
+    console.log(item);
+    console.log(isNaN(item.rea));
+    console.log(parseInt(item.rea));
+    console.log('-------');
+    console.log(isNaN(item.det));
+    console.log(parseInt(item.det));
+    item.rea = isNaN(item.rea) ? null : isNaN(parseInt(item.rea)) ? null: parseInt(item.rea);
+    item.det = isNaN(item.det) ? null : isNaN(parseInt(item.det)) ? null: parseInt(item.det);
     await insertTreatment(idCase, item.type, item.name, item.from, item.to, item.obs, item.current_using, item.rea, item.det, true, client);
     return item;
   }));
   client.release(true);
+  // console.log('Termindo de agregar tratamiento');
   // Contacto
   data = await listContacts(dniPaciente, true);
   const contacts = data.results;
@@ -471,7 +490,7 @@ async function savePatientCase(req, res) {
     await removeScheduledCase(dniMedico, dniPaciente);
     await dropCase(idCase);
     await req.flash('warning', 'Caso liberado.');
-    return res.redirect('/dashboard');
+    return res.redirect('/dashboard/bandejas/covid');
   }
   // Cerrar caso
   data = await canTerminateCase(dniMedico, idCase);
@@ -492,18 +511,333 @@ async function savePatientCase(req, res) {
     if (body.tipo_guardado == '2') {
       await terminateCase(idCase, dniMedico);
       await req.flash('success', 'Caso grabado y cerrado exitosamente.');
-      return res.redirect('/dashboard');
+      return res.redirect('/dashboard/bandejas/covid');
     }
     await req.flash('success', 'Caso grabado exitosamente.');
-    return res.redirect('/dashboard');
+    return res.redirect('/dashboard/bandejas/covid');
   }
   await req.flash('danger', canTerminate.message);
-  return res.redirect('/dashboard');
+  return res.redirect('/dashboard/bandejas/covid');
 };
+
+
+/**
+ * Mostrar la vista de bandejas de pacientes con vacuna
+ * @function
+ * @param {Object} req request
+ * @param {Object} res response
+ * @return {Object}
+ */
+async function getInboxVaccine(req, res) {
+  const dni = req.session.user.dni;
+  const idHospital = req.session.user.id_hospital;
+  console.log('Inbox Vaccine');
+  // Obtener bandeja de alertas
+  let data = await getPatientsVaccine(dni, true);
+  const inbox = data.result;
+  console.log(inbox);
+  const inboxTypeNormal = [];
+  const inboxTypeImproved = [];
+  await Promise.all(inbox.map((item)=>{
+    if (item.tipo_caso == 1) {
+      inboxTypeNormal.push(item);
+    } else {
+      inboxTypeImproved.push(item);
+    }
+  }));
+  // Obtener la cantidad de casos del dia
+  data = await countAllCaseVaccineToday(idHospital, true, data.client);
+  const numberCaseToDay = data.result[0].count;
+  console.log('*************');
+  // Obtener la cantidad de casos atendidos hoy
+  data = await countAllCaseVaccineAttendedToday(idHospital, true, data.client);
+  const numberCaseAttented = data.result[0].count;
+  console.log('*************');
+  // Obtener la cantidad de casos atendidos por el usuario hoy
+  data = await countAllCaseVaccineAttendedToDayForDoctor(dni, true, data.client);
+  const numberCaseAttentedByDoctor = data.result[0].count;
+  console.log('*************');
+  // Obtener y calcular el promedio de atenciones
+  data = await countAllCaseVaccineAttendedToDayBetweenDoctors(idHospital, false, data.client);
+  let count = 0;
+  let sum = 0;
+  data.result.forEach((json) => {
+    count++;
+    sum += parseInt(json.count);
+  });
+  let averageCaseAttented = 0;
+  if (count && sum) {
+    averageCaseAttented = parseInt(sum / count);
+  }
+  await req.useFlash(res);
+  res.render('dashboardVaccine', {
+    'layout': 'dashboardVaccineLayout',
+    'islogin': true,
+    ...req.session.user,
+    inbox,
+    inboxTypeNormal,
+    inboxTypeImproved,
+    numberCaseAttentedByDoctor,
+    averageCaseAttented,
+    numberCaseToDay,
+    numberCaseAttented,
+  });
+}
+
+/**
+ * Mostrar la vista de mi bandejas de pacientes con vacuna.
+ * @function
+ * @param {Object} req request
+ * @param {Object} res response
+ * @return {Object}
+ */
+async function getMyInboxVaccine(req, res) {
+  const dni = req.session.user.dni;
+  const idHospital = req.session.user.id_hospital;
+  console.log('Inbox Vaccine');
+  // Obtener bandeja de alertas
+  let data = await getMyPatientsVaccine(dni, true);
+  const myInbox = data.result;
+  console.log(myInbox);
+  const myInboxTypeNormal = [];
+  const myInboxTypeImproved = [];
+  await Promise.all(myInbox.map((item)=>{
+    if (item.tipo_caso == 1) {
+      myInboxTypeNormal.push(item);
+    } else {
+      myInboxTypeImproved.push(item);
+    }
+  }));
+  // Obtener la cantidad de casos del dia
+  data = await countAllCaseVaccineToday(idHospital, true, data.client);
+  const numberCaseToDay = data.result[0].count;
+  console.log('*************');
+  // Obtener la cantidad de casos atendidos hoy
+  data = await countAllCaseVaccineAttendedToday(idHospital, true, data.client);
+  const numberCaseAttented = data.result[0].count;
+  console.log('*************');
+  // Obtener la cantidad de casos atendidos por el usuario hoy
+  data = await countAllCaseVaccineAttendedToDayForDoctor(dni, true, data.client);
+  const numberCaseAttentedByDoctor = data.result[0].count;
+  console.log('*************');
+  // Obtener y calcular el promedio de atenciones
+  data = await countAllCaseVaccineAttendedToDayBetweenDoctors(idHospital, false, data.client);
+  let count = 0;
+  let sum = 0;
+  data.result.forEach((json) => {
+    count++;
+    sum += parseInt(json.count);
+  });
+  let averageCaseAttented = 0;
+  if (count && sum) {
+    averageCaseAttented = parseInt(sum / count);
+  }
+  await req.useFlash(res);
+  res.render('dashboardVaccineMyInbox', {
+    'layout': 'dashboardVaccineLayout',
+    'islogin': true,
+    ...req.session.user,
+    myInbox,
+    myInboxTypeNormal,
+    myInboxTypeImproved,
+    numberCaseAttentedByDoctor,
+    averageCaseAttented,
+    numberCaseToDay,
+    numberCaseAttented,
+  });
+}
+
+/**
+ * Mostrar formulario de caso diario de pacientes con vacuna.
+ * @function
+ * @param {Object} req request
+ * @param {Object} res response
+ * @return {Object}
+ */
+async function getPatientCaseVaccine(req, res) {
+  const idCase = parseInt(req.params.case);
+  if (isNaN(idCase)) {
+    await req.flash('danger', `Codigo ${idCase}, no es valido.`);
+    return res.redirect('/dashboard/bandejas/vacuna');
+  }
+  const dniMedico = req.session.user.dni;
+  const caseVaccine = await casePatientWithVaccine.existToDay(idCase);
+  if (!caseVaccine) {
+    await req.flash('danger', `El caso no existe.`);
+    return res.redirect('/dashboard/bandejas/vacuna');
+  }
+  console.log(caseVaccine);
+  const {
+    documento_identidad_paciente_vacuna: numberDocumentPatient,
+    dni_medico: numberDocumentMedico,
+    estado: statusCase,
+  } = caseVaccine;
+  let caseTaken = false;
+  switch (statusCase) {
+    case 2:
+      if (numberDocumentMedico != dniMedico) {
+        await req.flash('danger', 'El caso esta tomado por otro medico.');
+        return res.redirect('/dashboard/bandejas/vacuna');
+      }
+      caseTaken = true;
+      break;
+    case 3:
+      await req.flash('danger', 'El caso ya ha sido cerrado.');
+      return res.redirect('/dashboard/bandejas/vacuna');
+      break;
+    case 4:
+      await req.flash('danger', 'El caso se encuentra cerrado por el sistema.');
+      return res.redirect('/dashboard/bandejas/vacuna');
+      break;
+  }
+
+  if (!caseTaken) {
+    await casePatientWithVaccine.update({
+      ...caseVaccine,
+      estado: 2,
+      dni_medico: dniMedico,
+      fecha_tomado: time.getTimeNow().peruvianDateCurrent,
+    });
+  }
+  // Obtener comentario
+  const patientVaccine= await patientWithVaccine.get(numberDocumentPatient);
+  const comments = await patientWithVaccine.getComments(numberDocumentPatient);
+  console.log(patientVaccine);
+  console.log(caseVaccine);
+  console.log(comments);
+  const onSiteWorkOptions = [{
+    'id': 0,
+    'descripcion': 'Seleccione',
+  }, {
+    'id': 1,
+    'descripcion': 'NO',
+  }, {
+    'id': 2,
+    'descripcion': 'SI',
+  }];
+  const fillESAVIOptions = [{
+    'id': 0,
+    'descripcion': 'Seleccione',
+  }, {
+    'id': 1,
+    'descripcion': 'NO',
+  }, {
+    'id': 2,
+    'descripcion': 'SI',
+  }];
+  const typeDocumentOptions = [{
+    'id': 1,
+    'descripcion': 'DNI',
+  }, {
+    'id': 2,
+    'descripcion': 'CR',
+  }];
+  const traysOptions = [{
+    'id': 5,
+    'descripcion': 'Bandeja SMS',
+  }, {
+    'id': 6,
+    'descripcion': 'Bandeja Urgente Vacuna',
+  }];
+  await req.useFlash(res);
+  return res.render('formCaseVaccine', {
+    layout: 'dashboardVaccineLayout',
+    ...patientVaccine,
+    ...caseVaccine,
+    comments,
+    estado_caso: caseVaccine.estado,
+    estado_paciente: patientVaccine.estado,
+    onSiteWorkOptions,
+    typeDocumentOptions,
+    traysOptions,
+    fillESAVIOptions,
+  });
+}
+
+
+/**
+ * Guardar formulario de caso diario de pacientes con vacuna.
+ * @function
+ * @param {Object} req request
+ * @param {Object} res response
+ * @return {Object}
+ */
+async function savePatientCaseVaccine(req, res) {
+  const idCase = parseInt(req.params.case);
+  if (isNaN(idCase)) {
+    await req.flash('danger', `Codigo ${idCase}, no es valido.`);
+    return res.redirect('/dashboard/bandejas/covid');
+  }
+  // {
+  //   celular: '913044201',
+  //   cargo: '1581-TEC. EN ENFERMERIA I',
+  //   email: 'Kycontrerasr@gmail.com',
+  //   estado_paciente: '6',
+  //   tipo_guardado: '1',
+  //   nota_grupo: '',
+  //   comentario: ''
+  // }
+  const body = req.body;
+  body.estado = body.estado_paciente;
+  const {
+    tipo_guardado: typeSaved,
+  } = body;
+  const dniMedico = req.session.user.dni;
+  const caseVaccine = await casePatientWithVaccine.existToDay(idCase);
+  if (!caseVaccine) {
+    await req.flash('danger', `El caso no existe.`);
+    return res.redirect('/dashboard/bandejas/vacuna');
+  }
+  const {
+    documento_identidad_paciente_vacuna: numberDocumentPatient,
+    dni_medico: numberDocumentMedico,
+    estado: statusCase,
+  } = caseVaccine;
+  switch (statusCase) {
+    case 2:
+      if (numberDocumentMedico != dniMedico) {
+        await req.flash('danger', 'El caso esta tomado por otro medico.');
+        return res.redirect('/dashboard/bandejas/vacuna');
+      }
+      break;
+    case 3:
+      await req.flash('danger', 'El caso ya ha sido cerrado.');
+      return res.redirect('/dashboard/bandejas/vacuna');
+      break;
+    case 4:
+      await req.flash('danger', 'El caso se encuentra cerrado por el sistema.');
+      return res.redirect('/dashboard/bandejas/vacuna');
+      break;
+  }
+  // Obtener comentario
+  const patientVaccine= await patientWithVaccine.get(numberDocumentPatient);
+  await casePatientWithVaccine.update({
+    ...caseVaccine,
+    comentario: body.comentario,
+    estado: typeSaved == 3? 1 : typeSaved == 2? 3 : 2,
+    dni_medico: typeSaved == 3? null : dniMedico,
+    fecha_cierre: typeSaved == 2? time.getTimeNow().peruvianDateCurrent : caseVaccine.fecha_cierre,
+  });
+  await patientWithVaccine.update({
+    ...patientVaccine,
+    ...body,
+    estado: typeSaved == 2? 5 : body.estado,
+  });
+  // 1 -> Guarda
+  // 2 -> Cerrar
+  // 3 -> Liberar
+  const message = typeSaved == 3 ? 'Caso liberado' : typeSaved == 2 ? 'Caso cerrado exitosamente.' : 'Caso guardado correctamente.';
+  await req.flash('success', message);
+  return res.redirect('/dashboard/bandejas/vacuna');
+}
 
 module.exports = {
   getInbox,
   getMyInbox,
   getPatientCase,
   savePatientCase,
+  getInboxVaccine,
+  getMyInboxVaccine,
+  getPatientCaseVaccine,
+  savePatientCaseVaccine,
 };

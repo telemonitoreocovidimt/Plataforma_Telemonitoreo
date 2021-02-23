@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj" crossorigin="anonymous"></script>
+    <!-- Jquery 3.5.1 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- link fontawesome -->
+    <script src="https://kit.fontawesome.com/28012698d4.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/encuesta.css">
+    <!-- <script src="./js/script.js"></script> -->
+    <script src="./js/encuesta.js"></script>
+    <title>Formulario Inicial</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="hidden-xs col-md-1 col-lg-2">&nbsp;</div>
+            <div class="col-xs-12 col-md-10 col-lg-8 main-container">
+                <div class="col-md-12">
+					<div class="text-center main-title">
+						<h1>Formulario Seguimiento</h1>
+					</div>
+					<div class="main-description text-center"></div>
+				</div>
+
+                <div class="col-md-12 main-form">
+                    <form action="" class="row" id="form-poll">
+                        <div class="col-md-12 item-question" id="pregunta1">
+                            <div class="row">
+                                <!-- <div class="hidden-xs col-md-1 col-lg-1">&nbsp;</div> -->
+                                <div class="col-md-9 item-question-text">
+                                    <label>1. Hola (Nombre). ¿Has tenido alguna molestia hoy?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta1" id="pregunta1_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta1_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta1" id="pregunta1_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta1_NO">No</label>
+                                    </div>
+                                </div>
+                                <!-- <div class="hidden-xs col-md-1 col-lg-1">&nbsp;</div> -->
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 item-question">
+                            <div class="row">
+                                <div class="col-md-9 item-question-text">
+                                    <label>2. ¿Tienes alguna erupción en la piel (ronchas, puntos o enrojecimiento) fuera del sitio de aplicación de la vacuna?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta2" id="pregunta2_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta2_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta2" id="pregunta2_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta2_NO">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 item-question">
+                            <div class="row">
+                                <div class="col-md-9 item-question-text">
+                                    <label>3. ¿Tienes dolor, enrojecimiento, hinchazón o picazón en el sitio de aplicación?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta3" id="pregunta3_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta3_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta3" id="pregunta3_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta3_NO">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 item-question">
+                            <div class="row">
+                                <div class="col-md-9 item-question-text">
+                                    <label>4. ¿Tienes fiebre?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta4" id="pregunta4_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta4_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta4" id="pregunta4_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta4_NO">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 item-question">
+                            <div class="row">
+                                <div class="col-md-9 item-question-text">
+                                    <label>5. ¿Tienes malestar general, fatiga, dolor muscular, o dolor de articulaciones?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta5" id="pregunta5_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta5_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta5" id="pregunta5_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta5_NO">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 item-question">
+                            <div class="row">
+                                <div class="col-md-9 item-question-text">
+                                    <label>6. ¿Tienes dolor de cabeza?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta6" id="pregunta6_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta6_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta6" id="pregunta6_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta6_NO">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 item-question">
+                            <div class="row">
+                                <div class="col-md-9 item-question-text">
+                                    <label>7. ¿Te sientes confundido o con mucho sueño?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta7" id="pregunta7_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta7_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta7" id="pregunta7_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta7_NO">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 item-question">
+                            <div class="row">
+                                <div class="col-md-9 item-question-text">
+                                    <label>8. ¿Has tenido adormecimiento de brazos o piernas?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta8" id="pregunta8_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta8_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta8" id="pregunta8_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta8_NO">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 item-question">
+                            <div class="row">
+                                <div class="col-md-9 item-question-text">
+                                    <label>9. ¿Tienes diarrea, nauseas o vómitos?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta9" id="pregunta9_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta9_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta9" id="pregunta9_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta9_NO">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 item-question">
+                            <div class="row">
+                                <div class="col-md-9 item-question-text">
+                                    <label>10. ¿Tienes alguna otra molestia que quieras reportar?</label>
+                                </div>
+                                <div class="col-md-3 item-question-option">
+                                    <div>
+                                        <input type="radio" name="pregunta10" id="pregunta10_SI" class="form-check-input" value="SI" required>
+                                        <label class="form-check-label" for="pregunta10_SI">Si</label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="pregunta10" id="pregunta10_NO" class="form-check-input" value="NO" required>
+                                        <label class="form-check-label" for="pregunta10_NO">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group form-button">
+                                <button class="btn btnEnviar">Enviar</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    
+
+                    <div class="modal fade" id="modal-encuenta" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modal-encuentaLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="modal-encuentaLabel">Formulario Seguimiento</h5>
+                              <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                            </div>
+                            <div class="modal-body">
+                                Hola (Nombre). ¿Has tenido alguna molestia hoy? 
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Si</button>
+                              <button type="button" class="btn btn-primary">No</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                </div>
+            </div>
+            <div class="hidden-xs col-md-1 col-lg-2">&nbsp;</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -72,11 +72,18 @@ function addPatientTamizaje(params) {
   return new Promise(async (resolve, reject)=>{
     const {documento} = params;
     const patient = await getPatientContactByDNI(documento);
-
+    // console.log(params);
+    // resolve();
     params.estado = 1;
-    if (params.resultadoMuestra1 == null &&
-      params.resultadoMuestra2 == null &&
-      params.resultadoMuestra3 == null) {
+    if ((params.resultadoMuestra1 == null &&
+      params.fechaResultado1 == null &&
+      params.tipoMuestra1 == null) &&
+    (params.resultadoMuestra1 == null &&
+      params.fechaResultado1 == null &&
+      params.tipoMuestra1 == null) &&
+    (params.resultadoMuestra1 == null &&
+      params.fechaResultado1 == null &&
+      params.tipoMuestra1 == null)) {
       params.grupo = 'C';
     } else if (params.resultadoMuestra1 == 2 ||
       params.resultadoMuestra2 == 2||
@@ -94,16 +101,16 @@ function addPatientTamizaje(params) {
       } else {
         params.estado = patient.estado;
       }
-      console.log(params);
+      // console.log(params);
       await updatePatient(params);
     } else {
       params.factorRiesgo = null;
       params.pasoEncuestaInicial = false;
       params.flagActivo = true;
-      console.log(params);
+      // console.log(params);
       await addPatient(params);
     }
-    resolve();
+    resolve(true);
   });
 }
 

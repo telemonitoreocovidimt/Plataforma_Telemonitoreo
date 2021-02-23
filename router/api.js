@@ -1,7 +1,14 @@
 /* eslint 'max-len': ['error', {'code':100}] */
 const {Router} = require('express');
 const router = new Router();
-const {apiAcceptedTermsByUser, savePatient} = require('./../controller/api');
+const controllerApi = require('./../controller/api');
+const validation = require('./../lib/validation');
+const middlewareAuth = require('./../middleware/auth');
+const middlewareValidation = require('./../middleware/validation');
+const middlewareSanitizers = require('./../middleware/sanitizers');
+const middlewareResponse = require('./../middleware/response');
+
+
 const {getPatientsSurvey01,
   existsCasePatient,
   getPatientsSurvey02,
@@ -17,7 +24,10 @@ const {getPatientsSurvey01,
 const {makeMigrationsCustomer} = require('../model/migration');
 const {casosDia,
   encuestasIniciales,
-  encuestasDiarias} = require('../controller/report');
+  encuestasDiarias,
+  generateExcelPatientsTrayVaccine,
+  generateExcelgetPatientsVaccine,
+} = require('../controller/report');
 const {check} = require('express-validator');
 const {isValidDate} = require('../useful');
 const {listContactsByDNI,
@@ -388,24 +398,62 @@ const validations = [
   check('to').toDate(),
 ];
 
-router.get('/report/case/:from/:to', validations, casosDia);
+router.get('/report/vaccine/register', generateExcelgetPatientsVaccine);
+router.get('/report/vaccine/tray', generateExcelPatientsTrayVaccine);
 
 router.get('/report/initial_survey/:from/:to', validations, encuestasIniciales);
-
 router.get('/report/daily_survey/:from/:to', validations, encuestasDiarias);
-
+router.get('/report/case/:from/:to', validations, casosDia);
+router.get('/report/initial_survey/:from/:to', validations, encuestasIniciales);
+router.get('/report/daily_survey/:from/:to', validations, encuestasDiarias);
 router.get('/ajax/contact', getContact);
-
 router.put('/ajax/contact', takeContact);
-
-router.get('/ajax/:dni/acceptedTerms', apiAcceptedTermsByUser);
-
+router.get('/ajax/:dni/acceptedTerms', controllerApi.apiAcceptedTermsByUser);
 router.post('/tray/move/normal', movePatient);
+router.post('/ajax/patient/add', controllerApi.savePatient);
 
-router.post('/ajax/patient/add', savePatient);
+const validationsRegisterPatientVaccine = [
+  check('dni').custom(validation.isDNINotRequire),
+  check('email').custom(validation.isEmailNotRequired),
+  check('onSiteWork').isBoolean().toBoolean(),
+  check('phone').custom(validation.isPhone),
+  check('ce').custom(validation.isCENotRequired),
+];
+router.post('/ajax/vaccine/register',
+    validationsRegisterPatientVaccine,
+    middlewareSanitizers.sanitizeIdentificationDocument,
+    controllerApi.apiRegistrationPatientsWithVaccine);
+
+router.post('/vaccine/register',
+    middlewareAuth.validateTokenAPi,
+    validationsRegisterPatientVaccine,
+    middlewareSanitizers.sanitizeIdentificationDocument,
+    controllerApi.apiRegistrationPatientsWithVaccineValidated);
+
+const validationsValidationVaccinePatients = [
+  check('code').custom(validation.isCode),
+];
+router.post('/ajax/vaccine/validation',
+    validationsValidationVaccinePatients, controllerApi.apiValidationVaccinePatients);
+
+
+const validationsVaccinePatientSurvey = [
+  check('piel').isBoolean().toBoolean(),
+  check('dolor').isBoolean().toBoolean(),
+  check('fiebre').isBoolean().toBoolean(),
+  check('fatiga').isBoolean().toBoolean(),
+  check('cabeza').isBoolean().toBoolean(),
+  check('confusion').isBoolean().toBoolean(),
+  check('adormecimiento').isBoolean().toBoolean(),
+  check('diarrea').isBoolean().toBoolean(),
+  check('otros').isBoolean().toBoolean(),
+];
+
+router.post('/ajax/vaccine/survey', validationsVaccinePatientSurvey,
+    middlewareResponse.responseJson,
+    // middlewareAuth.isPatientVaccine,
+    middlewareValidation.patientVaccineHasPhoneRegistered,
+    middlewareValidation.patientVaccineHasSurveyForm,
+    controllerApi.apiVaccinePatientSurveyForm);
 
 module.exports = router;
-
-// http://localhost:3000/api/v1/report/case/2020-01-20/2020-12-20
-// http://localhost:3000/api/v1/report/initial_survey/2020-01-20/2020-12-20
-// http://localhost:3000/api/v1/report/daily_survey/2020-01-20/2020-12-20

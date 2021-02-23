@@ -1,0 +1,42 @@
+              <div class="card shadow mb-4">
+                <div class="card-header  bg-gradient-info py-3">
+                  <h6 class="m-0 font-weight-bold text-white">CASOS DE PACIENTES MEJORADOS ASIGNADOS</h6>
+                </div>
+                <div class="card-body">
+                  
+                  <div class="table-responsive">
+                 <table class="table table-hover table-bordered dataTable">
+        <thead>
+
+            <tr class="text-center tb-head">
+                <th scope="col">Nombre de Paciente</th>
+                <th scope="col">Día post vacuna</th>
+                <th scope="col">Tomó el caso ayer</th>
+                <th scope="col">Nota para el grupo</th>
+                <th scope="col">Atención Caso</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each myInboxTypeImproved }}
+                <tr class="border border-secondary">
+                    <td>{{ this.nombre }}</td>
+                    <td style="text-align:center;">{{ this.dias }}</td>
+                    <td style="text-align:center;">{{ this.had_patient_yesterday }}</td></td>
+                    <td style="text-align:center;">{{ this.nota_grupo }}</td></td>
+                    <td style="text-align:center;">
+                        <a href="/dashboard/caso/vacuna/{{ this.id }}" class="btn btn-success btn-icon-split">
+                            <span class="text">Tomar</span>
+                        </a>
+                    </td>
+                </tr>
+            {{/each}}
+        </tbody>
+
+    </table>
+        </div>
+                </div>
+              </div>
+
+
+
+    

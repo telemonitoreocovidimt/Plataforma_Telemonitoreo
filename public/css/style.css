@@ -1,0 +1,114 @@
+/* variables globales */
+:root{
+    --color-primary: #44546A;
+}
+
+/* main */
+.main-container{
+    border: 1px solid rgb(204, 204, 204);
+    background: rgb(245, 245, 245);
+    border-radius: 3px;
+    padding: 10px 20px;
+}
+
+.main-title{
+    font-size: 2.0em;
+    letter-spacing: -0.05em;
+    line-height: 1.3em;
+    font-weight: bold;
+    color: var(--color-primary);
+    margin: 20px 20px 0 20px;
+}
+
+.main-description{
+    margin: 10px 10px;
+    font-size: .9rem;
+}
+
+.form-group{
+    width: 85%;
+    margin: auto;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.form-group label{
+    font-size: .9rem;
+    margin-bottom: 3px;
+}
+
+.form-group input,
+.form-group select{
+    cursor: pointer;
+}
+
+.form-button{
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btnEnviar{
+    background: var(--color-primary);
+    color: white;
+    padding: .375rem 3rem;
+    margin: auto;
+}
+
+.message-error{
+    font-size: .75rem;
+    position: absolute;
+    top: 100%;
+}
+
+.form-group-radio{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.form-group-radio div{
+    margin: 0 20px;
+}
+
+.form-group-radio div input{
+    font-size: 1.2rem;
+}
+
+/* --- encuesta */
+
+.form-group-radio{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.form-group-radio div {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.form-group-radio input{
+    font-size: 1.4rem;
+    margin-top: 0;
+    margin-right: 5px;
+}
+
+@media (max-width: 767px){
+    .form-group{
+        width: 92%;
+    }
+
+    .form-group-radio{
+        margin-top: 10px;
+    }
+
+    .form-group-radio input{
+        margin-right: 6.5px;
+        font-size: 1.6rem !important;
+    }
+}
+
+
