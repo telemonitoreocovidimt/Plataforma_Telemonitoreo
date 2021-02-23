@@ -10,5 +10,7 @@ module.exports = {
     'NUMBER_DOCUMENT_NO_VALID': 'El número de documento de identidad no es valido.',
     'PATIENT_VACCINE_NO_EXIST': 'No existe ningun paciente con el número de documento enviado.',
     'CASE_FORM_NO_EXIST': 'No tiene encuesta diaria programada para hoy, intentelo mas tarde.',
+    'PATIENT_COVID_NO_EXIST': 'No existe ningun paciente con el número de documento enviado.',
+    'GROUP_PARAMETERS_HOSPITAL_NO_EXIST': 'El paciente no esta asociado a algun hospital que tenga habilitado los terminos y condiciones.',
   },
 };

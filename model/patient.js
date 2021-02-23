@@ -19,6 +19,22 @@ function getPatientContactByDNI(dni) {
 }
 
 /**
+ * Buscar información de un paciente por el DNI, si es null no existe el paciente.
+ * @param {String} numberDocument Número de Dni del pacietne que deseas ubicar.
+ * @return {Promise}
+ */
+function exist(numberDocument) {
+  return new Promise(async (resolve, reject)=>{
+    const client = await openConnection();
+    const query = `select * from ${PGSCHEMA}.dt_pacientes where dni = $1 limit 1`;
+    const params = [numberDocument];
+    const result = await client.query(query, params);
+    client.release(true);
+    resolve(result.rows[0]);
+  });
+}
+
+/**
  * Actualizar datos de un paciente
  * @function
  * @param {JSON} params Json con todos los datos para actualizar al paciente.
@@ -206,4 +222,5 @@ module.exports = {
   updatePatient,
   getPatientContactByDNI,
   addPatient,
+  exist,
 };

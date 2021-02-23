@@ -1,8 +1,11 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
-<script src='https://html2canvas.hertzen.com/dist/html2canvas.min.js'></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <style>
     form {
         padding: 4%;
+    }
+
+    #alert-error {
+        display:none;
     }
 
     @media screen and (min-width:1000px) {
@@ -14,192 +17,225 @@
         }
     }
 </style>
-{{#if userExists}}
-    {{#if acceptedTerms}}
-        <br>
+<script>
+    function sendTermResponse(form){
+        /*const checkbox = form.querySelector('#acceptTerms');
+        if (!checkbox.checked) {
+            alert('Es necesario que acepte los terminos y condiciones.');
+            event.preventDefault()
+        }*/
+    }
+</script>
+
+<!-- Modal -->
+<div class="modal fade" id="ConfirmModal" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalLabel" aria-hidden="true">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title" id="ConfirmModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        ...
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+    </div>
+    </div>
+</div>
+</div>
+
+
+<form onsubmit="sendTermResponse(this)"  method="POST" id="formTerms" >
+    
+    <div id="formTermsContainer">
         <center>
-            <h1>Usted ya respondio al formulario de las condiciones de uso, muchas gracias.</h1>
+            <h2>Atención mediante telemonitoreo COVID-19 – Consentimiento Informado</h2>
         </center>
-    {{else}}
-        <script>
-            function sendTermResponse(form){
-                /*const checkbox = form.querySelector('#acceptTerms');
-                if (!checkbox.checked) {
-                    alert('Es necesario que acepte los terminos y condiciones.');
-                    event.preventDefault()
-                }*/
-            }
-        </script>
-        <form onsubmit="sendTermResponse(this)"  method="POST" id="formTerms" >
-            <div id="formTermsContainer">
-                <center>
-                    <h2>Atención mediante telemonitoreo COVID-19 – Consentimiento Informado</h2>
-                </center>
-                <br>
-                <p align="justify">
-                    <font size="2" face="Tahoma, Arial, Verdana">
-                        El sistema de Telemonitoreo COVID-19 permite realizar un seguimiento de salud vía teléfono celular a adultos con diagnóstico o sospecha de diagnóstico de COVID-19 que regresaron a sus casas tras haber acudido a un establecimiento de salud.
-                    </font>
-                </p>
-                <br>
-                <p align="justify">
-                    <font size="2" face="Tahoma, Arial, Verdana">Para ellos, este sistema busca:</font>
-                </p>
-                <br>
-                <p align="justify">
-                    <font size="2" face="Tahoma, Arial, Verdana">
-                        <ul>
-                            <li>Detectar lo antes posible la posible aparición de complicaciones.</li>
-                            <li>Dar un seguimiento de salud continuo y de calidad sin tener que regresar diariamente al establecimiento de salud.</li>
-                            <li>Dar información útil y relevante relacionada con COVID-19.</li>
-                        </ul>
-                    </font>
-                </p>
-                <br>
-                <p align="justify"><b>
-                        <font face="Tahoma, Arial, Verdana">
-                            El sistema de atención por telemonitoreo NO REEMPLAZA a una atención médica en persona. Si su condición de salud empeora, deberá acudir a su establecimiento de salud más cercano.
-                        </font>
-                    </b></p>
-                <br>
-                <br>
-                <p align="justify"><h4>
-                        <font face="Tahoma, Arial, Verdana">¿Cómo funciona el telemonitoreo?</font>
-                    </h4></p>
-                <br>
-                <p align="justify">
-                    <font size="2" face="Tahoma, Arial, Verdana">
-                        En el celular recibirás preguntas iniciales sobre tu salud. Según tus respuestas, tu seguimiento continuará a través de (a) mensajes de texto diseñados por médicos, (b) llamadas telefónicas realizadas por médicos o (c) una combinación de mensajes y llamadas. Es recomendable responder todas las preguntas para poder ser seguido por este medio. De acuerdo a cómo vayan cambiando tus síntomas, el mecanismo de seguimiento podrá cambiar entre las opciones antes mencionadas.
-                    </font>
-                </p>
-                <br>
-                <p align="justify"><h4>
-                        <font face="Tahoma, Arial, Verdana">¿Cómo se usan mis datos personales?</font>
-                    </h4></p>
-                <br>
-                <p align="justify">
-                    <font size="2" face="Tahoma, Arial, Verdana">
-                        El sistema de Telemonitoreo COVID-19 protege tus datos personales según la Ley 29733 – Ley de Protección de Datos Personales, manejándolos de manera confidencial y segura. La información que proporciones se almacenará en bases de datos protegidas y estará a cargo del establecimiento de salud, gestionada por el sistema de telemonitoreo.
-    En caso lo autorice, la información obtenida a través de este seguimiento también podría utilizarse de manera anónima para fines de investigación sobre COVID-19.
-                    </font>
-                </p>
-                <br>
-                <br>
-                <p align="justify"><h4>
-                        <font face="Tahoma, Arial, Verdana">¿Y si tengo alguna queja o creo que estoy siendo tratado injustamente?</font>
-                    </h4></p>
-                <br>
-                <p align="justify">
-                    <font size="2" face="Tahoma, Arial, Verdana">
-                        Tu opinión y sentir es importante para nosotros. En cualquiera de estos casos, puedes comunicarte con:
-                    </font>
-                </p>
-                <br>
-                <p align="justify">
-                    <font size="2" face="Tahoma, Arial, Verdana">
-                        {{{contactDescription}}} </font>
-                </p>
-                <br>
-                <p align="justify">
-                    <font size="2" face="Tahoma, Arial, Verdana">
-                        <b>
-                            Recuerda que puedes decidir dejar de participar de este sistema de seguimiento en cualquier momento. En caso ya no desees participar del sistema de telemonitoreo, esto no cambiará la calidad de atención que recibas en tu establecimiento de salud.
-                        </b>
-                    </font>
-                </p>
-                <br>
-                <br>
-                <p align="justify"><b>
-                        <font face="Tahoma, Arial, Verdana" style="display: flex;align-items: center;flex-wrap: wrap;">
-                            Yo, <input class="form-control col-md-3 col-5" type="text" value="{{namePatient}}" name="name" style="margin: 0px 1%;"/> identificado con el número de 
-                            <select name="typeDocument" class="form-control col-md-2 col-3" style="margin: 0px 1%;">
-                                <option value="1" {{compare typeDocument 1 "selected"}}> DNI </option>
-                                <option value="2" {{compare typeDocument 2 "selected"}}> CE </option>
-                            </select>
-                            {{numberDocument}}, con fecha {{toDay}} confirmo haber leído la información brindada, ser consciente de mis derechos y autorizo de manera libre y voluntaria:
-                        </font>
-                    </b></p>
-                <p align="right">
-                    <br>
-                </p>
+        <br>
+        <p align="justify">
+            <font size="2" face="Tahoma, Arial, Verdana">
+                El sistema de Telemonitoreo COVID-19 permite realizar un seguimiento de salud vía teléfono celular a adultos con diagnóstico o sospecha de diagnóstico de COVID-19 que regresaron a sus casas tras haber acudido a un establecimiento de salud.
+            </font>
+        </p>
+        <br>
+        <p align="justify">
+            <font size="2" face="Tahoma, Arial, Verdana">Para ellos, este sistema busca:</font>
+        </p>
+        <br>
+        <p align="justify">
+            <font size="2" face="Tahoma, Arial, Verdana">
+                <ul>
+                    <li>Detectar lo antes posible la posible aparición de complicaciones.</li>
+                    <li>Dar un seguimiento de salud continuo y de calidad sin tener que regresar diariamente al establecimiento de salud.</li>
+                    <li>Dar información útil y relevante relacionada con COVID-19.</li>
+                </ul>
+            </font>
+        </p>
+        <br>
+        <p align="justify"><b>
+                <font face="Tahoma, Arial, Verdana">
+                    El sistema de atención por telemonitoreo NO REEMPLAZA a una atención médica en persona. Si su condición de salud empeora, deberá acudir a su establecimiento de salud más cercano.
+                </font>
+            </b></p>
+        <br>
+        <br>
+        <p align="justify"><h4>
+                <font face="Tahoma, Arial, Verdana">¿Cómo funciona el telemonitoreo?</font>
+            </h4></p>
+        <br>
+        <p align="justify">
+            <font size="2" face="Tahoma, Arial, Verdana">
+                En el celular recibirás preguntas iniciales sobre tu salud. Según tus respuestas, tu seguimiento continuará a través de (a) mensajes de texto diseñados por médicos, (b) llamadas telefónicas realizadas por médicos o (c) una combinación de mensajes y llamadas. Es recomendable responder todas las preguntas para poder ser seguido por este medio. De acuerdo a cómo vayan cambiando tus síntomas, el mecanismo de seguimiento podrá cambiar entre las opciones antes mencionadas.
+            </font>
+        </p>
+        <br>
+        <p align="justify"><h4>
+                <font face="Tahoma, Arial, Verdana">¿Cómo se usan mis datos personales?</font>
+            </h4></p>
+        <br>
+        <p align="justify">
+            <font size="2" face="Tahoma, Arial, Verdana">
+                El sistema de Telemonitoreo COVID-19 protege tus datos personales según la Ley 29733 – Ley de Protección de Datos Personales, manejándolos de manera confidencial y segura. La información que proporciones se almacenará en bases de datos protegidas y estará a cargo del establecimiento de salud, gestionada por el sistema de telemonitoreo.
+En caso lo autorice, la información obtenida a través de este seguimiento también podría utilizarse de manera anónima para fines de investigación sobre COVID-19.
+            </font>
+        </p>
+        <br>
+        <br>
+        <p align="justify"><h4>
+                <font face="Tahoma, Arial, Verdana">¿Y si tengo alguna queja o creo que estoy siendo tratado injustamente?</font>
+            </h4></p>
+        <br>
+        <p align="justify">
+            <font size="2" face="Tahoma, Arial, Verdana">
+                Tu opinión y sentir es importante para nosotros. En cualquiera de estos casos, puedes comunicarte con:
+            </font>
+        </p>
+        <br>
+        <p align="justify">
+            <font size="2" face="Tahoma, Arial, Verdana">
+                {{{contactDescription}}} </font>
+        </p>
+        <br>
+        <p align="justify">
+            <font size="2" face="Tahoma, Arial, Verdana">
+                <b>
+                    Recuerda que puedes decidir dejar de participar de este sistema de seguimiento en cualquier momento. En caso ya no desees participar del sistema de telemonitoreo, esto no cambiará la calidad de atención que recibas en tu establecimiento de salud.
+                </b>
+            </font>
+        </p>
+        <br>
+        <br>
+        <p align="justify"><b>
+                <font face="Tahoma, Arial, Verdana" style="display: flex;align-items: center;flex-wrap: wrap;">
+                    Yo, <input class="form-control col-md-3 col-5" type="text" value="{{namePatient}}" name="name" style="margin: 0px 1%;"/> identificado con el número de 
+                    <select name="typeDocument" class="form-control col-md-2 col-3" style="margin: 0px 1%;">
+                        <option value="1" {{compare typeDocument 1 "selected"}}> DNI </option>
+                        <option value="2" {{compare typeDocument 2 "selected"}}> CE </option>
+                    </select>
+                    {{numberDocument}}, con fecha {{currentDay}} confirmo haber leído la información brindada, ser consciente de mis derechos y autorizo de manera libre y voluntaria:
+                </font>
+            </b></p>
+        <p align="right">
+            <br>
+        </p>
 
-                <br>
-                <br>
-                {{!-- <p align="justify">
-                    <font size="2" face="Tahoma, Arial, Verdana">
-                        <b>
-                            Antes de seleccionar una alternativa, por favor asegúrate que tus nombres y apellidos, así como tu número de documento de identidad se encuentran escritos de manera correcta. Tu puedes modificarlos, de ser necesarios.
-                        </b>
-                    </font>
-                </p>
-                <br> --}}
+        <br>
+        <br>
+        {{!-- <p align="justify">
+            <font size="2" face="Tahoma, Arial, Verdana">
+                <b>
+                    Antes de seleccionar una alternativa, por favor asegúrate que tus nombres y apellidos, así como tu número de documento de identidad se encuentran escritos de manera correcta. Tu puedes modificarlos, de ser necesarios.
+                </b>
+            </font>
+        </p>
+        <br> --}}
 
-                <div>
-                    <div class="form-check col-12">
-                        {{!-- <input class="form-check-input" style="visibility: hidden;" type="checkbox" id="acceptTerms" name="acceptTerm"  style="transform: scale(1.6); margin-right:1.3%"> --}}
-                        {{!-- <label class="form-check-label" for="acceptTerms">He recibido información, soy consciente de mis derechos y autorizo de manera libre y voluntaria el seguimiento mediante telemonitoreo.</label> --}}
+        <div>
+            <div class="form-check col-12">
+                {{!-- <input class="form-check-input" style="visibility: hidden;" type="checkbox" id="acceptTerms" name="acceptTerm"  style="transform: scale(1.6); margin-right:1.3%"> --}}
+                {{!-- <label class="form-check-label" for="acceptTerms">He recibido información, soy consciente de mis derechos y autorizo de manera libre y voluntaria el seguimiento mediante telemonitoreo.</label> --}}
 
 
 
 
-                        <div class="form-check col-12">
-                            <input class="form-check-input" type="checkbox" id="acceptTerms" name="acceptTerm"  style="transform: scale(1.6); margin-right:1.3%" checked>
-                            <label class="form-check-label" for="acceptTerms">
-                                El seguimiento mediante telemonitoreo.
-                            </label>
-                        </div>
-                        <br>
-                        {{!-- <br> --}}
-                        <div class="form-check col-12">
-                            <input class="form-check-input" type="checkbox" id="acceptTermsData" name="acceptTermsData"  style="transform: scale(1.6); margin-right:1.3%" checked>
-                            <label class="form-check-label" for="acceptTermsData">
-                                El uso de mis datos personales de manera anónima para fines de investigación sobre COVID-19.
-                            </label>
-                        </div>
-                    </div>
+                <div class="form-check col-12">
+                    <input class="form-check-input" type="checkbox" id="acceptTerms" name="acceptTerm"  style="transform: scale(1.6); margin-right:1.3%" checked>
+                    <label class="form-check-label" for="acceptTerms">
+                        El seguimiento mediante telemonitoreo.
+                    </label>
+                </div>
+                <br>
+                {{!-- <br> --}}
+                <div class="form-check col-12">
+                    <input class="form-check-input" type="checkbox" id="acceptTermsData" name="acceptTermsData"  style="transform: scale(1.6); margin-right:1.3%" checked>
+                    <label class="form-check-label" for="acceptTermsData">
+                        El uso de mis datos personales de manera anónima para fines de investigación sobre COVID-19.
+                    </label>
                 </div>
             </div>
-            <br>
-            <center>
-                <input type="submit" value="Cancelar" class="btn btn-danger" onclick="document.querySelector('#acceptTerms').checked = false; document.querySelector('#acceptTermsData').checked = false">
-                <input type="button" value="Aceptar" class="btn btn-success" onclick="submitEventCustom(event)">
-                <script>
-                    function submitEventCustom(e) {
-                        e.preventDefault();
-                        const acceptTems = document.getElementById('acceptTerms').checked;
-                        const acceptTermsData = document.getElementById('acceptTermsData').checked;
+        </div>
+    </div>
+    <br>
+    <div class="alert alert-danger" role="alert" id="alert-error">
+    </div>
+    <center>
+        <input type="submit" value="Cancelar" class="btn btn-danger" onclick="document.querySelector('#acceptTerms').checked = false; document.querySelector('#acceptTermsData').checked = false">
+        <input type="button" value="Aceptar" class="btn btn-success" onclick="submitEventCustom(event)">
+        <script>
+            function submitEventCustom(e) {
+                e.preventDefault();
+                const acceptTems = document.getElementById('acceptTerms').checked;
+                const acceptTermsData = document.getElementById('acceptTermsData').checked;
 
-                        if ( acceptTems == false && acceptTermsData == true) {
-                            alert("Por favor, para poder utilizar sus datos con fines de investigación es necesario que acceda al seguimiento por la plataforma");
-                            return;
-                        }
+                if ( acceptTems == false && acceptTermsData == true) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Es necesario aceptar el seguimiento por plataforma',
+                        text: 'Por favor, para poder utilizar sus datos con fines de investigación es necesario que acceda al seguimiento por la plataforma.',
+                    })
+                    //const alertError = document.getElementById('alert-error');
+                    //alertError.innerText = 'Por favor, para poder utilizar sus datos con fines de investigación es necesario que acceda al seguimiento por la plataforma.';
+                    //alertError.style.display = 'block';
+                    return;
+                }
+                Swal.fire({
+                    title: '¿Confirmar el envío?',
+                    text: `Antes de seleccionar una alternativa, por favor asegúrate que tus nombres y apellidos, así como tu número de documento de identidad se encuentran escritos de manera correcta.
+                    Tu puedes modificarlos, de ser necesarios.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0f9645',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Aceptar'
+                    }).then((result) => {
+                    if (result.isConfirmed) {
                         document.getElementById('formTerms').submit();
                     }
-                </script>
-            </center>
-            <br>
-            <hr>
-            <br>
-            <p align="justify"><h4>
-                    <font face="Tahoma, Arial, Verdana">Revocatoria del consentimiento para uso de datos personales</font>
-                </h4></p>
-            <br>
-            <p align="justify">
-                <font size="2" face="Tahoma, Arial, Verdana">
-                    Usted puede decidir dejar de participar del sistema de telemonitoreo o uso de sus datos personales en cualquier momento. En caso desee invalidar el consentimiento brindado, por favor comuníquese con:
-                </font>
-            </p>
-            <br>
-            <p align="justify">
-                <font size="2" face="Tahoma, Arial, Verdana">
-                    {{{contactDescription}}} </font>
-            </p>
-            <br>
-        </form>
-    {{/if}}
-{{else}}
- <br>
- <center>
-     <h1>Por favor inténtelo más tarde.</h1>
- </center>
-{{/if}}
+                })
+                //document.getElementById('formTerms').submit();
+            }
+        </script>
+    </center>
+    <br>
+    <hr>
+    <br>
+    <p align="justify"><h4>
+            <font face="Tahoma, Arial, Verdana">Revocatoria del consentimiento para uso de datos personales</font>
+        </h4></p>
+    <br>
+    <p align="justify">
+        <font size="2" face="Tahoma, Arial, Verdana">
+            Usted puede decidir dejar de participar del sistema de telemonitoreo o uso de sus datos personales en cualquier momento. En caso desee invalidar el consentimiento brindado, por favor comuníquese con:
+        </font>
+    </p>
+    <br>
+    <p align="justify">
+        <font size="2" face="Tahoma, Arial, Verdana">
+            {{{contactDescription}}} </font>
+    </p>
+    <br>
+</form>

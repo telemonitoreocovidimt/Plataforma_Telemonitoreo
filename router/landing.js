@@ -1,19 +1,24 @@
 const {Router} = require('express');
 const router = new Router();
-const {
-  isUserParam,
-} = require('./../middleware/auth');
+const middlewareAuth = require('./../middleware/auth');
+const middlewareResponse = require('./../middleware/response');
+const middlewareValidation = require('./../middleware/validation');
+const middlewareSanitizers = require('./../middleware/sanitizers');
 const controllerLanding = require('./../controller/landing');
 
-router.get('/terms/:dni', isUserParam, controllerLanding.terms);
-router.post('/terms/:dni', isUserParam, controllerLanding.updateTerms);
-router.get('/terms/:dni/thanks', isUserParam, controllerLanding.thanksTerms);
-router.get('/terms/:dni/rejected/thanks',
-    isUserParam, controllerLanding.rejectedThanksTerms);
+router.get('/terms/:numberDocument', middlewareResponse.responseRender,
+    middlewareAuth.isPatientCovid,
+    middlewareSanitizers.sanitizeHospitalMasterParameters,
+    controllerLanding.terms);
 
-// router.get('/vaccine/validation', controllerLanding.validationVaccinePatients);
-// router.get('/vaccine/thanks', controllerLanding.ThanksVaccinePatients);
-// router.get('/vaccine/survey/:dni', hasCaseToDayPatientVaccineForm,
-//     controllerLanding.vaccinePatientSurvey);
+router.post('/terms/:numberDocument', middlewareResponse.responseRender,
+    middlewareAuth.isPatientCovid,
+    controllerLanding.updateTerms);
+
+router.get('/terms/:numberDocument/thanks', middlewareResponse.responseRender,
+    middlewareAuth.isPatientCovid,
+    controllerLanding.thanksTerms);
+// router.get('/terms/:dni/rejected/thanks',
+//     middlewareAuth.isUserParam, controllerLanding.rejectedThanksTerms);
 
 module.exports = router;

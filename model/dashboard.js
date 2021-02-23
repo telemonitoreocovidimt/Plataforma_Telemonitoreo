@@ -1542,7 +1542,7 @@ function countAllCaseVaccineToday(idHospital, pass=false, client=null) {
                       on cv.documento_identidad_paciente_vacuna = pv.documento_identidad
                       where pv.id_hospital = $2
                       and cv.estado in (1,2)
-                      and cv.fecha_creacion = $1;`;
+                      and cv.fecha_creacion::date = $1::date;`;
     const params = [peruvianDateInit, idHospital];
     const result = await client.query(query, params);
     if (!pass) {
@@ -1571,7 +1571,7 @@ function countAllCaseVaccineAttendedToday(idHospital, pass=false, client=null) {
                       on cv.documento_identidad_paciente_vacuna = pv.documento_identidad
                       where pv.id_hospital = $2
                       and cv.estado = 3
-                      and cv.fecha_creacion = $1;`;
+                      and cv.fecha_creacion::date = $1::date;`;
     const params = [peruvianDateInit, idHospital];
     const result = await client.query(query, params);
     if (!pass) {

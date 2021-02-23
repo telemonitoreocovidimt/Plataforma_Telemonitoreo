@@ -185,6 +185,7 @@ function getPatientsTrayVaccine() {
     cvf.piel,
     cvf.dolor,
     cvf.fiebre,
+    cvf.fatiga,
     cvf.cabeza,
     cvf.confusion,
     cvf.adormecimiento,

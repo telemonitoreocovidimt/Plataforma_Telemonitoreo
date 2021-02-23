@@ -26,4 +26,12 @@ module.exports = {
     'TRAY_SMS': 5,
     'TRAY_NORMAL_VACCINE': 6,
   },
+  'GROUP_PARAMETERS_HOSPITAL': {
+    'TERMS': 1,
+  },
+  'STATUS_TERMS': {
+    'NO_RESPONSE': 0,
+    'REFUSED': 1,
+    'ACCEPTED': 2,
+  },
 };

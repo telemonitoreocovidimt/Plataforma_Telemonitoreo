@@ -1,11 +1,8 @@
 /* eslint "max-len" : ["error", {"code":100}] */
 const {validateTerm, updateTermsPatient} = require('./../model/user');
-const {getMasterParameterHospital} = require('./../model/masterParameters');
 const {setName, setTypeDocument} = require('./../model/pacient');
-const {getTimeNow} = require('./../lib/time');
-
-const patientWithVaccineModel = require('../model/patientWithVaccine');
-
+const time = require('./../lib/time');
+const enums = require('./../res/enum');
 
 /**
  * Mostrar la vista de terminos y condiciones.
@@ -15,39 +12,42 @@ const patientWithVaccineModel = require('../model/patientWithVaccine');
  * @return {Object}
  */
 async function terms(req, res) {
-  const {peruvianDateInit} = getTimeNow();
-  const numberDocument = req.params.dni;
-  const userTemp = req.session.userTemp;
-  const namePatient = userTemp.nombre;
-  const typeDocument = userTemp.tipo_documento;
-  const toDay = peruvianDateInit.substring(0, 10);
-  const data = await validateTerm(numberDocument);
-  const result = data.result;
-  const userExists = result.length == 0? false: true;
-  let acceptedTerms = false;
-  if (userExists) {
-    // console.log(data);
-    // console.log(result);
-    acceptedTerms = result[0].acepto_terminos > 0;
+  const patient = req.session.patient;
+  if (patient == null) {
+    response.badRequest(res, MESSAGES.ERROR.PATIENT_COVID_NO_EXIST);
+    return;
   }
-  let contactDescription = await getMasterParameterHospital(1, userTemp.id_hospital);
-  if (contactDescription.result.length == 0) {
-    contactDescription = '';
+  const masterParameterHospital = req.session.masterParameterHospital;
+  if (masterParameterHospital == null) {
+    response.badRequest(res, MESSAGES.ERROR.GROUP_PARAMETERS_HOSPITAL_NO_EXIST);
+    return;
+  }
+  const {
+    dni: numberDocument,
+    nombre: namePatient,
+    tipo_documento: typeDocument,
+    acepto_terminos: acceptedTerms,
+  } = patient;
+  const {
+    descripcion: contactDescription,
+  } = masterParameterHospital;
+  const peruvianDateInit = time.getTimeNow().peruvianDateInit;
+  const currentDay = peruvianDateInit.substring(0, 10);
+  if (enums.STATUS_TERMS.NO_RESPONSE == acceptedTerms) {
+    res.render('terms', {
+      'layout': 'blank',
+      'title': 'Terminos y condiciones',
+      ...patient,
+      namePatient,
+      contactDescription,
+      numberDocument,
+      acceptedTerms,
+      currentDay,
+      typeDocument,
+    });
   } else {
-    contactDescription = contactDescription.result[0].descripcion;
+    res.redirect(`/landing/terms/${numberDocument}/thanks`);
   }
-  await req.useFlash(res);
-  return res.render('terms', {
-    'layout': 'blank',
-    'title': 'terms and conditions',
-    namePatient,
-    contactDescription,
-    numberDocument,
-    acceptedTerms,
-    userExists,
-    toDay,
-    typeDocument,
-  });
 }
 
 /**
@@ -58,43 +58,32 @@ async function terms(req, res) {
  * @return {Object}
  */
 async function thanksTerms(req, res) {
-  const userTemp = req.session.userTemp;
-  const numberDocument = userTemp.dni;
-  if (userTemp) {
-    const accetedTerms = userTemp.acepto_terminos == 2;
-    const accetedTermsData = userTemp.acepto_terminos_datos == 2;
-    const accetedTermsDate = userTemp.fecha_respuesta_terminos;
-    return res.render('successTerms', {
-      'layout': 'blank',
-      'title': 'terms and conditions',
-      ...userTemp,
-      accetedTerms,
-      accetedTermsData,
-      accetedTermsDate,
-      numberDocument,
-    });
-  } else {
-    return res.redirect(`/landing/terms/${userTemp.dni}`);
+  const patient = req.session.patient;
+  if (patient == null) {
+    response.badRequest(res, MESSAGES.ERROR.PATIENT_COVID_NO_EXIST);
+    return;
   }
-}
-
-/**
- * Mostrar la vista de agradecimiento para los terminos y condiciones.
- * @function
- * @param {Object} req request
- * @param {Object} res response
- * @return {Object}
- */
-async function rejectedThanksTerms(req, res) {
-  const userTemp = req.session.userTemp;
-  if (userTemp) {
+  const {
+    dni: numberDocument,
+    nombre: namePatient,
+    acepto_terminos: acceptedTerms,
+  } = patient;
+  if (acceptedTerms == enums.STATUS_TERMS.REFUSED) {
     return res.render('refuseTerms', {
       'layout': 'blank',
       'title': 'terms and conditions',
-      ...userTemp,
+      numberDocument,
+      namePatient,
+    });
+  } else if (acceptedTerms == enums.STATUS_TERMS.ACCEPTED) {
+    return res.render('successTerms', {
+      'layout': 'blank',
+      'title': 'terms and conditions',
+      numberDocument,
+      namePatient,
     });
   } else {
-    return res.redirect(`/landing/terms/${userTemp.dni}`);
+    return res.redirect(`/landing/terms/${numberDocument}`);
   }
 }
 
@@ -106,54 +95,32 @@ async function rejectedThanksTerms(req, res) {
  * @return {Object}
  */
 async function updateTerms(req, res) {
-  const userTemp = req.session.userTemp;
+  const patient = req.session.patient;
+  if (patient == null) {
+    response.badRequest(res, MESSAGES.ERROR.PATIENT_COVID_NO_EXIST);
+    return;
+  }
+  const {
+    dni: numberDocument,
+  } = patient;
   const body = req.body;
-  console.log('Datos del POST : ', body);
-  if (userTemp) {
-    await setName(body.name, userTemp.dni);
-    await setTypeDocument(body.typeDocument, userTemp.dni);
-    const acceptedTerm = body.acceptTerm == 'on'? 2 : 1;
-    const acceptedTermData = body.acceptTermsData == 'on' ? 2 : 1;
-    await updateTermsPatient(userTemp.dni, acceptedTerm, acceptedTermData);
-    console.log(acceptedTerm + ' ---------- ' +acceptedTermData);
-    if (acceptedTerm == 1 && acceptedTermData == 1) {
-      return res.redirect(`/landing/terms/${userTemp.dni}/rejected/thanks`);
-    } else if (acceptedTerm > 0 && acceptedTermData > 0) {
-      return res.redirect(`/landing/terms/${userTemp.dni}/thanks`);
-    } else {
-      return res.redirect(`/landing/terms/${userTemp.dni}`);
-    }
-  } else {
+  await setName(body.name, numberDocument);
+  await setTypeDocument(body.typeDocument, numberDocument);
+  const acceptedTerm = body.acceptTerm == 'on'? 2 : 1;
+  const acceptedTermData = body.acceptTermsData == 'on' ? 2 : 1;
+  await updateTermsPatient(numberDocument, acceptedTerm, acceptedTermData);
+  if (acceptedTerm == enums.STATUS_TERMS.NO_RESPONSE) {
     return res.redirect('back');
+  } else {
+    return res.redirect(`/landing/terms/${numberDocument}/thanks`);
   }
 };
-
-
-// Formularios para las vacunas.
-
-
-
-
-// app.post("/api/formulario", (req, res, next) => {
-//   console.log(req.body);
-//   res.json({status : true})
-// });
-
-// app.post("/api/Verificacion", (req, res, next) => {
-//   console.log(req.body);
-//   res.json({status : true})
-// });
-
-// app.post("/api/Seguimiento", (req, res, next) => {
-//   console.log(req.body);
-//   res.json({status : req.body})
-// });
 
 module.exports = {
   terms,
   thanksTerms,
   updateTerms,
-  rejectedThanksTerms,
+  // rejectedThanksTerms,
   // vaccinePatientRegistry,
   // validationVaccinePatients,
   // vaccinePatientSurvey,

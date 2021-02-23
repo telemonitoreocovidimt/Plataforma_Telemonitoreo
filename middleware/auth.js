@@ -4,6 +4,7 @@ const patientWithVaccine = require('../model/patientWithVaccine');
 const validation = require('./../lib/validation');
 const MESSAGES = require('./../res/string');
 const patientVaccineModel = require('./../model/patientWithVaccine');
+const patientModel = require('./../model/patient');
 const enums = require('./../res/enum');
 const response = require('./../lib/response');
 
@@ -145,6 +146,31 @@ async function isPatientVaccine(req, res, next) {
     next();
   });
 }
+/**
+ * Middleware para validar si es un paciente de seguimiento covid
+ * segun el parametro por url con su Documento de identidad.
+ * @param {Object} req Objeto request.
+ * @param {Object} res Objeto response.
+ * @param {Function} next Función para seguir la solicitud.
+ */
+async function isPatientCovid(req, res, next) {
+  // Obtener y validar paramtros
+  const numberDocument = req.params.numberDocument;
+  if (numberDocument == null || !validation.hasOnlyNumbers(numberDocument)) {
+    response.badRequest(res, MESSAGES.ERROR.NUMBER_DOCUMENT_NO_VALID);
+    return;
+  }
+  // Validar si existe el paciente
+  const patient = await patientModel.exist(numberDocument);
+  if (patient == null) {
+    response.badRequest(res, MESSAGES.ERROR.PATIENT_COVID_NO_EXIST);
+    return;
+  }
+  req.session.patient = patient;
+  req.session.save(()=>{
+    next();
+  });
+}
 
 /**
  * Validar si es un doctor o voluntario
@@ -270,6 +296,7 @@ module.exports = {
   isDoctorCOVID,
   isUserParam,
   isPatientVaccine,
+  isPatientCovid,
   validateExistsPatientWithVaccineCaseForm,
   validateExistsPatientWithVaccineCaseFormNotStrict,
   validateTokenAPi,

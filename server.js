@@ -104,7 +104,7 @@ app.use('/dashboard', require('./router/dashboard'));
 app.use('/admin', require('./router/admin'));
 
 // Rutas para reportes
-// app.use('/report', require('./router/report'));
+app.use('/report', require('./router/report'));
 
 // Rutas de apis
 app.use('/api/v1/', require('./router/api'));

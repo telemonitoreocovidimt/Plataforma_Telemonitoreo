@@ -11,6 +11,9 @@ const {dateToDateString, dateToTimeStampString} = require('./../useful');
 const {generatePDFTerms} = require('./../lib/pdf');
 const {getMasterParameterHospital} = require('./../model/masterParameters');
 const {getTimeNow} = require('./../lib/time');
+const time = require('./../lib/time');
+const enums = require('./../res/enum');
+
 /**
  *
  * @function
@@ -117,19 +120,37 @@ async function encuestasDiarias(req, res) {
  * @param {Response} res Respuesta HTTP
  */
 async function generarPDFTerminos(req, res) {
-  const {peruvianDateInit} = getTimeNow();
-  const userTemp = req.session.userTemp;
-  const numberDocument = req.params.dni;
-  const name = userTemp.nombre;
-  const typeDocument = userTemp.tipo_documento == 0 ? '' : userTemp.tipo_documento == 2? 'CE' : 'DNI';
-  const toDay = peruvianDateInit.substring(0, 10);
-  const acceptTermData = userTemp.acepto_terminos_datos == 2 ? true : false;
-  const acceptTerm = userTemp.acepto_terminos == 2 ? true : false;
-  let detailHospital = await getMasterParameterHospital(1, userTemp.id_hospital);
-  detailHospital = detailHospital.result[0].descripcion;
-  const data = await generatePDFTerms(detailHospital, name, typeDocument, numberDocument, toDay, acceptTermData, acceptTerm);
+  const patient = req.session.patient;
+  if (patient == null) {
+    response.badRequest(res, MESSAGES.ERROR.PATIENT_COVID_NO_EXIST);
+    return;
+  }
+  const masterParameterHospital = req.session.masterParameterHospital;
+  if (masterParameterHospital == null) {
+    response.badRequest(res, MESSAGES.ERROR.GROUP_PARAMETERS_HOSPITAL_NO_EXIST);
+    return;
+  }
+  const {
+    dni: numberDocument,
+    nombre: namePatient,
+    tipo_documento: typeDocument,
+    acepto_terminos: acceptedTerms,
+    acepto_terminos_datos: acceptedTermsData,
+  } = patient;
+  const {
+    descripcion: contactDescription,
+  } = masterParameterHospital;
+
+  const peruvianDateInit = time.getTimeNow().peruvianDateInit;
+  const typeDocumentDescription = typeDocument == enums.TYPE_DOCUMENT.CE ?
+    'CE' : typeDocument == enums.TYPE_DOCUMENT.DNI? 'DNI' : '';
+  const currentDay = peruvianDateInit.substring(0, 10);
+  const acceptTermDataBool = acceptedTermsData == enums.STATUS_TERMS.ACCEPTED ? true : false;
+  const acceptTermBool = acceptedTerms == enums.STATUS_TERMS.ACCEPTED ? true : false;
+  const pdfBuffer = await generatePDFTerms(contactDescription, namePatient, typeDocumentDescription,
+      numberDocument, currentDay, acceptTermDataBool, acceptTermBool);
   res.contentType('application/pdf');
-  return res.send(data);
+  return res.send(pdfBuffer);
 }
 
 
@@ -160,7 +181,6 @@ async function generateExcelPatientsTrayVaccine(req, res) {
  */
 async function generateExcelgetPatientsVaccine(req, res) {
   let listInitialSurvey = await getPatientsVaccine();
-
   if (!listInitialSurvey.length) {
     listInitialSurvey = [{'': 'No hay resultados, ingrese otro rango de fecha'}];
   }
