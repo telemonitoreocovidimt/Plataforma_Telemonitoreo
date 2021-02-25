@@ -1461,10 +1461,15 @@ function getPatientsVaccine(dniMedico, pass=false, client=null) {
     pv.nombre,
     ($1::date - pv.fecha_validacion::date)::int + 1 as dias,
     case when (select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cvt
-                  where cvt.documento_identidad_paciente_vacuna = cvt.documento_identidad_paciente_vacuna
+                  where cvt.documento_identidad_paciente_vacuna = cv.documento_identidad_paciente_vacuna
                   and cvt.fecha_creacion = ($1::date - '1 day'::interval)
                   and cvt.dni_medico = $2)::int > 0 then 'SI'
                   else 'NO' end as had_patient_yesterday,
+                  (select concat(mvt.nombre, ' ', mvt.apellido) from ${PGSCHEMA}.dt_casos_vacuna as cvt
+                    inner join ${PGSCHEMA}.dm_medicos_voluntarios as mvt
+                    on cvt.dni_medico = mvt.dni
+                    where cvt.documento_identidad_paciente_vacuna = cv.documento_identidad_paciente_vacuna
+                    and cvt.fecha_creacion = ($1::date - '1 day'::interval) limit 1)::text as nombre_doctor_ayer,
     pv.nota_grupo,
     pv.puntuacion,
     cv.tipo_caso
@@ -1474,6 +1479,8 @@ function getPatientsVaccine(dniMedico, pass=false, client=null) {
     where cv.fecha_creacion = $1 and cv.estado = 1
     order by pv.puntuacion desc, cv.id asc;`;
     const params = [peruvianDateInit, dniMedico];
+    console.log(query);
+    console.log(params);
     const result = await client.query(query, params);
     if (!pass) {
       client.release(true);
@@ -1501,10 +1508,15 @@ function getMyPatientsVaccine(dniMedico, pass=false, client=null) {
     pv.nombre,
     ($1::date - pv.fecha_validacion::date)::int + 1 as dias,
     case when (select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cvt
-                  where cvt.documento_identidad_paciente_vacuna = cvt.documento_identidad_paciente_vacuna
+                  where cvt.documento_identidad_paciente_vacuna = cv.documento_identidad_paciente_vacuna
                   and cvt.fecha_creacion = ($1::date - '1 day'::interval)
                   and cvt.dni_medico = $2)::int > 0 then 'SI'
                   else 'NO' end as had_patient_yesterday,
+    (select  concat(mvt.nombre, ' ', mvt.apellido)  from ${PGSCHEMA}.dt_casos_vacuna as cvt
+    inner join ${PGSCHEMA}.dm_medicos_voluntarios as mvt
+    on cvt.dni_medico = mvt.dni
+    where cvt.documento_identidad_paciente_vacuna = cv.documento_identidad_paciente_vacuna
+    and cvt.fecha_creacion = ($1::date - '1 day'::interval) limit 1)::text as nombre_doctor_ayer,
     pv.nota_grupo,
     pv.puntuacion,
     cv.tipo_caso
