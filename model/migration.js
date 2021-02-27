@@ -91,17 +91,6 @@ function makeMigrationsPatientVaccineForm() {
   return new Promise(async (resolve, reject)=> {
     const {peruvianDateInit} = getTimeNow();
     const client = await openConnection();
-    // const query = `insert into ${PGSCHEMA}.dt_casos_vacuna_form (
-    //   documento_identidad_paciente_vacuna,
-    //   fecha_creacion,
-    //   estado
-    // )
-    // select documento_identidad, $1::date, 1
-    // from ${PGSCHEMA}.dt_pacientes_vacuna
-    // where celular_validado > 0
-    // and estado in (5, 6)
-    // and (($1::date - fecha_respuesta_registro::date)::int < 7
-    // or mod(($1::date - fecha_respuesta_registro::date)::int, 7) = 0);`;
     const query = `insert into ${PGSCHEMA}.dt_casos_vacuna_form (
       documento_identidad_paciente_vacuna,
       fecha_creacion,
@@ -121,9 +110,40 @@ function makeMigrationsPatientVaccineForm() {
           where celular_validado > 0
           and estado in (5, 6)
           and (
-            ($1::date - fecha_respuesta_registro::date)::int < 7
-              or mod(($1::date - fecha_respuesta_registro::date)::int, 7) = 0)
+            ((
+              (($1::date - fecha_respuesta_registro::date)::int < 7
+                or mod(($1::date - fecha_respuesta_registro::date)::int, 7) = 0))
+              and ($1::date - fecha_respuesta_registro::date)::int < 21
+            ) or
+            ((
+              (($1::date - fecha_respuesta_registro::date)::int < 29
+                or mod((($1::date - fecha_respuesta_registro::date) - 21)::int, 7) = 0))
+              and ($1::date - fecha_respuesta_registro::date)::int > 21
+            )
+            )
       ) as p`;
+    // const query = `insert into ${PGSCHEMA}.dt_casos_vacuna_form (
+    //   documento_identidad_paciente_vacuna,
+    //   fecha_creacion,
+    //   estado
+    // )
+    // select distinct p.* from (
+    //     select documento_identidad, $1::date, 1 
+    //       from ${PGSCHEMA}.dt_pacientes_vacuna
+    //       where documento_identidad in (
+    //         select documento_identidad_paciente_vacuna
+    //         from ${PGSCHEMA}.dt_casos_vacuna_form
+    //         where puntuacion > 0 
+    //         and ($1::date - '1 day'::interval) = fecha_creacion::date)
+    //     union
+    //     select documento_identidad, $1::date, 1
+    //       from ${PGSCHEMA}.dt_pacientes_vacuna
+    //       where celular_validado > 0
+    //       and estado in (5, 6)
+    //       and (
+    //         ($1::date - fecha_respuesta_registro::date)::int < 7
+    //           or mod(($1::date - fecha_respuesta_registro::date)::int, 7) = 0)
+    //   ) as p`;
     const params = [peruvianDateInit];
     const result = await client.query(query, params);
     client.release(true);
