@@ -175,7 +175,7 @@ function excelTamizaje(excelPath, idHospital) {
       paramsPatient.resultadoMuestra3 = resultadoMuestra(row.resultadoMuestra3);
       paramsPatient.fechaResultado3 = row.fechaResultado3 == undefined ? null : row.fechaResultado3;
       paramsPatient.tipoMuestra3 = tipoPrueba(row.tipoMuestra3);
-      paramsPatient.sexo = row.sexo;
+      paramsPatient.sexo = resultadoSexo(row.sexo);
       paramsPatient.pais = row.pais;
       paramsPatient.provincia = row.provincia;
       paramsPatient.distrito = row.distrito;
@@ -227,7 +227,7 @@ function validateTamizaje(rows) {
     lengthRestriction(row.documento, 'D', 1, 16, rowNumber, error);
     isRequired(row.nombre, 'E', rowNumber, error);
     isRequired(row.edad, 'F', rowNumber, error);
-    isRequired(row.sexo, 'G', rowNumber, error);
+    parseSexo(row.sexo, 'G', rowNumber, error);
     isRequired(row.celular, 'H', rowNumber, error);
     isRequired(row.pais, 'I', rowNumber, error);
     isRequired(row.provincia, 'J', rowNumber, error);
@@ -444,6 +444,36 @@ function parseClasificacion(data, column, row, error) {
 }
 
 /**
+ * Validar si existe la datos en determinada celda y que tenga
+ * similitud con las palabras reservadas de "Sexo" de un paciente:
+ * - M
+ * - F
+ * - MASCULINO
+ * - FEMENINO
+ * @function
+ * @param {String} data Información de una celda
+ * @param {Number} column Indice de columna
+ * @param {Number} row Indice de fila
+ * @param {Array} error Array al cual se le agregaran los errores
+ */
+function parseSexo(data, column, row, error) {
+  if (
+    data !== null &&
+    data !== undefined &&
+    data.toUpperCase() !== 'M' &&
+    data.toUpperCase() !== 'F' &&
+    data.toUpperCase() !== 'MASCULINO' &&
+    data.toUpperCase() !== 'FEMENINO'
+  ) {
+    error.push(
+        column +
+        row +
+        ' solo puede tener los siguientes valores' +
+        ' F, M, MASCULINO y FEMENINO');
+  }
+}
+
+/**
  * @function
  * @param {String} apellidoPaterno Apellido paterno de una persona
  * @param {String} apellidoMaterno Apellido materno de una persona
@@ -495,6 +525,32 @@ function resultadoMuestra(resultado) {
   // else {
   //   result = 3;
   // }
+  return result;
+}
+
+/**
+ * Validar si el valor es de tipo "Sexo" solo pueda ser de 1 char.
+ * - F
+ * - M
+ * - MASCULINO
+ * - FEMENINO
+ * @function
+ * @param {String} resultado valor de celda de tipo "Sexo"
+ * @return {String}
+ */
+function resultadoSexo(resultado) {
+  let result = null;
+  if (resultado) {
+    if (resultado.toUpperCase() === 'M') {
+      result = 'M';
+    } else if (resultado.toUpperCase() === 'MASCULINO') {
+      result = 'M';
+    } else if (resultado.toUpperCase() === 'F') {
+      result = 'F';
+    } else if (resultado.toUpperCase() === 'FEMENINO') {
+      result = 'F';
+    }
+  }
   return result;
 }
 
