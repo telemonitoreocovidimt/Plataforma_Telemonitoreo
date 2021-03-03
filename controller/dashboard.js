@@ -208,9 +208,15 @@ async function getPatientCase(req, res) {
     const testReasons = data.results;
     client = data.client;
     // Estados posibles de pacientes
-    data = await getStatusPatients(true, client);
-    const statementsPatients = data.results;
-    client = data.client;
+    const statementsPatients = [
+      {'id': 1, 'descripcion': 'Bandeja Bot'},
+      {'id': 2, 'descripcion': 'Bandeja Normal'},
+      {'id': 3, 'descripcion': 'Bandeja Urgente'},
+      {'id': 4, 'descripcion': 'Alta'},
+    ];
+    // data = await getStatusPatients(true, client);
+    // const statementsPatients = data.results;
+    // client = data.client;
     // Casos previos
     data = await getPreviousCases(dniPaciente, true, client);
     const previousCases = data.results;
@@ -275,24 +281,6 @@ async function getPatientCase(req, res) {
       {'id': '3', 'descripcion': 'S'},
     ];
     await req.useFlash(res);
-    console.log('Contexto GET CASE: ', {
-      layout: 'main1',
-      contactsString,
-      treatmentsString,
-      monitoringStatus,
-      previousCases,
-      haveThisScheduledCase,
-      ...myCase,
-      // ...data,
-      statementsPatients,
-      groups,
-      factors,
-      testResults,
-      exitConditions,
-      comments,
-      condicionEgreso,
-      testReasons,
-    });
     myCase.can_plus_fv = false;
     if (myCase.sat_fv) {
       myCase.can_plus_fv = true;

@@ -27,7 +27,7 @@ async function get(document) {
 async function exist(document, typeDocument) {
   return new Promise(async (resolve, reject)=>{
     const client = await openConnection();
-    const query = `select * from ${PGSCHEMA}.dt_pacientes_vacuna
+    const query = `select *, fecha_respuesta_registro::date fecha_respuesta_registro_date from ${PGSCHEMA}.dt_pacientes_vacuna
                       where documento_identidad = $1 and tipo_documento = $2 limit 1;`;
     const params = [document, typeDocument];
     const result = await client.query(query, params);
@@ -83,6 +83,7 @@ async function update(data) {
       id_hospital: idHospital,
       fecha_respuesta_registro: fechaRespuestaRegistro,
       fill_document_esavi: fillDocumentESAVI,
+      fecha_respuesta_registro_2: fechaRespuestaRegistro2,
     } = data;
     const {peruvianDateCurrent: fechaUltimaModificacion} = time.getTimeNow();
     const client = await openConnection();
@@ -104,7 +105,8 @@ async function update(data) {
         puntuacion = $16,
         id_hospital = $17,
         fecha_respuesta_registro = $18,
-        fill_document_esavi = $19
+        fill_document_esavi = $19,
+        fecha_respuesta_registro_2 = $20
       where documento_identidad = $1;`;
     const params = [
       documentoIdentidad,
@@ -126,6 +128,7 @@ async function update(data) {
       idHospital,
       fechaRespuestaRegistro,
       fillDocumentESAVI,
+      fechaRespuestaRegistro2,
     ];
     const result = await client.query(query, params);
     client.release(true);

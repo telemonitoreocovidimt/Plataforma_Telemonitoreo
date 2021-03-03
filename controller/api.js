@@ -134,7 +134,6 @@ async function apiRegistrationPatientsWithVaccine(req, res) {
     onSiteWork,
     phone,
   } = req.body;
-
   // Validar si existe el paciente con vacuana con los mismos documentos de identidad
   let patient = await patientWithVaccineModel.exist(numberDocument, typeDocument);
   if (!patient) {
@@ -144,12 +143,8 @@ async function apiRegistrationPatientsWithVaccine(req, res) {
       'status': false,
     });
   }
-  if (patient.fecha_respuesta_registro != null) {
-    return res.status(200).json({
-      'message': 'Usted ya esta registrado y esta siendo monitoreado diariamente.',
-      'status': false,
-    });
-  }
+  const lastPhone = patient.celular;
+  const phoneValidated = patient.celular_validado;
   patient = {
     ...patient,
     'documento_identidad': numberDocument,
@@ -157,16 +152,37 @@ async function apiRegistrationPatientsWithVaccine(req, res) {
     'email': email == ''? null: email,
     'trabajo_presencial': onSiteWork ? 2: 1,
     'celular_validado': 1,
-    'fecha_respuesta_registro': time.getTimeNow().peruvianDateCurrent,
   };
+  if (patient.fecha_respuesta_registro != null) {
+    const daysPassed = (new Date(time.getTimeNow().peruvianDateInit) - patient.fecha_respuesta_registro_date) / (1000 * 3600 * 24);
+    if (daysPassed >= 14) {
+      if (patient.fecha_respuesta_registro_2 != null) {
+        return res.status(200).json({
+          'message': 'Usted ya esta registrado y esta siendo monitoreado diariamente.',
+          'status': false,
+        });
+      } else {
+        patient.fecha_respuesta_registro_2 = time.getTimeNow().peruvianDateCurrent;
+      }
+    } else {
+      return res.status(200).json({
+        'message': 'Usted ya esta registrado y esta siendo monitoreado diariamente.',
+        'status': false,
+      });
+    }
+  } else {
+    patient.fecha_respuesta_registro = time.getTimeNow().peruvianDateCurrent;
+  }
+  const codeGenerated = generate.generateCode();
+  if (lastPhone == phone && phoneValidated == 2) {
+    patient.celular_validado = 2;
+  } else {
+    // Enviar codigo de activación
+    const message = `Tu codigo de verificación es ${codeGenerated}.`;
+    movistar.sendSMS(phone, message);
+  }
   // Actualizar datos del paciente
   await patientWithVaccineModel.update(patient);
-
-  // Enviar codigo de activación
-  const codeGenerated = generate.generateCode();
-  const message = `Tu codigo de verificación es ${codeGenerated}.`;
-  movistar.sendSMS(phone, message);
-
   // Guardar sesión temporal
   req.session.tempPatientWithVaccineRegister = {
     ...patient,

@@ -109,16 +109,16 @@ function makeMigrationsPatientVaccineForm() {
           from ${PGSCHEMA}.dt_pacientes_vacuna
           where celular_validado > 0
           and estado in (5, 6)
-          and (
+          and  (
             ((
               (($1::date - fecha_respuesta_registro::date)::int < 7
                 or mod(($1::date - fecha_respuesta_registro::date)::int, 7) = 0))
-              and ($1::date - fecha_respuesta_registro::date)::int < 21
+              and fecha_respuesta_registro_2 is null
             ) or
             ((
-              (($1::date - fecha_respuesta_registro::date)::int < 29
-                or mod((($1::date - fecha_respuesta_registro::date) - 21)::int, 7) = 0))
-              and ($1::date - fecha_respuesta_registro::date)::int > 21
+              (($1::date - fecha_respuesta_registro_2::date)::int < 7
+                or mod(($1::date - fecha_respuesta_registro_2::date)::int, 7) = 0))
+              and not fecha_respuesta_registro_2 is null
             )
             )
       ) as p`;

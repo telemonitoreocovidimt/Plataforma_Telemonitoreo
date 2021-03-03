@@ -32,6 +32,9 @@ function validatePhoneOfPatientsWithVaccine(req, res) {
     return res.redirect('/vacuna');
   }
   const tempPatientWithVaccineRegister = req.session.tempPatientWithVaccineRegister;
+  if (tempPatientWithVaccineRegister.celular_validado == 2) {
+    return res.redirect('/vacuna/gracias');
+  }
   return res.render('validationVaccinePatients', {
     'layout': 'blankLanding',
     'title': 'Validar número de celular de pacientes con vacuna',
