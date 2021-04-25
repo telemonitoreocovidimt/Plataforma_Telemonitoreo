@@ -112,12 +112,18 @@ function makeMigrationsPatientVaccineForm() {
           and  (
             ((
               (($1::date - fecha_respuesta_registro::date)::int < 7
-                or mod(($1::date - fecha_respuesta_registro::date)::int, 7) = 0))
+                or (
+                  mod(($1::date - fecha_respuesta_registro::date)::int, 7) = 0 
+                  and ($1::date - fecha_respuesta_registro::date)::int < 22
+                )))
               and fecha_respuesta_registro_2 is null
             ) or
             ((
               (($1::date - fecha_respuesta_registro_2::date)::int < 7
-                or mod(($1::date - fecha_respuesta_registro_2::date)::int, 7) = 0))
+                or (
+                  mod(($1::date - fecha_respuesta_registro_2::date)::int, 7) = 0
+                  and ($1::date - fecha_respuesta_registro_2::date)::int < 22
+                )))
               and not fecha_respuesta_registro_2 is null
             )
             )
