@@ -29,7 +29,8 @@ function getRangeCase(from, to) {
                   case when cd.malestar_general = 1 then 'SI' else 'NO' end "Malestar general",
                   case when cd.cefalea = 1 then 'SI' else 'NO' end "Cefalea",
                   case when cd.nauseas = 1 then 'SI' else 'NO' end "Nauseas",
-                  case when cd.diarrea = 1 then 'SI' else 'NO' end "Diarre"
+                  case when cd.diarrea = 1 then 'SI' else 'NO' end "Diarre",
+                  p.nota_grupo
                   FROM ${PGSCHEMA}.dt_casos_dia cd
                   INNER JOIN ${PGSCHEMA}.dt_pacientes p ON cd.dni_paciente = p.dni
                   INNER JOIN ${PGSCHEMA}.dm_medicos_voluntarios mv ON cd.dni_medico = mv.dni
@@ -62,7 +63,8 @@ function getRangeDailySurvey(from, to) {
                     max(tos) tos,max(desaparicion_olfato) "Desaparición del olfato",
                     max(fiebre_ayer) "Tubo fiebre ayer",
                     max(fiebre_hoy) "Tienes fiebre hoy",
-                    max(diarrea) "Diarrea"
+                    max(diarrea) "Diarrea",
+                    nota_grupo "Nota de grupo"
                     from
                     (select dni_paciente,nombre,fecha_respuesta
                     ,case id_pregunta when 'dificultad_para_respirar' then respuesta_string else null end as dificultad_para_respirar
@@ -75,6 +77,7 @@ function getRangeDailySurvey(from, to) {
                     ,case id_pregunta when 'fiebre_ayer' then respuesta_string else null end as fiebre_ayer
                     ,case id_pregunta when 'fiebre_hoy' then respuesta_string else null end as fiebre_hoy
                     ,case id_pregunta when 'diarrea' then respuesta_string else null end as diarrea
+                    , p.nota_grupo
                     from ${PGSCHEMA}.dt_respuestas r
                     inner join ${PGSCHEMA}.dt_pacientes p on p.dni = r.dni_paciente
                     where r.fecha_respuesta::date >= $1::date and r.fecha_respuesta::date <= $2::date and
@@ -82,7 +85,7 @@ function getRangeDailySurvey(from, to) {
                     'dolor_garganta','tos','desaparicion_olfato','fiebre_ayer','fiebre_hoy','diarrea')
                     order by p.dni asc
                     ) fex
-                    group by dni_paciente, nombre
+                    group by dni_paciente, nombre, nota_grupo
                     order by max(fecha_respuesta) asc`;
     const params = [from, to];
     const result = await client.query(query, params);
@@ -161,7 +164,8 @@ function getPatientsVaccine() {
               fecha_ultima_modificacion::text fecha_ultima_modificacion,
               puntuacion,
               id_hospital,
-              fecha_respuesta_registro::text fecha_respuesta_registro
+              fecha_respuesta_registro::text fecha_respuesta_registro,
+              fecha_respuesta_registro_2::text fecha_respuesta_registro_segunda_vacuna
     from ${PGSCHEMA}.dt_pacientes_vacuna
     where celular_validado > 0;`;
     const params = [];

@@ -14,8 +14,10 @@ function login(email, password) {
     const query = `select * from ${PGSCHEMA}.dm_medicos_voluntarios as m 
                     where m.correo = $1 and m.password = $2`;
     const params = [email, password];
+    console.log('Run query login');
     const result = await client.query(query, params);
     client.release(true);
+    console.log('End query login');
     resolve(result.rows);
   });
 }

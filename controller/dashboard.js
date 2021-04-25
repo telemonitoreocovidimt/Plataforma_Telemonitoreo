@@ -321,6 +321,8 @@ async function savePatientCase(req, res) {
     return res.redirect('/dashboard/bandejas/covid');
   }
   const body = req.body;
+  console.log('Body : ');
+  console.log(body);
   // console.log('Contexto BODY POST CASE: ', body);
   // Parseo de input checkbox para continuar el tracking para el dia siguiente
   body.continue_tracking = body.continue_tracking === 'on' ? true : false;

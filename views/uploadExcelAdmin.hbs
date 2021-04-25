@@ -60,7 +60,7 @@
         const finish = document.getElementById("fecha_fin");
         const download = document.getElementById("downloadReportCases");
         if (init.value != '' && finish.value != '') {
-          download.href = `api/v1/report/case/${init.value}/${finish.value}`;
+          download.href = `/api/v1/report/case/${init.value}/${finish.value}`;
           download.download = true;
         } else {
           download.href = '#';
@@ -92,7 +92,7 @@
         const download = document.getElementById("downloadReportSurveyInit");
         
         if (init.value != '' && finish.value != '') {
-          download.href = `api/v1/report/initial_survey/${init.value}/${finish.value}`;
+          download.href = `/api/v1/report/initial_survey/${init.value}/${finish.value}`;
           download.download = true;
         } else {
           download.removeAttribute('download');
@@ -124,7 +124,7 @@
         const download = document.getElementById("downloadReportSurveyDaily");
         
         if (init.value != '' && finish.value != '') {
-          download.href = `api/v1/report/daily_survey/${init.value}/${finish.value}`
+          download.href = `/api/v1/report/daily_survey/${init.value}/${finish.value}`
           download.download = true;
         } else {
           download.removeAttribute('download');

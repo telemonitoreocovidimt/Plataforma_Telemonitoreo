@@ -20,6 +20,7 @@ function getPatientsAlert(dniMedico, pass=false, client=null) {
     const query = `select c.id as id_case, p.dni, p.nombre, p.sexo, p.edad,p.grupo, 
           case when p.factor_riesgo then 'SI' else 'NO' end as factor_riesgo,
           concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
+          p.fecha_inicio_sintomas::date::text as fecha_inicio_sintomas,
           extract(day from ($1::date - p.fecha_creacion)) + 1 as tiempo_seguimiento,
           case when p.fecha_prueba_1 is null then '-' else concat(extract(day from p.fecha_prueba_1), '-', extract(month from p.fecha_prueba_1), '-', extract(year from p.fecha_prueba_1)) end as fecha_prueba_1,
           case when p.resultado_prueba_1 is null then '-' when p.resultado_prueba_1 = 3 then 'Positivo' when p.resultado_prueba_1 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_1, 
@@ -73,6 +74,7 @@ function getPatients(dniMedico, pass=false, client=null) {
     }
     const query = `select c.id as id_case, p.dni, p.nombre, p.sexo, p.edad, p.grupo, 
             concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
+            p.fecha_inicio_sintomas::date::text as fecha_inicio_sintomas,
             case when p.factor_riesgo then 'SI' else 'NO' end as factor_riesgo,
             extract(day from ($1::date - p.fecha_creacion)) + 1 as tiempo_seguimiento,
             case when p.fecha_prueba_1 is null then '-' else concat(extract(day from p.fecha_prueba_1), '-', extract(month from p.fecha_prueba_1), '-', extract(year from p.fecha_prueba_1)) end as fecha_prueba_1,
@@ -128,6 +130,7 @@ function getMyPatients(dniMedico, pass=false, client=null) {
     const query = `select c.id as id_case, p.dni, p.nombre, p.sexo, p.edad, p.grupo, 
             case when p.factor_riesgo then 'SI' else 'NO' end as factor_riesgo,
             concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
+            p.fecha_inicio_sintomas::date::text as fecha_inicio_sintomas,
             extract(day from ($1::date - p.fecha_creacion)) + 1 as tiempo_seguimiento,
             case when p.fecha_prueba_1 is null then '-' else concat(extract(day from p.fecha_prueba_1), '-', extract(month from p.fecha_prueba_1), '-', extract(year from p.fecha_prueba_1)) end as fecha_prueba_1,
             case when p.resultado_prueba_1 is null then '-' when p.resultado_prueba_1 = 3 then 'Positivo' when p.resultado_prueba_1 = 2 then 'Reactivo' else 'Negativo' end as resultado_prueba_1, 
@@ -399,8 +402,8 @@ function getCase(id_case, pass = false, client = null) {
     if (!client) {
       client = await openConnection();
     }
-    const query = `select TO_CHAR($1::date,'YYYY/MM/DD') as to_day , p.*, p.nombre , p.celular, p.fijo, p.grupo, p.factor_riesgo, p.estado , 
-          concat(extract(year from p.fecha_inicio_sintomas), '-', LPAD(extract(month from p.fecha_inicio_sintomas)::text, 2, '0'), '-',LPAD(extract(day from p.fecha_inicio_sintomas)::text, 2, '0')) as fecha_inicio_sintomas,
+    const query = `select TO_CHAR($1::date,'YYYY/MM/DD') as to_day , p.*, p.nombre , p.celular, p.fijo, p.grupo, p.factor_riesgo, p.estado,
+          p.fecha_inicio_sintomas::date::text,
           (extract(day from ($1::date - p.fecha_creacion)) + 1)::int as tiempo_seguimiento, 
           (select pr.resultado from ${PGSCHEMA}.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'rapida' order by pr.fecha_resultado_prueba desc limit 1) as resultado_rapido,
           (select pr.resultado from ${PGSCHEMA}.dt_pruebas as pr where pr.dni_paciente = p.dni and pr.tipo = 'molecular' order by pr.fecha_resultado_prueba desc limit 1) as resultado_molecular,
@@ -1456,10 +1459,11 @@ function getPatientsVaccine(dniMedico, pass=false, client=null) {
     if (!client) {
       client = await openConnection();
     }
+    // ($1::date - pv.fecha_validacion::date)::int + 1 as dias,
     const query = `select
     cv.id,
     pv.nombre,
-    ($1::date - pv.fecha_validacion::date)::int + 1 as dias,
+    ($1::date - pv.fecha_respuesta_registro::date)::int + 1 as dias,
     case when (select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cvt
                   where cvt.documento_identidad_paciente_vacuna = cv.documento_identidad_paciente_vacuna
                   and cvt.fecha_creacion = ($1::date - '1 day'::interval)
@@ -1503,10 +1507,11 @@ function getMyPatientsVaccine(dniMedico, pass=false, client=null) {
     if (!client) {
       client = await openConnection();
     }
+    // ($1::date - pv.fecha_validacion::date)::int + 1 as dias,
     const query = `select
     cv.id,
     pv.nombre,
-    ($1::date - pv.fecha_validacion::date)::int + 1 as dias,
+    ($1::date - pv.fecha_respuesta_registro::date)::int + 1 as dias,
     case when (select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cvt
                   where cvt.documento_identidad_paciente_vacuna = cv.documento_identidad_paciente_vacuna
                   and cvt.fecha_creacion = ($1::date - '1 day'::interval)
