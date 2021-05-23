@@ -1554,6 +1554,8 @@ function countAllCaseVaccineToday(idHospital, pass=false, client=null) {
     if (!client) {
       client = await openConnection();
     }
+    console.log("idHospital");
+    console.log(idHospital);
     const query = `select count(*) from ${PGSCHEMA}.dt_casos_vacuna as cv
                       inner join ${PGSCHEMA}.dt_pacientes_vacuna as pv
                       on cv.documento_identidad_paciente_vacuna = pv.documento_identidad

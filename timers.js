@@ -34,6 +34,8 @@ async function sendSMSPatientWithVaccine() {
       'url': `${URL_BASE}/vacuna/encuesta/${formCase.documento_identidad}`,
     };
   }));
+  console.log("Total de mensajes a enviar.");
+  console.log(listRecipent.length)
   movistar.sendManySMS(listRecipent, ` ¡Hola! Te saludamos del Programa de Monitoreo post-vacunación contra COVID-19.
   Para completar el seguimiento de hoy, por favor ingresa al siguiente enlace:`);
 }

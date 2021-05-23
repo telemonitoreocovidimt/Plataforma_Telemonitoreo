@@ -1,100 +1,120 @@
-<div class="col-md-6" >
-  <form action="/admin/vacuna/paciente/agregar" method="post" enctype="multipart/form-data">
-    <h2>Agregar paciente vacunado</h2>
-    <br>
-    <div class="form-row">
-        <div class="form-group col-md-12">
-            <label for="nombre">Nombre y appellido:</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" required placeholder="Nombre y appellido">
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-4">
-            <label for="tipo_documento">Tipo de documento:</label>
-            <select class="form-control" id="tipo_documento" name="tipo_documento" required onchange="onChangeTypeDocuemnt(event)">
-                {{#each typeDocumentOptions}}
-                <option value="{{ this.id }}" {{compare this.id ../tipo_documento "selected"}}>
-                    {{ this.descripcion }}</option>
-                {{/each}}
-            </select>
-        </div>
-        <script>
-            function onChangeTypeDocuemnt(e) {
-                debugger;
-                const selectTypeDocument = e.target;
-                const inputNumberDocument = document.getElementById('documento_identidad');
-                const typeDocument = selectTypeDocument.value;
-                switch(typeDocument) {
-                    case '1':
-                        inputNumberDocument.pattern='[0-9]{8}';
-                        inputNumberDocument.maxlength='8';
-                        break;
-                    case '2':
-                        inputNumberDocument.pattern='[0-9]{9}';
-                        inputNumberDocument.maxlength='9';
-                        break;
-                }
-            }
-        </script>
-        <div class="form-group col-md-8">
-            <label for="documento_identidad">Documento:</label>
-            <input type="text" class="form-control" required name="documento_identidad" id="documento_identidad" maxlength="8" pattern="[0-9]{8}"/>
-        </div>
-        <div class="form-group col-md-6">
-            <label for="cargo">Cargo:</label>
-            <input type="text" class="form-control" name="cargo" id="cargo"/>
-        </div>
-        <div class="form-group col-md-6">
-            <label for="hospital">Hospital:</label>
-            <input type="text" class="form-control" name="hospital" id="hospital"/>
-        </div>
-        <div class="form-group col-md-6">
-            <label for="condicion">Condición:</label>
-            <input type="text" class="form-control" name="condicion" id="condicion"/>
-        </div>
-        <div class="form-group col-md-6">
-            <label for="trabajo_presencial">¿Hace trabajo presencial?</label>    
-            <div class="form-group custom-switch">
-                <input type="checkbox" class="custom-control-input" name="trabajo_presencial" id="trabajo_presencial"
-                    data-toggle="toggle" data-on="Si"
-                    data-off="No" data-onstyle="success" data-offstyle="danger" />
+<div class="col-md-6">
+    <form action="/admin/vacuna/paciente/agregar" method="post" enctype="multipart/form-data">
+        <h2>Agregar paciente vacunado</h2>
+        <br>
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <label for="nombre">Nombre y appellido:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" required
+                    placeholder="Nombre y appellido">
             </div>
         </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-4">
-            <label for="fecha_validacion">Fecha de registro:</label>
-            <input class="form-control" type="date" id="fecha_validacion"
-                name="fecha_validacion" required />
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="tipo_documento">Tipo de documento:</label>
+                <select class="form-control" id="tipo_documento" name="tipo_documento" required
+                    onchange="onChangeTypeDocuemnt(event)">
+                    {{#each typeDocumentOptions}}
+                    <option value="{{ this.id }}" {{compare this.id ../tipo_documento "selected" }}>
+                        {{ this.descripcion }}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <script>
+                function onChangeTypeDocuemnt(e) {
+                    debugger;
+                    const selectTypeDocument = e.target;
+                    const inputNumberDocument = document.getElementById('documento_identidad');
+                    const typeDocument = selectTypeDocument.value;
+                    switch (typeDocument) {
+                        case '1':
+                            inputNumberDocument.pattern = '[0-9]{8}';
+                            inputNumberDocument.maxlength = '8';
+                            break;
+                        case '2':
+                            inputNumberDocument.pattern = '[0-9]{9}';
+                            inputNumberDocument.maxlength = '9';
+                            break;
+                    }
+                }
+            </script>
+            <div class="form-group col-md-8">
+                <label for="documento_identidad">Documento:</label>
+                <input type="text" class="form-control" required name="documento_identidad" id="documento_identidad"
+                    maxlength="8" pattern="[0-9]{8}" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="cargo">Cargo:</label>
+                <input type="text" class="form-control" name="cargo" id="cargo" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="hospital">Hospital:</label>
+                <input type="text" class="form-control" name="hospital" id="hospital" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="condicion">Condición:</label>
+                <input type="text" class="form-control" name="condicion" id="condicion" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="trabajo_presencial">¿Hace trabajo presencial?</label>
+                <div class="form-group custom-switch">
+                    <input type="checkbox" class="custom-control-input" name="trabajo_presencial"
+                        id="trabajo_presencial" data-toggle="toggle" data-on="Si" data-off="No" data-onstyle="success"
+                        data-offstyle="danger" />
+                </div>
+            </div>
         </div>
-        <div class="form-group col-md-8">
-            <label for="celular">Celular:</label>
-            <input type="text" class="form-control" name="celular" id="celular" maxlength="9" pattern="9[0-9]{8}" required />
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="fecha_validacion">Fecha de registro:</label>
+                <input class="form-control" type="date" id="fecha_validacion" name="fecha_validacion" required />
+            </div>
+            <div class="form-group col-md-8">
+                <label for="celular">Celular:</label>
+                <input type="text" class="form-control" name="celular" id="celular" maxlength="9" pattern="9[0-9]{8}"
+                    required />
+            </div>
+            <div class="form-group col-md-12">
+                <label for="email">Correo electrónico:</label>
+                <input type="email" class="form-control" name="email" id="email" />
+            </div>
         </div>
-        <div class="form-group col-md-12">
-            <label for="email">Correo electrónico:</label>
-            <input type="email" class="form-control" name="email" id="email"/>
+        <div class="form-row">
+            <div class="form-group col-md-12 d-flex justify-content-center">
+                <input type="submit" value="Guardar" class="btn btn-primary">
+            </div>
         </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-12 d-flex justify-content-center">
-            <input type="submit" value="Guardar" class="btn btn-primary">
-        </div>
-    </div>
-  </form>
+    </form>
 </div>
 
-<div class="col-md-6" >
-  <div class="col-md-6" >
-    <h2>Reportes registros vacuna</h2>
-    <br>
-    <a href="/api/v1/report/vaccine/register" class="btn btn-primary" id="downloadReportSurveyDaily" download>Descargar</a>
-  </div>
-  <br>
-  <br>
-  <div class="col-md-6" >
-    <h2>Reportes respuestas formulario vacuna</h2>
-    <br>
-    <a href="/api/v1/report/vaccine/tray" class="btn btn-primary" id="downloadReportSurveyDaily" download>Descargar</a>
-  </div>
+<div class="col-md-6">
+    <style>
+        #reports > div, form{
+            margin-bottom: 5%;
+        }
+        form > input{
+            margin-top: 10px;
+        }
+    </style>
+    <div class="container row col-12" id="reports">
+        <form action="/api/v1/excel/patients/vaccinated" method="post" enctype="multipart/form-data" class="col-md-12">
+            <h2 class="form-title">Carga de pacientes vacunados</h2>
+            <div class="custom-file">
+                <input type="file" class="custom-file-input" id="inputGroupFile01" name="filePatientsVaccinated"
+                    aria-describedby="inputGroupFileAddon01">
+                <label class="custom-file-label" for="inputGroupFile01">Seleccionar archivo</label>
+            </div>
+            <input type="submit" value="Subir" class="btn btn-primary">
+        </form>
+        <div class="col-md-12">
+            <h2>Reportes registros vacuna</h2>
+            <a href="/api/v1/report/vaccine/register" class="btn btn-primary" id="downloadReportSurveyDaily"
+                download>Descargar</a>
+        </div>
+        <div class="col-md-12">
+            <h2>Reportes respuestas formulario vacuna</h2>
+            <a href="/api/v1/report/vaccine/tray" class="btn btn-primary" id="downloadReportSurveyDaily"
+                download>Descargar</a>
+        </div>
+    </div>
 </div>

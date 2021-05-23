@@ -1,4 +1,6 @@
 /* eslint max-len: ["error", { "code": 150 }] */
+const fs = require('fs');
+
 const expressValidator = require('express-validator');
 const {validateTerm, updatePatient} = require('./../model/user');
 const {addPatientAdmission} = require('./../model/loadExcel');
@@ -6,16 +8,21 @@ const {patientChangeStatus} = require('./../model/api');
 const {getPatient} = require('./../model/account');
 const migration = require('./../model/migration');
 const {getTimeNow} = require('./../lib/time');
-
 const patientWithVaccineModel = require('../model/patientWithVaccine');
 const casePatientWithVaccineFormModel = require('../model/casePatientWithVaccineForm');
 const casePatientWithVaccineModel = require('../model/casePatientWithVaccine');
-
 const enums = require('./../res/enum');
-
 const generate = require('./../lib/generate');
 const movistar = require('./../lib/movistar');
 const time = require('./../lib/time');
+
+const apiController = require('./ApiController');
+
+/** Builder **/
+const ExcelPagetDirector = require('../DesignPattern/Builder/ExcelResume/ExcelResumeDirector.js');
+const VaccinatedPatientsExceltConcreteBuilder = require('../DesignPattern/Builder/ExcelResume/VaccinatedPatientsExcelResumeConcreteBuilder.js');
+const { throws } = require('assert');
+
 
 /**
  * Api para validar si un usuario acepto los terminos
@@ -84,35 +91,6 @@ async function savePatient(req, res) {
     'success': true,
   });
 }
-
-/**
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
 
 /**
  * Api para validar registro de pacientes con vacuna.
@@ -428,6 +406,41 @@ async function apiRegistrationPatientsWithVaccineValidated(req, res) {
   });
 };
 
+/**
+ * Api para validar si un usuario acepto los terminos
+ * @function
+ * @param {Object} req request
+ * @param {Object} res response
+ * @return {Object}
+ */
+ async function apiUploadVaccinatedPatients (req, res) {
+  const filePatientsVaccinated = req.files.filePatientsVaccinated;
+  if (filePatientsVaccinated) {
+    const vaccinatedPatientsExceltConcreteBuilder = new VaccinatedPatientsExceltConcreteBuilder(filePatientsVaccinated);
+    const excelPagetDirector = new ExcelPagetDirector(vaccinatedPatientsExceltConcreteBuilder);
+    await excelPagetDirector.build();
+    const excelResume = excelPagetDirector.getExcelResume();
+    
+    if (excelResume.size > 0) {
+      try {
+        if (excelResume.pages[0].exceptions.length > 0) {
+          throw excelResume.pages[0].exceptions.join('<br/>');
+        }
+        const countRows = await apiController.uploadVaccinatedPatients(excelResume.pages[0].data);
+        await req.flash('success', `Se insertaron ${countRows} registros.`);
+      } catch (error) {
+        await req.flash('danger', error);
+      }
+    } else {
+      await req.flash('danger', 'No hay registros en el excel.');
+    }
+  } else {
+    await req.flash('danger', 'No hay archivo.');
+  }
+  return res.redirect('back');
+}
+
+
 module.exports = {
   apiAcceptedTermsByUser,
   savePatient,
@@ -435,4 +448,5 @@ module.exports = {
   apiValidationVaccinePatients,
   apiVaccinePatientSurveyForm,
   apiRegistrationPatientsWithVaccineValidated,
+  apiUploadVaccinatedPatients,
 };

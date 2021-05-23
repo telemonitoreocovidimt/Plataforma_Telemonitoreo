@@ -6,6 +6,7 @@ const session = require('express-session');
 const PGSession = require('connect-pg-simple')(session);
 const morgan = require('morgan');
 const formData = require('express-form-data');
+const expressFileUpload = require('express-fileupload');
 const exphbs = require('express-handlebars');
 const {pool} = require('./model/connection');
 const {PORT, PGSCHEMA, KEY_SECRET} = require('./config');
@@ -26,6 +27,8 @@ app.use(formData.parse(options));
 app.use(formData.format());
 app.use(formData.stream());
 app.use(formData.union());
+
+
 
 // Agregando middleware para acceder al req.body
 app.use(express.urlencoded({'extended': false}));

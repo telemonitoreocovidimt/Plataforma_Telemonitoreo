@@ -456,4 +456,9 @@ router.post('/ajax/vaccine/survey', validationsVaccinePatientSurvey,
     middlewareValidation.patientVaccineHasSurveyForm,
     controllerApi.apiVaccinePatientSurveyForm);
 
+router.post('/excel/patients/vaccinated',
+    middlewareResponse.responseRender,
+    middlewareAuth.isAdminVaccine,
+    controllerApi.apiUploadVaccinatedPatients);
+
 module.exports = router;
