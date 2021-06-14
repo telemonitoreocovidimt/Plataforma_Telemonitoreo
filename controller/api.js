@@ -420,15 +420,17 @@ async function apiRegistrationPatientsWithVaccineValidated(req, res) {
     const excelPagetDirector = new ExcelPagetDirector(vaccinatedPatientsExceltConcreteBuilder);
     await excelPagetDirector.build();
     const excelResume = excelPagetDirector.getExcelResume();
-    
     if (excelResume.size > 0) {
       try {
         if (excelResume.pages[0].exceptions.length > 0) {
           throw excelResume.pages[0].exceptions.join('<br/>');
         }
         const countRows = await apiController.uploadVaccinatedPatients(excelResume.pages[0].data);
+        console.log('success', `Se insertaron ${countRows} registros.`);
         await req.flash('success', `Se insertaron ${countRows} registros.`);
       } catch (error) {
+        console.log('Error');
+        console.log(error);
         await req.flash('danger', error);
       }
     } else {

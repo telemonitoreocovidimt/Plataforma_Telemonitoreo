@@ -1,6 +1,7 @@
 const {excelAdmision, excelTamizaje} = require('./../service/loadExcel');
 const patientWithVaccine = require('./../model/patientWithVaccine');
 const time = require('./../lib/time');
+const adminController = require('./AdminController');
 
 /**
  * Mostrar la vista de carga de archivos Covid
@@ -87,6 +88,10 @@ async function addPacientVaccine(req, res) {
  */
 async function subirAdmision(req, res) {
   if (req.body.fileAdmision) {
+    console.log("Admision");
+    const comment = req.body.comment;
+    const tray = req.body.tray == 'on';
+    const sent_today = req.body.sent_today == 'on';
     let errorHTML = '';
     const idHospital = req.session.user.id_hospital;
     const result = await excelAdmision(req.body.fileAdmision.path, idHospital)
@@ -96,7 +101,15 @@ async function subirAdmision(req, res) {
           });
         });
     if (result) {
-      await req.flash('success', result);
+      console.log(result.documentNumberList);
+      await adminController.updateGroupNote(result.documentNumberList, comment);
+      if (tray) {
+        await adminController.sentToDashboard(result.documentNumberList);
+        if (sent_today) {
+          await adminController.forceSentToDashboard(result.documentNumberList,)
+        }
+      }
+      await req.flash('success', result.message);
     } else {
       await req.flash('danger', errorHTML);
     }
@@ -115,6 +128,10 @@ async function subirAdmision(req, res) {
  */
 async function subirTamizaje(req, res) {
   if (req.body.fileTamizaje) {
+    console.log("Tamizaje");
+    const comment = req.body.comment;
+    const tray = req.body.tray == 'on';
+    const sent_today = req.body.sent_today == 'on';
     const idHospital = req.session.user.id_hospital;
     let errorHTML = '';
     const result = await excelTamizaje(req.body.fileTamizaje.path, idHospital)
@@ -124,7 +141,15 @@ async function subirTamizaje(req, res) {
           });
         });
     if (result) {
-      await req.flash('success', result);
+      console.log(result.documentNumberList);
+      await adminController.updateGroupNote(result.documentNumberList, comment);
+      if (tray) {
+        await adminController.sentToDashboard(result.documentNumberList);
+        if (sent_today) {
+          await adminController.forceSentToDashboard(result.documentNumberList,)
+        }
+      }
+      await req.flash('success', result.message);
     } else {
       await req.flash('danger', errorHTML);
     }

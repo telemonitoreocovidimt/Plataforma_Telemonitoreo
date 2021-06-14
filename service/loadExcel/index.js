@@ -42,11 +42,14 @@ function excelAdmision(excelPath, idHospital) {
     if (error.length !== 0) {
       return reject(error);
     }
+    const documentNumberList = [];
     const {peruvianDateCurrent} = getTimeNow();
     await Promise.all(rows.map(async (row, i)=>{
       const rowNumber = i + 2;
       const params = [];
-      params.push(numeroDocumento(row.documento));
+      const documentNumber = numeroDocumento(row.documento);
+      documentNumberList.push(documentNumber);
+      params.push(documentNumber);
       params.push(row.numero);
       params.push(concatApellidosNombrePG(
           row.apellidoPaterno, row.apellidoMaterno, row.nombre));
@@ -72,7 +75,10 @@ function excelAdmision(excelPath, idHospital) {
     if (error.length !== 0) {
       return reject(error);
     }
-    return resolve('La Carga fue exitosa.');
+    return resolve({
+      'message': 'La Carga fue exitosa.',
+      'documentNumberList': documentNumberList
+    });
   });
 }
 
@@ -152,12 +158,15 @@ function excelTamizaje(excelPath, idHospital) {
     if (error.length !== 0) {
       return reject(error);
     }
+    const documentNumberList = [];
     const {peruvianDateCurrent} = getTimeNow();
     await Promise.all(rows.map(async (row, i)=>{
       const rowNumber = i + 2;
       const paramsPatient = {};
       const paramsHistory = [];
-      paramsPatient.documento = numeroDocumento(row.documento);
+      const documentNumber = numeroDocumento(row.documento);
+      documentNumberList.push(documentNumber);
+      paramsPatient.documento = documentNumber;
       paramsPatient.numero = row.numero;
       paramsPatient.nombre = row.nombre;
       paramsPatient.fecha = row.fecha;
@@ -205,7 +214,11 @@ function excelTamizaje(excelPath, idHospital) {
     if (error.length !== 0) {
       return reject(error);
     }
-    return resolve('La Carga fue exitosa.');
+    return resolve({
+      'message': 'La Carga fue exitosa.',
+      'documentNumberList': documentNumberList
+    });
+    
   });
 }
 
