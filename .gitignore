@@ -7,3 +7,6 @@ package-lock.json
 nodemon.json
 .env
 .*
+*.pdf
+*.sql
+*.xlsx
