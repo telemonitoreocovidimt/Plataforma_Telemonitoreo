@@ -10,3 +10,6 @@ nodemon.json
 *.pdf
 *.sql
 *.xlsx
+exportData/
+database/
+excels/
