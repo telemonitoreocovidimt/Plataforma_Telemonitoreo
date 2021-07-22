@@ -8,8 +8,6 @@ nodemon.json
 .env
 .*
 *.pdf
-*.sql
 *.xlsx
 exportData/
-database/
 excels/
