@@ -4,7 +4,9 @@ const {subirAdmision,
   subirTamizaje,
   adminVaccine,
   uploadExcel,
-  addPacientVaccine} = require('./../controller/admin');
+  searchPatient,
+  updatePatient,
+  updateCase, addPacientVaccine} = require('./../controller/admin');
 const {isAdmin, isAdminCovid, isAdminVaccine} = require('./../middleware/auth');
 
 
@@ -24,6 +26,12 @@ router.get('/vacuna', isAdminVaccine, adminVaccine);
 router.post('/vacuna/paciente/agregar', isAdminVaccine, addPacientVaccine);
 
 router.get('/covid', isAdminCovid, uploadExcel);
+
+router.get('/covid/patient', isAdminCovid, searchPatient);
+
+router.post('/covid/case/:caseId', isAdminCovid, updateCase);
+
+router.post('/covid/patient/:patientId', isAdminCovid, updatePatient);
 
 router.post('/respuesta-admision', isAdmin, subirAdmision);
 

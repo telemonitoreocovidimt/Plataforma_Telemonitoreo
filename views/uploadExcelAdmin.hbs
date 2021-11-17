@@ -1,4 +1,397 @@
+
+<script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<style>
+
+
+.showModal {
+    display: block;
+    padding: 15px;
+    background: rgba(0,0,0,0.4);
+}
+
+</style>
+
+<!-- Modal -->
+<div class="modal bd-example-modal-lg" id="patientListModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Pacientes:</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModel(document.getElementById('patientListModal'))">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="wrapper"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModel(document.getElementById('patientListModal'))">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+
+<!-- Modal -->
+<div class="modal bd-example-modal-lg" id="patientDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">DATOS PACIENTE</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModel(document.getElementById('patientDetailModal'))">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="col-md-12">         
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="patientName">Paciente:</label>
+                                <input type="text" class="form-control" id="patientName" name="nombre" placeholder="Nombre"
+                                    disabled>
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="patientDni">DNI:</label>
+                                <input type="text" class="form-control" name="dni" id="patientDni" disabled />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="patientPhone">Teléfono</label>
+                                <input type="text" class="form-control" name="celular" id="patientPhone" disabled />
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="edad">Edad:</label>
+                                <input type="text" class="form-control" name="edad" id="patientAge" disabled />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="patientTrays">Tipo Bandeja:</label>
+                                <select class="form-control" id="patientTrays" name="estado">
+                                    <option value="">Seleccionar</option>
+                                    {{#each patientTrays }}
+                                    <option value="{{ this.id }}">
+                                        {{ this.descripcion }}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-2">
+                                <label for="patientGroups">Grupo:</label>
+                                <select class="form-control" id="patientGroups" name="grupo" disabled>
+                                    <option value="">Seleccionar</option>
+                                    {{#each patientGroups}}
+                                    <option value="{{ this.id }}">{{ this.id }}
+                                    </option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="patientFactors">Factor de riesgo:</label>
+                                <select class="form-control" id="patientFactors" name="factor_riesgo" disabled>
+                                    <option value="">Seleccionar</option>
+                                    {{#each patientFactors}}
+                                      <option value="{{ this.id }}">
+                                          {{ this.descripcion }}</option>
+                                    {{/each}}
+                                </select>
+
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="patientIsDoctor">¿Es personal de salud?</label>
+                                <select class="form-control" id="patientIsDoctor" name="is_doctor" disabled>
+                                    <option value="">Seleccionar</option>
+                                    {{#each patientFactors}}
+                                      <option value="{{ this.id }}">
+                                          {{ this.descripcion }}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="updatePatientButton">Actualizar</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModel(document.getElementById('patientDetailModal'))">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+
+
+<!-- Modal -->
+<div class="modal bd-example-modal-lg" id="CaseDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">CASO</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModel(document.getElementById('CaseDetailModal'))">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="col-md-12">         
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="patientName">Paciente:</label>
+                                <input type="text" class="form-control" id="casePatientName" name="nombre" placeholder="Nombre"
+                                    disabled>
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-md-3">
+                                <label for="caseDate">Fecha:</label>
+                                <input type="date" class="form-control" name="caseDate" id="caseDate" disabled />
+                            </div>
+
+
+                            <div class="form-group col-md-6">
+                                <label for="caseIsMedico">Medico:</label>
+                                <select class="form-control" id="caseIsMedico" name="estado">
+                                    <option value="">Seleccionar</option>
+                                    {{#each medicals }}
+                                    <option value="{{ this.dni }}">
+                                        {{ this.name }}</option>
+                                    {{/each}}
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-3">
+                                <label for="statusCaseList">Estado :</label>
+                                <select class="form-control" id="statusCaseList" name="grupo">
+                                    {{#each statusCase}}
+                                    <option value="{{ this.id }}">{{ this.description }}
+                                    </option>
+                                    {{/each}}
+                                </select>
+                            </div>
+                        </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="updateCaseButon">Actualizar</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModel(document.getElementById('CaseDetailModal'))">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+
+<script>
+
+  function openModel(modelElem) {
+    modelElem.classList.add("showModal");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModel(modelElem) {
+    modelElem.classList.remove("showModal");
+    document.body.style.overflow = "auto";
+  }
+
+  function openPatientDetailModel(patient) {
+    //closeModel(document.getElementById('patientListModal'));
+    openModel(document.getElementById('patientDetailModal'));
+    
+    document.getElementById("patientName").value = patient.nombre;
+    document.getElementById("patientDni").value = patient.dni;
+    document.getElementById("patientPhone").value = patient.celular;
+    document.getElementById("patientAge").value = patient.edad;
+    document.getElementById("patientTrays").value = patient.estado;
+    document.getElementById("patientGroups").value = patient.grupo;
+    document.getElementById("patientFactors").value = patient.factor_riesgo;
+    document.getElementById("patientIsDoctor").value = patient.is_doctor;
+    document.getElementById("updatePatientButton").onclick = function(event) {
+      updatePatient(patient.dni, {
+        "estado": document.getElementById("patientTrays").value
+      })
+    };
+  }
+
+  function openCaseDetailModel(patient) {
+    //closeModel(document.getElementById('patientListModal'));
+    openModel(document.getElementById('CaseDetailModal'));
+    document.getElementById("casePatientName").value = patient.nombre;
+    document.getElementById("caseIsMedico").value = patient.dni_medico == null ? "": patient.dni_medico;
+    document.getElementById("statusCaseList").value = patient.estado_caso;
+    document.getElementById("caseDate").value = patient.fecha_caso.split("T")[0];
+    document.getElementById("updateCaseButon").onclick = function(event) {
+      console.log((patient, {
+        "estado_caso": document.getElementById("statusCaseList").value,
+        "dni_medico": document.getElementById("caseIsMedico").value
+      }));
+      let dni_medico = document.getElementById("caseIsMedico").value;
+      updateCase(patient.id, {
+        "estado_caso": document.getElementById("statusCaseList").value,
+        "dni_medico": dni_medico == "" ? null : dni_medico
+      })
+    }
+  }
+
+  let gridPatients = null;
+  let dataPatients = [];
+  window.onload = function () {
+    gridPatients = new gridjs.Grid({
+      columns: [
+        "DNI",
+        'Nombre',
+        'Bandeja',
+        'Grupo',
+        'Es Doctor?',
+        { 
+          name: 'Accion',
+          formatter: (cell, row) => {
+            return gridjs.h('button', {
+              className: 'py-2 mb-4 px-4 border rounded-md text-white bg-primary',
+              onClick: () => {
+                openPatientDetailModel(dataPatients[cell]);
+              }
+            }, 'Editar');
+          }
+        },{ 
+          name: 'Caso',
+          formatter: (cell, row) => {
+            if (cell) {
+              return gridjs.h('button', {
+                className: 'py-2 mb-4 px-4 border rounded-md text-white bg-primary',
+                onClick: () => {
+                  openCaseDetailModel(dataPatients[row._cells[5].data])
+                }
+              }, 'Ver caso');
+            } else {
+              return "";
+            }
+          }
+        }
+      ],
+      data: [],
+      search: true,
+      sort: true,
+      pagination: true,
+      fixedHeader: true,
+    }).render(document.getElementById("wrapper"));
+  };
+  
+  async function searchPatient(query) {
+    Swal.fire({imageUrl: 'https://i.pinimg.com/originals/7e/fc/2c/7efc2cb33ee4eb9d7625ca1eca702506.gif', title: "Espere un momento."})
+    const res = await fetch(`covid/patient?query=${query}`);
+    const data = await res.json();
+    dataPatients = data;
+    const rows = data.map((patient, index)=> {
+      return [patient.dni, patient.nombre, patient.descripcion, patient.grupo, patient.is_doctor ? "Si" : "No", index, patient.fecha_caso != null]
+    });
+    gridPatients.updateConfig({
+      search: true,
+      data: rows,
+      sort: true,
+      pagination: true,
+      fixedHeader: true,
+    }).forceRender();
+    let modalElem = document.getElementById("patientListModal");
+    Swal.close()
+    openModel(modalElem);
+  }
+
+  async function updateCase(caseId, body) {
+    Swal.fire({imageUrl: 'https://i.pinimg.com/originals/7e/fc/2c/7efc2cb33ee4eb9d7625ca1eca702506.gif', title: "Espere un momento."})
+    const res = await fetch(`covid/case/${caseId}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    }).catch((err)=>{
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo actualizar el caso',
+        text: err,
+      });
+    });
+    const data = await res.json().catch((err)=>{
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo actualizar el caso',
+        text: err,
+      });
+    });
+    if (data) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Caso actualizado',
+        text: "",
+      });
+      console.log("Data updateCase");
+      console.log(data);
+      closeModel(document.getElementById('CaseDetailModal'));
+    }
+  }
+
+  async function updatePatient(patientDni, body) {
+    Swal.fire({imageUrl: 'https://i.pinimg.com/originals/7e/fc/2c/7efc2cb33ee4eb9d7625ca1eca702506.gif', title: "Espere un momento."})
+    const res = await fetch(`covid/patient/${patientDni}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    }).catch((err)=>{
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo actualizar al paciente.',
+        text: err,
+      });
+    });
+    const data = await res.json().catch((err)=>{
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo actualizar al paciente.',
+        text: err,
+      });
+    });
+    if (data) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Paciente actualizado',
+        text: "",
+      });
+      console.log("Data updatePatient");
+      console.log(data);
+      closeModel(document.getElementById('patientDetailModal'));
+    }
+  }
+</script>
+
+
 <div class="col-md-6" >
+
+  <h3>Actualizar bandeja de casos</h3>
+
+  <div class="form-row">
+      <div class="form-group col-md-12" style="flex-wrap: wrap;">
+            <label for="searcher_patients">Buscar paciente:</label>
+            <input id="searcher_patients" class="form-control col-12" type="text" placeholder="Ingrese el nombre o documento de un paciente"/>
+            <br/>
+            <button class="btn btn-primary" onclick="searchPatient(document.getElementById('searcher_patients').value)">Buscar</button>
+      </div>
+  </div>
+
+<br><br>
 
 
   <form action="/admin/respuesta-admision" method="post" enctype="multipart/form-data">
@@ -236,6 +629,10 @@
   <br>
   <br> 
 </div>
+
+ <!-- Bootstrap core JavaScript-->
+  <script src="/vendor/jquery/jquery.min.js"></script>
+  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 {{!-- // http://localhost:3000/api/v1/report/case/2020-01-20/2020-12-20
 // http://localhost:3000/api/v1/report/initial_survey/2020-01-20/2020-12-20

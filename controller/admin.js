@@ -2,6 +2,9 @@ const {excelAdmision, excelTamizaje} = require('./../service/loadExcel');
 const patientWithVaccine = require('./../model/patientWithVaccine');
 const time = require('./../lib/time');
 const adminController = require('./AdminController');
+const patientController = require('./PatientController');
+const doctorController = require('./DoctorController');
+const caseController = require('./CaseController');
 
 /**
  * Mostrar la vista de carga de archivos Covid
@@ -12,12 +15,88 @@ const adminController = require('./AdminController');
  */
 async function uploadExcel(req, res) {
   await req.useFlash(res);
+  const patientTrays = [
+    {'id': 1, 'descripcion': 'Bandeja Bot'},
+    {'id': 2, 'descripcion': 'Bandeja Normal'},
+    {'id': 3, 'descripcion': 'Bandeja Urgente'},
+    {'id': 4, 'descripcion': 'Alta'},
+  ];
+  const patientGroups = [
+    {'id': 'A', 'descripcion': 'A'},
+    {'id': 'B', 'descripcion': 'B'},
+    {'id': 'C', 'descripcion': 'C'},
+  ];
+  const patientFactors = [
+    {'id': true, 'descripcion': 'SI'},
+    {'id': false, 'descripcion': 'NO'},
+  ];
+  const medicals = await doctorController.getDoctorList(req.session.user.id_hospital);
+  const statusCase = [
+    { "id": 1, "description": "En cola"},
+    { "id": 2, "description": "Atención en progreso"},
+    { "id": 3, "description": "Atención completado"},
+    { "id": 4, "description": "Cerrado por el sistema"}
+  ]
   return res.render('uploadExcelAdmin', {
     'layout': 'case',
     'islogin': true,
     'nombre': req.session.user.email,
     'nombre_hospital': req.session.user.nombre_hospital,
     'title': 'Upload excels',
+    patientFactors,
+    patientGroups,
+    patientTrays,
+    statusCase,
+    medicals
+  });
+}
+
+
+/**
+ * Obtener pacientes con casos
+ * @function
+ * @param {Object} req request
+ * @param {Object} res response
+ * @return {Object}
+ */
+ async function searchPatient(req, res) {
+  let {query} = req.query;
+  query = query == undefined ? '' : query;
+  const {id_hospital} = req.session.user;
+  const patients = await patientController.searchPatient(query, id_hospital);
+  return res.json(patients);
+}
+
+/**
+ * Actualizar caso
+ * @function
+ * @param {Object} req request
+ * @param {Object} res response
+ * @return {Object}
+ */
+ async function updateCase(req, res) {
+  let {caseId} = req.params;
+  const body = req.body;
+  const rowCount = await caseController.update(caseId, body);
+  return res.json({
+    "rowCount": rowCount
+  });
+}
+
+
+/**
+ * Actualizar paciente
+ * @function
+ * @param {Object} req request
+ * @param {Object} res response
+ * @return {Object}
+ */
+ async function updatePatient(req, res) {
+  let {patientId} = req.params;
+  const body = req.body;
+  const rowCount = await patientController.update(patientId, body);
+  return res.json({
+    "rowCount": rowCount
   });
 }
 
@@ -69,7 +148,6 @@ async function addPacientVaccine(req, res) {
     id_hospital: req.session.user.id_hospital,
     fecha_respuesta_registro: body.fecha_validacion,
   };
-  console.log(patient);
   const rowCount = await patientWithVaccine.insert(patient);
   if (rowCount > 0) {
     await req.flash('success', 'Paciente creado.');
@@ -101,7 +179,6 @@ async function subirAdmision(req, res) {
           });
         });
     if (result) {
-      console.log(result.documentNumberList);
       await adminController.updateGroupNote(result.documentNumberList, comment);
       if (tray) {
         await adminController.sentToDashboard(result.documentNumberList);
@@ -141,7 +218,6 @@ async function subirTamizaje(req, res) {
           });
         });
     if (result) {
-      console.log(result.documentNumberList);
       await adminController.updateGroupNote(result.documentNumberList, comment);
       if (tray) {
         await adminController.sentToDashboard(result.documentNumberList);
@@ -164,5 +240,8 @@ module.exports = {
   subirTamizaje,
   uploadExcel,
   adminVaccine,
+  searchPatient,
   addPacientVaccine,
+  updateCase,
+  updatePatient,
 };
