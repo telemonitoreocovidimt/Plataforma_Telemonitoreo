@@ -48,7 +48,7 @@ Igualmente podra visualizar estadisticas del sistema de casos atendidos por otro
 
 Cuando un medico toma un caso podra visualizar una vista web que mustra los datos de del paciente.
 
-![](/source/atencion01.PNG)
+![](/source/atencion01.png)
 ![](/source/atencion02.PNG)
 ![](/source/atencion03.PNG)
 ![](/source/atencion04.PNG)
