@@ -13,4 +13,14 @@ module.exports = class ParameterModel {
         const result = await executeSelect(query, []);
         return result;
     }
+
+    static async setParameter(parameter, value) {
+        const query = `
+            update ${PGSCHEMA}.dm_parametros set
+                ${parameter} = $1;
+        `;
+        const result = await executeSelect(query, [value]);
+        return result;
+    }
+    
 }

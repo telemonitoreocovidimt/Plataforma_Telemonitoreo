@@ -5,7 +5,7 @@ const adminController = require('./AdminController');
 const patientController = require('./PatientController');
 const doctorController = require('./DoctorController');
 const caseController = require('./CaseController');
-
+const ParameterController = require('./ParameterController');
 /**
  * Mostrar la vista de carga de archivos Covid
  * @function
@@ -37,6 +37,7 @@ async function uploadExcel(req, res) {
     { "id": 3, "description": "Atención completado"},
     { "id": 4, "description": "Cerrado por el sistema"}
   ]
+  const schema = await ParameterController.getParameter('esquema_convertidor_formato');
   return res.render('uploadExcelAdmin', {
     'layout': 'case',
     'islogin': true,
@@ -47,7 +48,8 @@ async function uploadExcel(req, res) {
     patientGroups,
     patientTrays,
     statusCase,
-    medicals
+    medicals,
+    'schema': JSON.stringify(schema),
   });
 }
 

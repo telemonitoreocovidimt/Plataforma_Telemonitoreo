@@ -12,4 +12,10 @@ module.exports = class ParameterController {
         }
         return result.rows[0][parameterName];
     }
+
+    static async setParameter(parameter, value) {
+        const result = await ParameterModel.setParameter(parameter, value);
+        return result.rowCount;
+    }
+
 }

@@ -40,6 +40,20 @@ router.post('/respuesta-admision', isAdmin, subirAdmision);
 
 router.post('/respuesta-tamizaje', isAdmin, subirTamizaje);
 
+router.post('/excel/schema', isAdmin, async (req, res) => {
+  const rowCountUpdated = await ParameterController.setParameter('esquema_convertidor_formato', req.body);
+  if (rowCountUpdated > 0) {
+    res.send({
+      'message': 'Esquema actualizada correctamente.'
+    });
+  } else {
+    res.status(400).send({
+      'message': 'No se pudo actualizar el esquema.'
+    });
+  }
+  
+});
+
 router.post('/excel/convert', isAdmin, async (req, res) => {
   const fileData = req.files.fileData;
   const fileExclude = req.files.fileExclude;

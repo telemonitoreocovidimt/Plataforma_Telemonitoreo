@@ -2,6 +2,8 @@
 <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<link href="https://cdn.jsdelivr.net/npm/jsoneditor@9.5.11/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.5.11/dist/jsoneditor.min.js"></script>
 <style>
 
 
@@ -533,14 +535,94 @@
 </div>
 
 <div class="col-md-6">
-  {{!-- <div class="col-md-12" >
+  <div class="col-md-12">
     <h2>Convertir formato</h2>
-    <br>
     <div class="form-row">
+      <div class="col-12">
+        <label for="jsoneditor">Configuraciones de conversion:</label>
+        <div id="jsoneditor" style="width: 100%; height: 600px;"></div>
+        <br/>
+        <input type="button" value="Actualizar" class="btn btn-primary" onclick='updateSchema(editor.get())'/>
+        <br/>
+        <br/>
+        <script>
+          // create the editor
+          const container = document.getElementById("jsoneditor")
+          const options = {}
+          const editor = new JSONEditor(container, options)
+
+          // set json
+          const initialJson = {{{schema}}};
+          editor.set(initialJson);
+
+          // get json
+          //const updatedJson = editor.get();
+          //console.log(updatedJson);
+
+          //    
+          async function updateSchema(schema) {
+            Swal.fire({imageUrl: 'https://i.pinimg.com/originals/7e/fc/2c/7efc2cb33ee4eb9d7625ca1eca702506.gif', title: "Espere un momento."});
+            try {
+              const res = await fetch('/admin/excel/schema', {
+                method: 'POST',
+                body: JSON.stringify(schema),
+                headers: {"Content-type": "application/json; charset=UTF-8"}
+              });
+              const data = await res.json();
+              console.log(data);
+              Swal.fire({
+                icon: 'success',
+                title: 'Esquema actualizado correctamente.',
+                text: '',
+              });
+            } catch(e){
+              Swal.fire({
+                icon: 'error',
+                title: 'Problemas actualizando el esquema.',
+                text: '',
+              });
+            }
+          }
+        </script>
+      </div>
+    </div>
+    <div class="form-row">
+      
+      <form class="col-md-12" action="/admin/excel/convert" target="_blank" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="fileData">Fuentes de datos:</label>
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="fileData" name="fileData" lang="es" required>
+            <label class="custom-file-label" for="fileData" id="fileDataLabel">Seleccionar Archivo</label>
+            <script type="application/javascript">
+              $('#fileData').change(function(e){
+                var fileName = e.target.files[0].name;
+                $('#fileDataLabel').html(fileName);
+              });
+            </script>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="fileExclude">Fuentes de excluidos:</label>
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="fileExclude" name="fileExclude" lang="es" required>
+            <label class="custom-file-label" for="fileExclude" id="fileExcludeLabel">Seleccionar Archivo</label>
+            <script type="application/javascript">
+              $('#fileExclude').change(function(e){
+                var fileName = e.target.files[0].name;
+                $('#fileExcludeLabel').html(fileName);
+              });
+            </script>
+          </div>
+        </div>
+
+        <input type="submit" value="Convertir" class="btn btn-primary"/>
+      </form>
     </div>
   </div>
   <br>
-  <br> --}}
+  <br>
   <div class="col-md-12" >
     <h2>Reportes de casos</h2>
     <br>
