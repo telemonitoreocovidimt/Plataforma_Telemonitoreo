@@ -13,7 +13,7 @@ const {PORT, PGSCHEMA, KEY_SECRET} = require('./config');
 const {runJobs} = require('./timers');
 
 // Ejecutar los Jobs
-runJobs();
+// runJobs();
 
 // Log para desarrollo
 app.use(morgan('dev'));
