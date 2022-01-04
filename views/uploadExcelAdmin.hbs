@@ -532,6 +532,124 @@
     </div>
     <br>
   </form>
+
+
+  <br><br>
+  <script>
+    function fullCheckedCase(classname) {
+      const input = event.target;
+      const checks = document.getElementsByClassName(classname);
+      Array.from(checks).forEach((checkInput) => {
+        checkInput.checked = input.checked;
+      });
+    }
+
+
+  </script>
+  <form action="/admin/report/custom" target="_blank" method="post" enctype="multipart/form-data">
+      <h3 class="form-title">Carga de Archivo Tamizaje</h3>
+      <br/>
+      <div style="flex-wrap: wrap; display: flex; justify-content: space-between;">
+        <label style="font-weight: bold;">Campos de pacientes:</label>
+        <div class="form-check" style="display: inline-block">
+          <input class="form-check-input" type="checkbox" id="allcheckedP" checked onchange="fullCheckedCase('checkP')"><label class="form-check-label" for="allcheckedP">Seleccionar todos</label></div>
+      </div>
+      <div class="col-12" style="flex-wrap: wrap; display: flex;">
+         <style>
+            .check_report:nth-child(2n+1) {
+            }
+            .check_report {
+              width: 50%;
+              display: inline-block;
+            }
+        </style>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.dni" name="p.dni" value="dni"><label class="form-check-label" for="dni">DNI</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.nombre" name="p.nombre" value="nombre"><label class="form-check-label" for="nombre">Nombre</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_ingreso" name="p.fecha_ingreso" value="fecha_ingreso"><label class="form-check-label" for="fecha_ingreso">Fecha de ingreso</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.direccion" name="p.direccion" value="direccion"><label class="form-check-label" for="direccion">Direccion</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.celular" name="p.celular" value="celular"><label class="form-check-label" for="celular">Celular</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fijo" name="p.fijo" value="fijo"><label class="form-check-label" for="fijo">Fijo</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.edad" name="p.edad" value="edad"><label class="form-check-label" for="edad">Edad</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.sexo" name="p.sexo" value="sexo"><label class="form-check-label" for="sexo">Sexo</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.pais" name="p.pais" value="pais"><label class="form-check-label" for="pais">Pais</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.provincia" name="p.provincia" value="provincia"><label class="form-check-label" for="provincia">Provincia</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.distrito" name="p.distrito" value="distrito"><label class="form-check-label" for="distrito">Distrito</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_inicio_sintomas" name="p.fecha_inicio_sintomas" value="fecha_inicio_sintomas"><label class="form-check-label" for="fecha_inicio_sintomas">Fecha del inicio de sintomas</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.estado" name="p.estado" value="estado"><label class="form-check-label" for="estado">Estado del paciente</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.grupo" name="p.grupo" value="grupo"><label class="form-check-label" for="grupo">Grupo</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.factor_riesgo" name="p.factor_riesgo" value="factor_riesgo"><label class="form-check-label" for="factor_riesgo">Factor de riesgo</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.dias_atencion" name="p.dias_atencion" value="dias_atencion"><label class="form-check-label" for="dias_atencion">Dias de atencion</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.paso_encuesta_inicial" name="p.paso_encuesta_inicial" value="paso_encuesta_inicial"><label class="form-check-label" for="paso_encuesta_inicial">Paso encuesta inicial</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_creacion" name="p.fecha_creacion" value="fecha_creacion"><label class="form-check-label" for="fecha_creacion">Fecha creacion</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.tipo_documento" name="p.tipo_documento" value="tipo_documento"><label class="form-check-label" for="tipo_documento">Tipo documento</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_prueba_1" name="p.fecha_prueba_1" value="fecha_prueba_1"><label class="form-check-label" for="fecha_prueba_1">Fecha de prueba 1</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_resultado_prueba_1" name="p.fecha_resultado_prueba_1" value="fecha_resultado_prueba_1"><label class="form-check-label" for="fecha_resultado_prueba_1">Fecha del resultado de la prueba 1</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.tipo_prueba_1" name="p.tipo_prueba_1" value="tipo_prueba_1"><label class="form-check-label" for="tipo_prueba_1">Tipo de prueba 1</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_prueba_2" name="p.fecha_prueba_2" value="fecha_prueba_2"><label class="form-check-label" for="fecha_prueba_2">Fecha de prueba 2</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_resultado_prueba_2" name="p.fecha_resultado_prueba_2" value="fecha_resultado_prueba_2"><label class="form-check-label" for="fecha_resultado_prueba_2">Fecha del resultado de la prueba 2</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.tipo_prueba_2" name="p.tipo_prueba_2" value="tipo_prueba_2"><label class="form-check-label" for="tipo_prueba_2">Tipo de prueba 2</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_prueba_3" name="p.fecha_prueba_3" value="fecha_prueba_3"><label class="form-check-label" for="fecha_prueba_3">Fecha de prueba 3</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_resultado_prueba_3" name="p.fecha_resultado_prueba_3" value="fecha_resultado_prueba_3"><label class="form-check-label" for="fecha_resultado_prueba_3">Fecha del resultado de la prueba 3</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.tipo_prueba_3" name="p.tipo_prueba_3" value="tipo_prueba_3"><label class="form-check-label" for="tipo_prueba_3">Tipo de prueba 3</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.resultado_prueba_1" name="p.resultado_prueba_1" value="resultado_prueba_1"><label class="form-check-label" for="resultado_prueba_1">Resultado de prueba 1</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.resultado_prueba_2" name="p.resultado_prueba_2" value="resultado_prueba_2"><label class="form-check-label" for="resultado_prueba_2">Resultado de prueba 2</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.resultado_prueba_3" name="p.resultado_prueba_3" value="resultado_prueba_3"><label class="form-check-label" for="resultado_prueba_3">Resultado de prueba 3</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_prueba" name="p.fecha_prueba" value="fecha_prueba"><label class="form-check-label" for="fecha_prueba">Fecha de prueba</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.is_doctor" name="p.is_doctor" value="is_doctor"><label class="form-check-label" for="is_doctor">Es doctor</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.condicion_egreso" name="p.condicion_egreso" value="condicion_egreso"><label class="form-check-label" for="condicion_egreso">Condicion de egreso</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.nota_grupo" name="p.nota_grupo" value="nota_grupo"><label class="form-check-label" for="nota_grupo">Nota de grupo</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.id_hospital" name="p.id_hospital" value="id_hospital"><label class="form-check-label" for="id_hospital">Id hospital</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.id_tipo_registro" name="p.id_tipo_registro" value="id_tipo_registro"><label class="form-check-label" for="id_tipo_registro">Id tipo de registro</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.id_motivo_prueba" name="p.id_motivo_prueba" value="id_motivo_prueba"><label class="form-check-label" for="id_motivo_prueba">Id motivo de la prueba</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.acepto_terminos" name="p.acepto_terminos" value="acepto_terminos"><label class="form-check-label" for="acepto_terminos">Acepto los terminos</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.acepto_terminos_datos" name="p.acepto_terminos_datos" value="acepto_terminos_datos"><label class="form-check-label" for="acepto_terminos_datos">Acepto los terminos de datos</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_respuesta_terminos" name="p.fecha_respuesta_terminos" value="fecha_respuesta_terminos"><label class="form-check-label" for="fecha_respuesta_terminos">Fecha de la respuesta de terminos</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkP" type="checkbox" checked id="p.fecha_ultima_actualizacion" name="p.fecha_ultima_actualizacion" value="fecha_ultima_actualizacion"><label class="form-check-label" for="fecha_ultima_actualizacion">fecha de la ultima actualizacion</label></div>
+      </div>
+      <br/>
+      <div style="flex-wrap: wrap; display: flex; justify-content: space-between;">
+        <label style="font-weight: bold;">Campos de casos:</label>
+        <div class="form-check" style="display: inline-block">
+          <input class="form-check-input" type="checkbox" id="allcheckedC" checked onchange="fullCheckedCase('checkC')"><label class="form-check-label" for="allcheckedC">Seleccionar todos</label></div>
+      </div>
+      <div class="col-12" style="flex-wrap: wrap; display: flex;">
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.estado_caso" name="c.estado_caso" value="estado_caso"><label class="form-check-label" for="estado_caso">Estado del caso</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.fiebre" name="c.fiebre" value="fiebre"><label class="form-check-label" for="fiebre">Fiebre</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.dificultad_respitar" name="c.dificultad_respitar" value="dificultad_respitar"><label class="form-check-label" for="dificultad_respitar">Dificultad al respitar</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.dolor_pecho" name="c.dolor_pecho" value="dolor_pecho"><label class="form-check-label" for="dolor_pecho">Dolor en el pecho</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.alteracion_sensorio" name="c.alteracion_sensorio" value="alteracion_sensorio"><label class="form-check-label" for="alteracion_sensorio">Alteracion sensorio</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.colaboracion_azul_labios" name="c.colaboracion_azul_labios" value="colaboracion_azul_labios"><label class="form-check-label" for="colaboracion_azul_labios">Colaboracion azul en los labios</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.tos" name="c.tos" value="tos"><label class="form-check-label" for="tos">Tos</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.dolor_garganta" name="c.dolor_garganta" value="dolor_garganta"><label class="form-check-label" for="dolor_garganta">Dolor de garganta</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.congestion_nasal" name="c.congestion_nasal" value="congestion_nasal"><label class="form-check-label" for="congestion_nasal">Congestion nasal</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.malestar_general" name="c.malestar_general" value="malestar_general"><label class="form-check-label" for="malestar_general">Malestar general</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.cefalea" name="c.cefalea" value="cefalea"><label class="form-check-label" for="cefalea">Cefalea</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.nauseas" name="c.nauseas" value="nauseas"><label class="form-check-label" for="nauseas">Nauseas</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.diarrea" name="c.diarrea" value="diarrea"><label class="form-check-label" for="diarrea">Diarrea</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.comentario" name="c.comentario" value="comentario"><label class="form-check-label" for="comentario">Comentario</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.fecha_caso" name="c.fecha_caso" value="fecha_caso"><label class="form-check-label" for="fecha_caso">Fecha del caso</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.fecha_cierre_caso" name="c.fecha_cierre_caso" value="fecha_cierre_caso"><label class="form-check-label" for="fecha_cierre_caso">Fecha del cierre de caso</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.dni_medico" name="c.dni_medico" value="dni_medico"><label class="form-check-label" for="dni_medico">DNI del medico</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.fecha_tomado" name="c.fecha_tomado" value="fecha_tomado"><label class="form-check-label" for="fecha_tomado">Fecha de tomado</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.disnea_sa" name="c.disnea_sa" value="disnea_sa"><label class="form-check-label" for="disnea_sa">Disnea sa</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.taqui_sa" name="c.taqui_sa" value="taqui_sa"><label class="form-check-label" for="taqui_sa">Taqui sa</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.saturacion_sa" name="c.saturacion_sa" value="saturacion_sa"><label class="form-check-label" for="saturacion_sa">Saturacion sa</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.alteracion_sa" name="c.alteracion_sa" value="alteracion_sa"><label class="form-check-label" for="alteracion_sa">Alteracion sa</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.otros_sa" name="c.otros_sa" value="otros_sa"><label class="form-check-label" for="otros_sa">Otros sa</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.otros" name="c.otros" value="otros"><label class="form-check-label" for="otros">Otros</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.estado_evo" name="c.estado_evo" value="estado_evo"><label class="form-check-label" for="estado_evo">Estado evo</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.temp_fv" name="c.temp_fv" value="temp_fv"><label class="form-check-label" for="temp_fv">Temperatura fv</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.fr_fv" name="c.fr_fv" value="fr_fv"><label class="form-check-label" for="fr_fv">Fr fv</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.fc_fv" name="c.fc_fv" value="fc_fv"><label class="form-check-label" for="fc_fv">Fc fv</label></div>
+        <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.sat_fv" name="c.sat_fv" value="sat_fv"><label class="form-check-label" for="sat_fv">Sat fv</label></div>
+      </div>
+      <br/>
+      <div class="input-group" style="display: flex; justify-content:center">
+        <input type="submit" value="Generar reporte" class="btn btn-primary">
+      </div>
+      <br>
+  </form>
+  
 </div>
 
 <div class="col-md-6">

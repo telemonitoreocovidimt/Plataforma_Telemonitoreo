@@ -11,7 +11,8 @@ const {isAdmin, isAdminCovid, isAdminVaccine} = require('./../middleware/auth');
 const ExcelResumeDirector = require('./../DesignPattern/Builder/ExcelResume/ExcelResumeDirector');
 const HeaderMultiColumnRowExcelResumeConcreteBuilder = require('./../DesignPattern/Builder/ExcelResume/HeaderMultiColumnRowExcelResumeConcreteBuilder');
 const Convert = require('./../util/convert');
-const ParameterController = require('../controller/ParameterController')
+const ParameterController = require('../controller/ParameterController');
+const ReportController = require('../controller/ReportController');
 
 router.get('/', isAdmin, (req, res, next)=> {
   const {
@@ -52,6 +53,22 @@ router.post('/excel/schema', isAdmin, async (req, res) => {
     });
   }
   
+});
+
+router.post('/report/custom', isAdmin, async (req, res) => {
+  if ( Object.keys(req.body).length == 0) {
+    await req.flash('danger', 'Tiene que seleccionar almenos una columna para el reporte.');
+    res.redirect('back');
+    return;
+  }
+  const rows = await ReportController.report(req.body);
+  const workbook = await Convert.jsonArrayToExcel(rows);
+  const buffer = await workbook.xlsx.writeBuffer();
+  res.writeHead(200, [
+    ['Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+    ["Content-Disposition", "attachment; filename=" + `report.xlsx`]
+  ]);
+  res.end(Buffer.from(buffer, 'base64'));
 });
 
 router.post('/excel/convert', isAdmin, async (req, res) => {

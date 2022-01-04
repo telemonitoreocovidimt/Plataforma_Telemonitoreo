@@ -34,4 +34,32 @@ module.exports = class Convert {
         return wb;
     }
 
+    static async jsonArrayToExcel(data)  {
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet('result');
+        ws.addTable({
+            name: 'MyTable',
+            ref: 'A1',
+            headerRow: true,
+            // totalsRow: true,
+            style: {
+              theme: 'TableStyleDark1',
+              showRowStripes: true,
+            },
+            columns: Object.keys(data[0]).map((head) => {
+                return {name: head};
+            }),
+            // rows: []
+            rows: data.map((row) => {
+                return Object.values(row);
+            }),
+        });
+        // ws.addRows(data);
+        // await Promise.all(data.map(async (item) => {
+        //     await ws.addRow(item).commit();
+        // }));
+        // await ws.commit();
+        // await wb.commit();
+        return wb;
+    }
 } 
