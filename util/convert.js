@@ -37,6 +37,11 @@ module.exports = class Convert {
     static async jsonArrayToExcel(data)  {
         const wb = new ExcelJS.Workbook();
         const ws = wb.addWorksheet('result');
+        console.log('Row Raw');
+        const rows = await Promise.all(data.map((row) => {
+            return Object.values(row);
+        }))
+        console.log("Rows normalized");
         ws.addTable({
             name: 'MyTable',
             ref: 'A1',
@@ -50,10 +55,9 @@ module.exports = class Convert {
                 return {name: head};
             }),
             // rows: []
-            rows: data.map((row) => {
-                return Object.values(row);
-            }),
+            rows: rows,
         });
+        console.log("Sheet generada");
         // ws.addRows(data);
         // await Promise.all(data.map(async (item) => {
         //     await ws.addRow(item).commit();

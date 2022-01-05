@@ -11,6 +11,7 @@ const exphbs = require('express-handlebars');
 const {pool} = require('./model/connection');
 const {PORT, PGSCHEMA, KEY_SECRET} = require('./config');
 const {runJobs} = require('./timers');
+// const json2xls = require('json2xls');
 
 // Ejecutar los Jobs
 // runJobs();
@@ -27,6 +28,7 @@ app.use(formData.parse(options));
 app.use(formData.format());
 app.use(formData.stream());
 app.use(formData.union());
+// app.use(json2xls.middleware);
 
 
 

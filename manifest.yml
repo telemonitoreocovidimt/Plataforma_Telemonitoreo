@@ -1,0 +1,4 @@
+applications:
+- disk_quota: 1024M
+  instances: 1
+  memory: 4G
