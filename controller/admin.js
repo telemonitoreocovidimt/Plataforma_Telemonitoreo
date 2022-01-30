@@ -174,6 +174,10 @@ async function subirAdmision(req, res) {
     const sent_today = req.body.sent_today == 'on';
     let errorHTML = '';
     const idHospital = req.session.user.id_hospital;
+    console.log("Path del archivo: " + req.body.fileAdmision.path);
+    console.log("Enviar directo a bandeja: " + tray);
+    console.log("Mostrar hoy en las bandejas: " + sent_today);
+    console.log("Comentario: " + comment);
     const result = await excelAdmision(req.body.fileAdmision.path, idHospital)
         .catch((error) => {
           error.forEach((e) => {
@@ -190,6 +194,7 @@ async function subirAdmision(req, res) {
       }
       await req.flash('success', result.message);
     } else {
+      console.log("Errores: " + errorHTML);
       await req.flash('danger', errorHTML);
     }
   } else {
@@ -212,6 +217,10 @@ async function subirTamizaje(req, res) {
     const tray = req.body.tray == 'on';
     const sent_today = req.body.sent_today == 'on';
     const idHospital = req.session.user.id_hospital;
+    console.log("Path del archivo: " + req.body.fileTamizaje.path);
+    console.log("Enviar directo a bandeja: " + tray);
+    console.log("Mostrar hoy en las bandejas: " + sent_today);
+    console.log("Comentario: " + comment);
     let errorHTML = '';
     const result = await excelTamizaje(req.body.fileTamizaje.path, idHospital)
         .catch((error) => {
@@ -229,6 +238,7 @@ async function subirTamizaje(req, res) {
       }
       await req.flash('success', result.message);
     } else {
+      console.log("Errores: " + errorHTML);
       await req.flash('danger', errorHTML);
     }
   } else {

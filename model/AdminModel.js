@@ -78,7 +78,11 @@ function sentToDashboard(documentNumberList) {
                   %L
           FROM ${PGSCHEMA}.dt_pacientes p
           where p.estado in (2, 3) and p.paso_encuesta_inicial = true
-      and p.dni in (%L);`, peruvianDateInit, peruvianDateInit, peruvianDateInit, peruvianDateInit, documentNumberList);
+      and p.dni in (%L)
+      and not p.dni in (
+        select cd.dni_paciente from ${PGSCHEMA}.dt_casos_dia as cd
+        where cd.fecha_caso = %L
+      );`, peruvianDateInit, peruvianDateInit, peruvianDateInit, peruvianDateInit, documentNumberList, peruvianDateInit);
     console.log(query);
     const params = [];
     const result = await client.query(query, params);

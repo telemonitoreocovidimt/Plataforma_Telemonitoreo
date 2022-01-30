@@ -14,7 +14,7 @@ const {runJobs} = require('./timers');
 // const json2xls = require('json2xls');
 
 // Ejecutar los Jobs
-// runJobs();
+runJobs();
 
 // Log para desarrollo
 app.use(morgan('dev'));

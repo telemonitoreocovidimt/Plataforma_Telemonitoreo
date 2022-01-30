@@ -426,6 +426,7 @@ async function apiRegistrationPatientsWithVaccineValidated(req, res) {
           throw excelResume.pages[0].exceptions.join('<br/>');
         }
         const countRows = await apiController.uploadVaccinatedPatients(excelResume.pages[0].data);
+        console.log('Subir pacientes vacunados');
         console.log('success', `Se insertaron ${countRows} registros.`);
         await req.flash('success', `Se insertaron ${countRows} registros.`);
       } catch (error) {

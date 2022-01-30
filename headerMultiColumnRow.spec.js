@@ -17,10 +17,6 @@ async function readExcel() {
     const headerMultiColumnRowExcelResumeConcreteBuilder = new HeaderMultiColumnRowExcelResumeConcreteBuilder(data, headers);
     const excelResumeDirector = new ExcelResumeDirector(headerMultiColumnRowExcelResumeConcreteBuilder);
     await excelResumeDirector.build();
-    // console.log(excelResumeDirector.getExcelResume())
-    console.log(excelResumeDirector.getExcelResume().pages[0].headers)
-    console.log(excelResumeDirector.getExcelResume().pages[1].headers)
-    // console.log(excelResumeDirector.getExcelResume().pages[0].data)
 }
 
 readExcel();
