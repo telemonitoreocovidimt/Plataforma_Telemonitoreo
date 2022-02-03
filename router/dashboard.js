@@ -18,6 +18,9 @@ router.get('/', middleware.isDoctor, (req, res)=>{
 router.get('/bandejas/covid',
     middleware.isDoctorCOVID, dashboardController.getInbox);
 
+router.get('/progress/covid',
+    middleware.isDoctorCOVID, dashboardController.attendanceStatistics);
+
 router.get('/mibandeja/covid',
     middleware.isDoctorCOVID, dashboardController.getMyInbox);
 

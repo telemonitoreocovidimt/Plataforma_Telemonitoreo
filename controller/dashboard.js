@@ -56,6 +56,7 @@ const {
 const time = require('./../lib/time');
 const casePatientWithVaccine = require('./../model/casePatientWithVaccine');
 const patientWithVaccine = require('./../model/patientWithVaccine');
+const caseController = require('./CaseController');
 
 /**
  * Mostrar la vista de bandejas
@@ -99,6 +100,7 @@ async function getInbox(req, res) {
   if (count && sum) {
     averageCaseAttented = parseInt(sum / count);
   }
+  
   await req.useFlash(res);
   res.render('dashboardCovid', {
     'layout': 'dashboardCovidLayout',
@@ -109,9 +111,28 @@ async function getInbox(req, res) {
     numberCaseAttentedByDoctor,
     averageCaseAttented,
     numberCaseToDay,
-    numberCaseAttented,
+    numberCaseAttented
   });
 }
+
+async function attendanceStatistics(req, res) {
+  let attendanceStatisticsByDoctor = await caseController.attendanceStatisticsToDay();
+  attendanceStatisticsByDoctor = attendanceStatisticsByDoctor.map(function(statistic) {
+    return {
+      ...statistic,
+      newCases: parseInt(statistic.casetaked) - parseInt(statistic.intraking),
+    };
+  });
+  attendanceStatisticsByDoctor.sort((a, b) => a.nickname.localeCompare(b.nickname));
+  console.log(attendanceStatisticsByDoctor);
+  res.render('attendanceStatistics', {
+    'layout': 'dashboardCovidLayout',
+    'islogin': true,
+    ...req.session.user,
+    attendanceStatisticsByDoctor
+  });
+}
+
 
 /**
  * Mostrar la vista de mi bandejas
@@ -823,6 +844,7 @@ async function savePatientCaseVaccine(req, res) {
 
 module.exports = {
   getInbox,
+  attendanceStatistics,
   getMyInbox,
   getPatientCase,
   savePatientCase,
