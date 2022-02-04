@@ -5,10 +5,11 @@ const HeaderMultiColumnRowExcelPageResumeConcreteBuilder = require('../ExcelPage
 
 module.exports = class HeaderMultiColumnRowExcelResumeConcreteBuilder extends ExcelPageResumeListBuilder {
 
-    constructor(data, headerConfigList) {
+    constructor(data, sheet, headerConfigList) {
         super();
         this.workBook = new ExcelJs.Workbook();
         this.data = data;
+        this.sheet = sheet;
         this.headerConfigList = headerConfigList;
     }
 
@@ -27,12 +28,18 @@ module.exports = class HeaderMultiColumnRowExcelResumeConcreteBuilder extends Ex
         const pages = [];
         const _this = this;
         await Promise.all(this.workBook.worksheets.map(async (sheet, index)=>{
-            const startHeader = _this.headerConfigList[index] && _this.headerConfigList[index].start ? _this.headerConfigList[index].start : 1;
-            const endHeader = _this.headerConfigList[index] && _this.headerConfigList[index].end ? _this.headerConfigList[index].end : 1;
-            const headerMultiColumnRowExcelPageResumeConcreteBuilder = new HeaderMultiColumnRowExcelPageResumeConcreteBuilder(sheet, startHeader, endHeader);
-            const excelPageResumeDirector = new ExcelPageResumeDirector(headerMultiColumnRowExcelPageResumeConcreteBuilder);
-            await excelPageResumeDirector.build();
-            pages.push(excelPageResumeDirector.getExcelPageResume());
+            console.log("------------------");
+            console.log("Sheet name: " + sheet.name);
+            console.log("Wanted sheet: " + this.sheet);
+            console.log("------------------");
+            if (sheet.name == this.sheet) {
+                const startHeader = _this.headerConfigList[index] && _this.headerConfigList[index].start ? _this.headerConfigList[index].start : 1;
+                const endHeader = _this.headerConfigList[index] && _this.headerConfigList[index].end ? _this.headerConfigList[index].end : 1;
+                const headerMultiColumnRowExcelPageResumeConcreteBuilder = new HeaderMultiColumnRowExcelPageResumeConcreteBuilder(sheet, startHeader, endHeader);
+                const excelPageResumeDirector = new ExcelPageResumeDirector(headerMultiColumnRowExcelPageResumeConcreteBuilder);
+                await excelPageResumeDirector.build();
+                pages.push(excelPageResumeDirector.getExcelPageResume());   
+            }
         }));
         // const headerMultiColumnRowExcelPageResumeConcreteBuilder = new HeaderMultiColumnRowExcelPageResumeConcreteBuilder(this.workBook.worksheets[0]);
         // const excelPageResumeDirector = new ExcelPageResumeDirector(headerMultiColumnRowExcelPageResumeConcreteBuilder);

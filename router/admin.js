@@ -163,18 +163,18 @@ router.post('/excel/convert', isAdmin, async (req, res) => {
     return;
   }
   if (fileData && fileExclude) {
-    let headerMultiColumnRowExcelResumeConcreteBuilder = new HeaderMultiColumnRowExcelResumeConcreteBuilder(fileData, [{ 'start': schema.data.headers.start, 'end': schema.data.headers.end }]);
+    let headerMultiColumnRowExcelResumeConcreteBuilder = new HeaderMultiColumnRowExcelResumeConcreteBuilder(fileData, schema.data.sheet, [{ 'start': schema.data.headers.start, 'end': schema.data.headers.end }]);
     let excelResumeDirector = new ExcelResumeDirector(headerMultiColumnRowExcelResumeConcreteBuilder);
     await excelResumeDirector.build();
     const dataResumen = excelResumeDirector.getExcelResume();
-    headerMultiColumnRowExcelResumeConcreteBuilder = new HeaderMultiColumnRowExcelResumeConcreteBuilder(fileExclude, [{ 'start': schema.exclude.headers.start, 'end': schema.exclude.headers.end }]);
+    headerMultiColumnRowExcelResumeConcreteBuilder = new HeaderMultiColumnRowExcelResumeConcreteBuilder(fileExclude, schema.exclude.sheet, [{ 'start': schema.exclude.headers.start, 'end': schema.exclude.headers.end }]);
     excelResumeDirector = new ExcelResumeDirector(headerMultiColumnRowExcelResumeConcreteBuilder);
     await excelResumeDirector.build();
     const excludeResumen = excelResumeDirector.getExcelResume();
     if (dataResumen && dataResumen.pages.length > 0 && excludeResumen && excludeResumen.pages.length > 0) {
       const pageData = dataResumen.pages[0];
       const pageExclude = excludeResumen.pages[0];
-      const dataFilter = pageData.data.filter((item) => {
+      let dataFilter = pageData.data.filter((item) => {
         let excluded = false;
         pageExclude.data.forEach((itemExclude) => {
           if (item[schema.data.columnToMatch] == itemExclude[schema.exclude.columnToMatch]) {
@@ -183,7 +183,200 @@ router.post('/excel/convert', isAdmin, async (req, res) => {
         });
         return !excluded;
       });
-      const workbook = Convert.toExcel(dataFilter, schema.as);
+      // Obtener las columnas indicadas
+      let rows = dataFilter.map((item) => {
+        const row = {};
+        Object.keys(schema.as).forEach(function(key) {
+            row[key] = item[schema.as[key]]
+        });
+        return row;
+      });
+      // console.log(rows);
+
+
+
+
+
+      if (schema.hasOwnProperty('transform') && typeof(schema.transform) == 'object') {
+        rows = rows.map((item) => {
+          Object.keys(item).forEach((key) => {
+            // console.log("----------------------------------------------------------------");
+            // console.log(key);
+            // console.log(keyAs);
+            // console.log(schema.as[keyAs]);
+            if (schema.transform.hasOwnProperty(key)) {
+
+
+              if (schema.transform[key].hasOwnProperty('mean') && schema.transform[key].mean.length > 0) {
+                let value = undefined;
+                schema.transform[key].mean.forEach(dupleMean => {
+                  if (dupleMean[0] == item[key]) {
+                    value = dupleMean[1];
+                  }
+                });
+                item[key] = value;
+              }
+
+              if (schema.transform[key].hasOwnProperty('default') && item[key] == undefined) {
+                item[key] = schema.transform[key].default;
+              }
+
+            } 
+          });
+          return item;
+        });
+      }
+
+
+      if (schema.hasOwnProperty('check') && typeof(schema.check) == 'object') {
+        rows = rows.filter((item) => {
+          let isValid = true;
+          Object.keys(item).forEach((key) => {
+            if (schema.check.hasOwnProperty(key) && isValid) {
+              if (isValid && schema.check[key].hasOwnProperty('gte')) {
+                // console.log("*******************************");
+                // console.log(item);
+                // console.log(key);
+                // console.log("Valor :");
+                // console.log(item[key]);
+                // console.log(typeof(item[key]));
+                // console.log("Restriccion :");
+                // console.log(schema.check[key].gte);
+                // console.log(typeof(schema.check[key].gte));
+                // if (item[key] instanceof Date && !isNaN(Date.parse(schema.check[key].gte))) {
+                //   console.log("Value:");
+                //   console.log(item[key]);
+                //   console.log(item[key].getTime());
+                //   console.log("Check:");
+                //   console.log(Date.parse(schema.check[key].gte));
+                //   console.log(new Date(Date.parse(schema.check[key].gte)));
+                //   console.log("Validate:");
+                //   console.log(item[key].getTime() >= Date.parse(schema.check[key].gte));
+                // }
+                
+                // console.log(item[key] instanceof Date && 
+                //   !isNaN(Date.parse(schema.check[key].gte)) &&
+                //   !(item[key].getTime() >= Date.parse(schema.check[key].gte)));
+                // console.log(typeof(schema.check[key].gte) == 'number' &&
+                // typeof(item[key]) == 'number' &&
+                // !(schema.check[key].gte <= item[key]));
+                // console.log(schema.check[key].gte instanceof Date);
+                // console.log(item[key].getTime());
+                // console.log(schema.check[key].gte.getTime());
+                // console.log(item[key].getTime() >= schema.check[key].gte.getTime());
+                if (item[key] instanceof Date && 
+                  !isNaN(Date.parse(schema.check[key].gte)) &&
+                  !(item[key].getTime() >= Date.parse(schema.check[key].gte))) {
+                    console.log("Update to false!!");
+                  isValid = false;
+                } else if (
+                  typeof(schema.check[key].gte) == 'number' &&
+                  typeof(item[key]) == 'number' &&
+                  !(schema.check[key].gte <= item[key])) {
+                  isValid = false;
+                } else if (item[key] == undefined || item[key] == null || item[key] == "") {
+                  isValid = false;
+                }
+              }
+              if (isValid && schema.check[key].hasOwnProperty('lte')) {
+                if (item[key] instanceof Date &&
+                  !isNaN(Date.parse(schema.check[key].lte)) &&
+                  !(item[key].getTime() <= schema.check[key].lte.getTime())) {
+                  isValid = false;
+                } else if (
+                  typeof(schema.check[key].lte == 'number') &&
+                  typeof(item[key] == 'number') &&
+                  !(schema.check[key].lte >= item[key])) {
+                  isValid = false;
+                } else if (item[key] == undefined || item[key] == null || item[key] == "") {
+                  isValid = false;
+                }
+              }
+              if (isValid && schema.check[key].hasOwnProperty('regex')) {
+                let re = new RegExp(schema.check[key].regex);
+                // console.log(schema.check[key].regex);
+                // console.log(item[key]);
+                // console.log(re.test(item[key]));
+                // console.log(re.test(item[key]));
+                // console.log(typeof(re.test(item[key])));
+                isValid = re.test(`${item[key]}`);
+              }
+              if (isValid && schema.check[key].hasOwnProperty('in')) {
+                isValid = schema.check[key].in.includes(item[key]);
+              }
+              if (isValid && schema.check[key].hasOwnProperty('isDate') && schema.check[key].isDate) {
+                // console.log("Is date:");
+                // console.log(item[key]);
+                // console.log(item[key] instanceof Date);
+                isValid = item[key] instanceof Date;
+              }
+              if (isValid && schema.check[key].hasOwnProperty('isRequired') && schema.check[key].isRequired) {
+                isValid = !(item[key] == undefined || item[key] == null || item[key] == "");
+              }
+            } 
+          });
+          return isValid;
+        });
+      }
+
+      console.log("Rows");
+      console.log(rows);
+
+      // if (schema.hasOwnProperty('check') && typeof(schema.check) == 'object') {
+      //   dataFilter = dataFilter.filter((item) => {
+      //     let isValid = true;
+      //     Object.keys(item).forEach((key) => {
+      //       Object.keys(schema.as).map(function (keyAs) {
+      //         if (key == schema.as[keyAs] && schema.check.hasOwnProperty(keyAs)) {
+      //           if (schema.check[keyAs].hasOwnProperty('gt') && !(schema.check[keyAs].gt < item[key])) {
+      //             isValid = false;
+      //           }
+      //           if (schema.check[keyAs].hasOwnProperty('regex')) {
+      //             let re = new RegExp(schema.check[keyAs].regex);
+      //             // console.log(schema.check[keyAs].regex);
+      //             // console.log(item[key]);
+      //             // console.log(re.test(item[key]));
+      //             // console.log(re.test(item[key]));
+      //             // console.log(typeof(re.test(item[key])));
+      //             isValid = re.test(`${item[key]}`);
+      //           }
+      //         } 
+      //       });
+      //     });
+      //     return isValid;
+      //   });
+      // }
+
+      // if (schema.hasOwnProperty('transform') && typeof(schema.transform) == 'object') {
+      //   dataFilter = dataFilter.map((item) => {
+      //     Object.keys(item).forEach((key) => {
+      //       Object.keys(schema.as).map(function (keyAs) {
+      //         // console.log("----------------------------------------------------------------");
+      //         // console.log(key);
+      //         // console.log(keyAs);
+      //         // console.log(schema.as[keyAs]);
+      //         if (key == schema.as[keyAs] && schema.transform.hasOwnProperty(keyAs)) {
+
+
+      //           if (schema.transform[keyAs].hasOwnProperty('mean') && schema.transform[keyAs].mean.length > 0) {
+      //             let value = null;
+      //             schema.transform[keyAs].mean.forEach(dupleMean => {
+      //               if (dupleMean[0] == item[key]) {
+      //                 value = dupleMean[1];
+      //               }
+      //             });
+      //             item[key] = value;
+      //           }
+
+      //         } 
+      //       });
+      //     });
+      //     return item;
+      //   });
+      // }
+
+      // const workbook = Convert.toExcel(dataFilter, schema.as);
+      const workbook = Convert.toExcel(rows, schema.as);
       const buffer = await workbook.xlsx.writeBuffer();
       res.writeHead(200, [
         ['Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],

@@ -15,10 +15,17 @@ module.exports = class Convert {
         const rows = data.map((item) => {
             const row = [];
             Object.keys(as).forEach(function(key) {
-                row.push(item[as[key]]);
+                row.push(item[key]);
             });
             return row;
         });
+        // const rows = data.map((item) => {
+        //     const row = [];
+        //     Object.keys(as).forEach(function(key) {
+        //         row.push(item[as[key]]);
+        //     });
+        //     return row;
+        // });
         ws.addTable({
             name: 'MyTable',
             ref: 'A1',
