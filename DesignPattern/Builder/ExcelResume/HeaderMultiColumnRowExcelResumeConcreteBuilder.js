@@ -32,9 +32,13 @@ module.exports = class HeaderMultiColumnRowExcelResumeConcreteBuilder extends Ex
             console.log("Sheet name: " + sheet.name);
             console.log("Wanted sheet: " + this.sheet);
             console.log("------------------");
-            if (sheet.name == this.sheet) {
-                const startHeader = _this.headerConfigList[index] && _this.headerConfigList[index].start ? _this.headerConfigList[index].start : 1;
-                const endHeader = _this.headerConfigList[index] && _this.headerConfigList[index].end ? _this.headerConfigList[index].end : 1;
+            // if (sheet.name == this.sheet) {
+            if ((typeof(this.sheet) == 'string' && sheet.name == this.sheet) || (typeof(this.sheet) == 'number' && this.sheet == index + 1) || (typeof(this.sheet) == 'number' && this.sheet == -1 && index + 1 == this.workBook.worksheets.length)) {
+                console.log('Sheet!!');
+                const startHeader = _this.headerConfigList[0] && _this.headerConfigList[0].start ? _this.headerConfigList[0].start : 1;
+                const endHeader = _this.headerConfigList[0] && _this.headerConfigList[0].end ? _this.headerConfigList[0].end : 1;
+                console.log(startHeader);
+                console.log(endHeader);
                 const headerMultiColumnRowExcelPageResumeConcreteBuilder = new HeaderMultiColumnRowExcelPageResumeConcreteBuilder(sheet, startHeader, endHeader);
                 const excelPageResumeDirector = new ExcelPageResumeDirector(headerMultiColumnRowExcelPageResumeConcreteBuilder);
                 await excelPageResumeDirector.build();

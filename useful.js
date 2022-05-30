@@ -168,9 +168,6 @@ function getGroupsContacts(data, lastdata=[]) {
   const for_drop = jsonToArray(els_drop);
   const for_add = jsonToArray(others);
   const for_update = jsonToArray(els_update);
-  // console.log('Elementos para eliminar: ', for_drop);
-  // console.log('Elementos para agregar: ', for_add);
-  // console.log('Elementos para actualizar : ', for_update);
 
   return {
     for_drop,
