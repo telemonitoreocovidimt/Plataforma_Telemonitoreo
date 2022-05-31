@@ -7,6 +7,9 @@
     "start": "node server.js",
     "test": "jest"
   },
+  "engines": {
+    "node": "14.19.1"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
