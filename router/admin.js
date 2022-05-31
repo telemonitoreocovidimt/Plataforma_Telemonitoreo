@@ -187,6 +187,28 @@ router.post('/excel/convert', isAdmin, async (req, res) => {
     });
     return !excluded;
   });
+  // Aplicar validaciones sobre columas del excel
+  if (schema.hasOwnProperty('filter') && typeof(schema.filter) == 'object') {
+    dataFilter = dataFilter.filter((item) => {
+      let isValid = true;
+      Object.keys(item).forEach((key) => {
+        if (schema.filter.hasOwnProperty(key) && isValid) {
+          if (isValid && schema.filter[key].hasOwnProperty('not_regex')) {
+            let re = new RegExp(schema.filter[key].not_regex);
+            isValid = !re.test(`${item[key]}`);
+          }
+          if (isValid && schema.filter[key].hasOwnProperty('not_in')) {
+            isValid = !schema.filter[key].not_in.includes(item[key]);
+          }
+          if (isValid && schema.filter[key].hasOwnProperty('is_blank')) {
+            isBlank = item[key] == null || item[key] == "";
+            isValid = schema.filter[key]['is_blank'] == isBlank;
+          }
+        }
+      });
+      return isValid;
+    })
+  }
   // Convertir datos filtrados estrctura definida en el squema.
   let rows = dataFilter.map((item) => {
     const row = {};
@@ -226,6 +248,7 @@ router.post('/excel/convert', isAdmin, async (req, res) => {
       // Definir flag
       let isValid = true;
       Object.keys(item).forEach((key) => {
+
         if (schema.check.hasOwnProperty(key) && isValid) {
           if (isValid && schema.check[key].hasOwnProperty('gte')) {
             // console.log("*******************************");
@@ -297,6 +320,13 @@ router.post('/excel/convert', isAdmin, async (req, res) => {
           }
           if (isValid && schema.check[key].hasOwnProperty('in')) {
             isValid = schema.check[key].in.includes(item[key]);
+          }
+          if (isValid && schema.check[key].hasOwnProperty('not_in')) {
+            isValid = !schema.check[key].not_in.includes(item[key]);
+          }
+          if (isValid && schema.check[key].hasOwnProperty('is_blank')) {
+            isBlank = item[key] != null && item[key] != "";
+            isValid = schema.check[key]['is_blank'] == isBlank;
           }
           if (isValid && schema.check[key].hasOwnProperty('isDate') && schema.check[key].isDate) {
             // console.log("Is date:");
