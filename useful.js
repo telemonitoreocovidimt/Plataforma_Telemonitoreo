@@ -25,8 +25,12 @@ function isValidDate(value) {
  * @return {String} Fecha en formato YYYY-MM-DD
  */
 function dateToDateString(date) {
-  const dateString = `${date.getFullYear().toString()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-  return dateString;
+  try {
+    const dateString = `${date.getFullYear().toString()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    return dateString;
+  } catch (e) {
+    return null;
+  }
 }
 
 /**

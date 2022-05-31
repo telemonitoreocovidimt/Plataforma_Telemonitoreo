@@ -547,7 +547,7 @@
 
   </script>
   <form action="/admin/report/custom" method="post" enctype="multipart/form-data">
-      <h3 class="form-title">Carga de Archivo Tamizaje</h3>
+      <h3 class="form-title">Reportes de casos</h3>
       <br/>
       <div style="flex-wrap: wrap; display: flex; justify-content: space-between;">
         <label style="font-weight: bold;">Campos de pacientes:</label>
@@ -642,6 +642,17 @@
         <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.fr_fv" name="c.fr_fv" value="fr_fv"><label class="form-check-label" for="fr_fv">Fr fv</label></div>
         <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.fc_fv" name="c.fc_fv" value="fc_fv"><label class="form-check-label" for="fc_fv">Fc fv</label></div>
         <div class="form-check check_report"><input class="form-check-input checkC" type="checkbox" checked id="c.sat_fv" name="c.sat_fv" value="sat_fv"><label class="form-check-label" for="sat_fv">Sat fv</label></div>
+      </div>
+      <br/>
+      <div class="col-12" style="flex-wrap: wrap; display: flex;">
+        <div class="form-group col-md-6" style="flex-wrap: wrap;">
+            <label for="fecha_inicio">Fecha de inicio:</label>
+            <input id="fecha_inicio" name="fecha_inicio" class="form-control col-12" type="date" required/>
+        </div>
+        <div class="form-group col-md-6" style="flex-wrap: wrap;">
+            <label for="fecha_fin">Fecha de fin:</label>
+            <input id="fecha_fin" name="fecha_fin" class="form-control col-12" type="date" required/>
+        </div>
       </div>
       <br/>
       <div class="input-group" style="display: flex; justify-content:center">
@@ -741,7 +752,7 @@
   </div>
   <br>
   <br>
-  <div class="col-md-12" >
+  {{!-- <div class="col-md-12" >
     <h2>Reportes de casos</h2>
     <br>
     <div class="form-row">
@@ -771,7 +782,7 @@
     <a href="#" class="btn btn-primary" id="downloadReportCases" >Descargar</a>
   </div>
   <br>
-  <br>
+  <br> --}}
   <div class="col-md-12" >
     <h2>Reportes de encuestas iniciales</h2>
     <br>

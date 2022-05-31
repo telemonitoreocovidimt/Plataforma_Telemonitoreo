@@ -8,6 +8,7 @@ const {subirAdmision,
   updatePatient,
   updateCase, addPacientVaccine} = require('./../controller/admin');
 const {isAdmin, isAdminCovid, isAdminVaccine} = require('./../middleware/auth');
+const {dateToDateString, dateToTimeStampString} = require('./../useful');
 const ExcelResumeDirector = require('./../DesignPattern/Builder/ExcelResume/ExcelResumeDirector');
 const HeaderMultiColumnRowExcelResumeConcreteBuilder = require('./../DesignPattern/Builder/ExcelResume/HeaderMultiColumnRowExcelResumeConcreteBuilder');
 const Convert = require('./../util/convert');
@@ -96,32 +97,19 @@ router.post('/report/custom', isAdmin, async (req, res) => {
     res.redirect('back');
     return;
   }
-  const rows = await ReportController.report(req.body);
+  console.log(req.body);
+  // const from = dateToDateString(req.body.fecha_inicio);
+  // const to = dateToDateString(req.body.fecha_fin);
+  // if (from == null || to == null) {
+  //   await req.flash('error', 'Rango de fecha incorrectos.');
+  //   return res.redirect('back');
+  // }
+  const rows = await ReportController.report(req.body, req.body.fecha_inicio, req.body.fecha_fin);
   console.log("*************************");
   console.log("****** Report row *******");
   console.log("*************************");
   const filename = `reporte_${req.session.user.id}`;
   fs.writeFileSync(`./public/report/${filename}.json`, JSON.stringify(rows));
-  // res.xls('reporte.xlsx', rows);
-  // res.send(rows);
-  // const workbook = await Convert.jsonArrayToExcel(rows);
-  // res.writeHead(200, [
-  //   ['Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-  //   ["Content-Disposition", "attachment; filename=" + `report.xlsx`]
-  // ]);
-  // await req.flash('success', `Se inicio el proceso de creacion de reporte. En breve se iniciara la descarga.`);
-  // res.redirect('back');
-  // setTimeout(async () => {
-  //   const filename = `reporte_${req.session.user.id}`;
-  //   statusReport[filename] = 0;
-  //   const workbook = await Convert.jsonArrayToExcel(rows);
-  //   await workbook.xlsx.writeFile(`./public/report/${filename}.xlsx`);
-  //   statusReport[filename] = 1;
-  // }, 1000)
-  // writeReport(rows, filename);
-  // console.log(filename);
-  // await workbook.xlsx.writeFile(`./public/report/${filename}`);
-  // console.log('Reporte creado');
   await req.flash('success', `<script>
       async function downloadFiles() {
         const res = await fetch("/admin/report/pagination/${filename}", {
